@@ -3,7 +3,7 @@ import AbsDtopApp from './abs-dtop-app.js'
 import Icon from '../js-dtop-icon/icon.js'
 
 //const CSS_ICON = 'js-dtop-bar-icon'
-const CSS_MINMAXCLOSE = 'js-dtop-win-minmaxclose'
+// const CSS_MINMAXCLOSE = 'js-dtop-win-minmaxclose'
 // const CSS_MIN = 'js-dtop-win-min'
 // const CSS_MAX = 'js-dtop-win-max'
 // const CSS_CLOSE = 'js-dtop-win-close'

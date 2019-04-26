@@ -77,7 +77,7 @@ js-dtop-window {
 
 .js-dtop-win-close, .js-dtop-win-max, .js-dtop-win-min {
 	color: gray;
-	font-family: Arial;
+	font-family: Arial, sans-serif;
 	font-size: 1.6em;
 	text-decoration: none;
 	line-height: 0;

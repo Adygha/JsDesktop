@@ -83,29 +83,29 @@ export default class Interface {
   }
 
   /**
-   * A supposedly private static method to get the class's properties/methods.
-   * @param {ObjectConstructor} theClass  the class to be checked
-   * @param {Boolean} [isStatic=false]    'true' to get the static properties, or default 'false' for non-static
-   * @returns {Map<String, Number>}       a map containing the properties'/methods' names as keys and the number of parameters as values
+   * A supposedly private static method to get the class's/object's properties/methods.
+   * @param {ObjectConstructor|Object} theClassObject the class/object to be checked
+   * @param {Boolean} [isStatic=false]                'true' to get the static properties, or default 'false' for non-static
+   * @returns {Map<String, Number>}                   a map containing the properties'/methods' names as keys and the number of parameters as values
    */
-  static _getProps (theClass, isStatic = false) {
+  static _getProps (theClassObject, isStatic = false) {
     let outMap = new Map()
     let tmpIgnoreArr = isStatic ? IGNORED_STATIC : IGNORED_INSTANCE
-    while (theClass && theClass !== Interface && theClass !== Function.prototype && theClass !== Object.prototype) { // Loop throw all prototypes (except those)
-      //if (theClass === Interface || theClass === Function.prototype || theClass === Object.prototype) {
-      //  theClass = Object.getPrototypeOf(theClass)
+    while (theClassObject && theClassObject !== Interface && theClassObject !== Function.prototype && theClassObject !== Object.prototype) { // Loop throw all prototypes (except those)
+      //if (theClassObject === Interface || theClassObject === Function.prototype || theClassObject === Object.prototype) {
+      //  theClassObject = Object.getPrototypeOf(theClassObject)
       //  continue // Skip this prototype
       //}
-      let tmpArr = Object.getOwnPropertyNames(theClass) // Get current prototype level property-names
+      let tmpArr = Object.getOwnPropertyNames(theClassObject) // Get current prototype level property-names
       tmpArr.forEach(propName => { // Go though propery-names
         if (tmpIgnoreArr.indexOf(propName) === -1) { // If propery-name is not in the ignore list, add it
-          let tmpDesc = Object.getOwnPropertyDescriptor(theClass, propName)
+          let tmpDesc = Object.getOwnPropertyDescriptor(theClassObject, propName)
           let tmpParams = tmpDesc.value && typeof tmpDesc.value === 'function' ? tmpDesc.value.length : -1
-          //outMap.set(propName, typeof theClass[propName] === 'function' ? theClass[propName].length : typeof theClass[propName]) // If it is a function, add the nuber of parameters
+          //outMap.set(propName, typeof theClassObject[propName] === 'function' ? theClassObject[propName].length : typeof theClassObject[propName]) // If it is a function, add the nuber of parameters
           outMap.set(propName, tmpParams) // If it is a function, add the number of parameters
         }
       })
-      theClass = Object.getPrototypeOf(theClass) // Go to deeper prototype level
+      theClassObject = Object.getPrototypeOf(theClassObject) // Go to deeper prototype level
     }
     return outMap
   }
