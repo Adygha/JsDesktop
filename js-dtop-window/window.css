@@ -1,0 +1,146 @@
+js-dtop-window {
+	position: absolute;
+	display: block;
+	/*z-index: 100;*/
+	border-style: double;
+	background-color: aliceblue;
+	left: 0;
+	top: 0;
+	width: 300px;
+	height: 300px;
+	box-shadow: 3px 3px 3px grey;
+	box-sizing: border-box;
+}
+
+.js-dtop-win {
+	width: 100%;
+	height: 100%;
+	display: flex;
+	flex-flow: column;
+}
+
+.app-inactive {
+	/* filter: blur(2px); */
+	filter: grayscale(100%);
+	box-shadow: 2px 2px 3px lightgray;
+}
+
+.app-transp {
+	filter: grayscale(100%);
+	opacity: .8;
+}
+
+.app-disabled {
+	filter: grayscale(100%);
+	box-shadow: 2px 2px 3px lightgray;
+	pointer-events: none;
+}
+
+.js-dtop-win-icon {
+	float: left;
+	box-sizing: border-box;
+	border-style: ridge;
+	width: 1.6em;
+	height: 90%;
+	margin-top: 1px;
+	margin-left: 1px;
+	pointer-events: none;
+}
+
+.js-dtop-win-bar {
+	box-sizing: border-box;
+	background-color: burlywood;
+	width: 100%;
+	/*height: 2em;*/
+	line-height: 2em;
+	top: 0;
+	left: 0;
+	right: 0;
+	flex: 0 1 2em;
+}
+
+.js-dtop-win-bar.js-dtop-win-moveresize {
+	cursor: move;
+}
+
+.js-dtop-win-title {
+	padding-left: 2em;
+	pointer-events: none;
+}
+
+.js-dtop-win-minmaxclose {
+	position: absolute;
+	top: 2px;
+	right: 1px;
+	cursor: default;
+}
+
+.js-dtop-win-close, .js-dtop-win-max, .js-dtop-win-min {
+	color: gray;
+	font-family: Arial;
+	font-size: 1.6em;
+	text-decoration: none;
+	line-height: 0;
+	padding-left: .2em;
+	padding-right: .2em;
+	cursor: pointer;
+}
+
+.js-dtop-win-close:hover, .js-dtop-win-max:hover, .js-dtop-win-min:hover {
+	color: red;
+}
+
+.js-dtop-win-content {
+	display: block;
+	width: 100%;
+	/*flex: 1 1 auto;*/
+	/*overflow-y: auto;*/
+}
+
+.js-dtop-win-topedge {
+	position: absolute;
+	top: -5px;
+	right: 0;
+	left: 0;
+	height: 10px;
+}
+
+.js-dtop-win-topedge.js-dtop-win-moveresize {
+	cursor: ns-resize;
+}
+
+.js-dtop-win-rightedge {
+	position: absolute;
+	top: 0;
+	right: -5px;
+	bottom: 0;
+	width: 10px;
+}
+
+.js-dtop-win-rightedge.js-dtop-win-moveresize {
+	cursor: ew-resize;
+}
+
+.js-dtop-win-botedge {
+	position: absolute;
+	right: 0;
+	bottom: -5px;
+	left: 0;
+	height: 10px;
+}
+
+.js-dtop-win-botedge.js-dtop-win-moveresize {
+	cursor: ns-resize;
+}
+
+.js-dtop-win-leftedge {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: -5px;
+	width: 10px;
+}
+
+.js-dtop-win-leftedge.js-dtop-win-moveresize {
+	cursor: ew-resize;
+}

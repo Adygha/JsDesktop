@@ -1,0 +1,61 @@
+body {
+	margin: 0;
+	overflow: hidden;
+	cursor: default;
+}
+
+/* This one is recommended by some site */
+header {
+	border: 1px black solid;
+}
+
+.js-dtop {
+	width: 100vw;
+	height: calc(100vh - 50px);
+	/*min-width: 640px;*/
+	/*min-height: 480px;*/
+	background: url('desktop-background.jpg') no-repeat center center fixed;
+	background-size: cover;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	position: fixed;
+}
+.js-dtop-bar {
+	position: fixed;
+	z-index: 9999;
+	bottom: 0;
+	width: 100%;
+	height: 40px;
+	padding: 5px;
+	/*padding-left: 20px;*/
+	text-align: center;
+	background-color: gray;
+	-webkit-touch-callout: none; /* Had to add the specific user-select */
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
+.js-dtop-icon-list {
+	list-style-type: none;
+	position: absolute;
+	margin: 0;
+	padding: 30px 10px 10px;
+	left: 0;
+	top: 0;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	flex-wrap: wrap;
+}
+
+.js-dtop-fake-window {
+	position: absolute;
+	border: 2px dotted;
+	background-color: burlywood;
+	opacity: .3;
+}

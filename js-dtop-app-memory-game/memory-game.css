@@ -1,0 +1,36 @@
+.game-board-2, .game-board-4 {
+	margin-top: 5px;
+}
+
+.game-board-2 {
+	box-sizing: border-box;
+	width: 98%;
+}
+
+.game-board-4 {
+	box-sizing: border-box;
+	width: 98%;
+}
+
+#game-start-but {
+	text-transform: capitalize;
+	background-color: #036FAB;
+	width: 100%;
+	padding: 7px;
+	color: white;
+	font-size: 14px;
+	font-weight: bold;
+	transition: all 30ms ease;
+	cursor: pointer;
+}
+
+#game-start-but:hover {
+	background-color: lightblue;
+}
+
+#game-choice {
+	background: #F2F2F2;
+	width: 100%;
+	padding: 8px;
+	font-size: 15px;
+}

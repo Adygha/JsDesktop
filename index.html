@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<link>
+		<meta charset="utf-8">
+		<title>Js Desktop</title>
+		<meta name="description" content="">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+	</head>
+	<body>
+		<script src="js/main.js" type="module"></script>
+		<script nomodule>
+			let tmpDiv = document.createElement('div')
+			tmpDiv.textContent = 'This browser does not support new JavaScript features ' +
+			  '(or the features are disabled). Please enable them or try another browser.'
+			document.body.appendChild(tmpDiv)
+		</script>
+		<noscript>
+			This browser does not support JavaScript (or JavaScript is disabled).
+			Please enable JavaScript support or try another browser.
+		</noscript>
+	</body>
+</html>
