@@ -8,7 +8,29 @@ import Icon from '../js-dtop-icon/icon.js'
 // const CSS_MAX = 'js-dtop-win-max'
 // const CSS_CLOSE = 'js-dtop-win-close'
 // const FLAG_ELEMS_HANDLE_EVENT = false
-const CSS_CLASS_ICON_LIST = 'js-dtop-icon-list'
+const CSS_CLASS_ICON_LIST = 'js-dtop-icon-list' //
+const DESK_BAR_ICON_THICK = 40 // Desktop-bar thickness in pixels
+const DESK_BAR_PAD = 5 // Desktop-bar padding in pixels
+
+/**
+ * An Enum used to position the desktop-bar on the desktop.
+ * @readonly
+ * @enum {Symbol}
+ */
+export const BarPos = Object.freeze({
+
+  /** Position the bar on top */
+  TOP: Symbol(0),
+
+  /** Position the bar on left */
+  LEFT: Symbol(1),
+
+  /** Position the bar on bottom */
+  BOTTOM: Symbol(2),
+
+  /** Position the bar on right */
+  RIGHT: Symbol(3)
+})
 
 /**
  * A class that represents a fake window to show when an actual window is resized.
@@ -113,22 +135,27 @@ window.customElements.define('js-dtop-fake-window', FakeWindow)
 export default class Desktop extends HTMLElement {
 
   /**
-   * Default Constructor.
+   * Constructor that takes the desktop-bar position as a parameter.
+   * @param {BarPos} [barPosition]  the position of the desktop-bar on the desktop (default is BOTTOM)
    */
-  constructor () {
+  constructor (barPosition = BarPos.BOTTOM) {
     super()
     /** @type {Array<Window>} */
     this._windows = new Array(0) // Holds references to all the open windows on desktop
     this._nextWinX = this._nextWinY = 10 // Tracks the next position for the next open window
-
-    // Here, we build the shadow and its CSS
     let tmpStyle = document.createElement('link')
     tmpStyle.setAttribute('rel', 'stylesheet')
     tmpStyle.setAttribute('href', 'js-dtop/desktop.css')
     // this._shadow = this.attachShadow({mode: 'open'})
-    this._deskTop = document.createElement('main')
+    this._deskTop = document.createElement('div')
     this._deskTop.classList.add('js-dtop')
-    this._deskBar = document.createElement('footer')
+    this._deskBar = document.createElement('div')
+    this._deskBarIconsStart = document.createElement('div')
+    this._deskBarIconsCenter = document.createElement('div')
+    this._deskBarIconsEnd = document.createElement('div')
+    this._deskBar.appendChild(this._deskBarIconsStart)
+    this._deskBar.appendChild(this._deskBarIconsCenter)
+    this._deskBar.appendChild(this._deskBarIconsEnd)
     this._deskBar.classList.add('js-dtop-bar')
     this._deskTopIconList = document.createElement('ul')
     // this._shadow.appendChild(tmpStyle)
@@ -137,6 +164,8 @@ export default class Desktop extends HTMLElement {
     document.head.appendChild(tmpStyle)
     this._deskTopIconList.classList.add(CSS_CLASS_ICON_LIST)
     this._deskTop.appendChild(this._deskTopIconList)
+    this._deskBar.style.padding = DESK_BAR_PAD + 'px'
+    this.changeBarPosition(barPosition)
     this.appendChild(this._deskTop)
     this.appendChild(this._deskBar)
     this._prepareEvents()
@@ -146,7 +175,7 @@ export default class Desktop extends HTMLElement {
   //_addDesktopIcon(theIcon) {
   //  let tmpLisItem = document.createElement('li')
   //  let tmpLabel = document.createElement('div')
-  //  tmpLisItem.classList.add('js-dtop-icon-list-icon')
+  //  tmpLisItem.classList.add('js-dtop-icon-list-icon-container')
   //  tmpLisItem.appendChild(theIcon)
   //  tmpLabel.innerText = theIcon.ApplicationClass.appName
   //  tmpLisItem.appendChild(tmpLabel)
@@ -158,6 +187,7 @@ export default class Desktop extends HTMLElement {
    *  https://stackoverflow.com/questions/39245488
    * @param {Element} forElem second window to compare
    * @returns {Array} An array of elements for the path up-tp the 'window' element
+   * @private
    */
   static _composedPath (forElem) {
     let outPath = []
@@ -174,8 +204,9 @@ export default class Desktop extends HTMLElement {
 
   /**
    * Prepares the desktop's events needed (intended as private)
+   * @private
    */
-  _prepareEvents() {
+  _prepareEvents () {
     // this._eventTopClickHandler = ev => { // A handler function to handle 'click' event for the desktop
     //   let tmpPath = ev.path || (ev.composedPath && ev.composedPath()) || Desktop._composedPath(ev.target)
     //   if (ev.target.parentElement.classList.contains(CSS_MINMAXCLOSE)) {
@@ -327,6 +358,7 @@ export default class Desktop extends HTMLElement {
 
   /**
    * Attach the desktop's events.
+   * @private
    */
   _attachEvents () {
     // My idea was to let every window handle its own events, but it seems that dispaching the event and
@@ -339,8 +371,9 @@ export default class Desktop extends HTMLElement {
   /**
    * Puts a window on top of all other windows (or add it to the other windows and put it on top)
    * @param {Window} [theWindow] the window to be put on top (or added on top). If omitted, the last window will be used.
+   * @private
    */
-  _putWinOnTop(theWindow) {
+  _putWinOnTop (theWindow) {
     theWindow = !theWindow && this._windows.length ? this._windows[this._windows.length - 1] : theWindow // If 'theWindow' is omitted, use the last window
     if (theWindow) {
       let tmpIndex = this._windows.indexOf(theWindow)
@@ -364,6 +397,47 @@ export default class Desktop extends HTMLElement {
   }
 
   /**
+   * Changes the desktop-bar position on the desktop.
+   * @param {BarPos} barPosition  the new position of the desktop-bar on the desktop
+   */
+  changeBarPosition (barPosition) {
+    let tmpHorBar = () => {
+      this._deskTop.style.width = '100vw'
+      this._deskTop.style.height = 'calc(100vh - ' + (2 * DESK_BAR_PAD + DESK_BAR_ICON_THICK) + 'px)'
+      this._deskBar.style.width = '100vw'
+      this._deskBar.style.height = DESK_BAR_ICON_THICK + 'px'
+      this._deskBar.style.flexDirection = 'row'
+    }
+    let tmpVerBar = () => {
+      this._deskTop.style.width = 'calc(100vw - ' + (2 * DESK_BAR_PAD + DESK_BAR_ICON_THICK) + 'px)'
+      this._deskTop.style.height = '100vh'
+      this._deskBar.style.width = DESK_BAR_ICON_THICK + 'px'
+      this._deskBar.style.height = '100vh'
+      this._deskBar.style.flexDirection = 'column'
+    }
+    switch (barPosition) {
+      case BarPos.TOP:
+        tmpHorBar()
+        this._deskTop.style.bottom = '0'
+        break
+      case BarPos.LEFT:
+        tmpVerBar()
+        this._deskTop.style.right = '0'
+        break
+      case BarPos.BOTTOM:
+        tmpHorBar()
+        this._deskBar.style.bottom = '0'
+        break
+      case BarPos.RIGHT:
+        tmpVerBar()
+        this._deskBar.style.right = '0'
+        break
+      default:
+        throw new TypeError('The passed \'barPosition\' value should be one of the \'BarPos\' constant values.')
+    }
+  }
+
+  /**
    * Adds an app to put inside the window.
    * @param {typeof AbsDtopApp} AppClass the class for the application to be put in the window (must extend 'AbsDtopApp')
    */
@@ -371,14 +445,14 @@ export default class Desktop extends HTMLElement {
     if (!(AppClass.prototype instanceof AbsDtopApp)) { // Check if it is actually a js-desktop-app class
       throw new TypeError('The passed \'appClass\' argument must be a class that extends the \'AbsDtopApp\' abstract class.')
     }
-    /*let tmpIcon =*/ new Icon(this, AppClass) // Prepare the app-icon (on bar and desktop) // TODO: make it better
+    /*let tmpIcon =*/ new Icon(this, AppClass, DESK_BAR_ICON_THICK) // Prepare the app-icon (on bar and desktop) // TODO: make it better
   }
 
   /**
    *
    * @param {HTMLElement} iconElement
    */
-  placeDesktopIcon(iconElement) {
+  placeDesktopIcon (iconElement) {
     this._deskTopIconList.appendChild(iconElement)
   }
 
@@ -386,15 +460,16 @@ export default class Desktop extends HTMLElement {
    *
    * @param {HTMLElement} iconElement
    */
-  placeBarIcon(iconElement) {
-    this._deskBar.appendChild(iconElement)
+  placeBarIcon (iconElement) {
+    // this._deskBar.appendChild(iconElement)
+    this._deskBarIconsCenter.appendChild(iconElement)
   }
 
   /**
    *
    * @param {Window} theWindow
    */
-  windowCreated(theWindow) {
+  windowCreated (theWindow) {
     if (this._windows.indexOf(theWindow) === -1) { // Extra check just in case
       theWindow.windowLeft = this._nextWinX
       theWindow.windowTop = this._nextWinY
@@ -412,7 +487,7 @@ export default class Desktop extends HTMLElement {
    *
    * @param {Window} theWindow
    */
-  windowClosed(theWindow) {
+  windowClosed (theWindow) {
     this._putWinOnTop(theWindow)
     if (this._windows.length && this._windows[this._windows.length - 1] === theWindow) {
       this._windows.pop() // Remove 'theWindow' window (it is on top now)
@@ -425,7 +500,7 @@ export default class Desktop extends HTMLElement {
    *
    * @param {Window} theWindow
    */
-  windowMaximized(theWindow) {
+  windowMaximized (theWindow) {
     theWindow.windowLeft = 0
     theWindow.windowTop = 0
     theWindow.windowWidth = this._deskTop.clientWidth
@@ -436,13 +511,13 @@ export default class Desktop extends HTMLElement {
    *
    * @param {Window} theWindow
    */
-  windowMinimized(theWindow) { }
+  windowMinimized (theWindow) { }
 
   /**
    *
    * @param {Window} theWindow
    */
-  windowFocused(theWindow) {
+  windowFocused (theWindow) {
     if (!theWindow.isActive) {
       this._putWinOnTop(theWindow)
     }

@@ -4,8 +4,8 @@ import IIconObserver from './i-icon-observer.js';
 // import IWindowObserver from '../js-dtop-window/i-window-observer.js'
 
 // const CSS_CLASS_ICON_LIST = 'js-dtop-icon-list'
-const CSS_CLASS_DESK_ICON = 'js-dtop-icon-list-icon'
-const CSS_CLASS_BAR_ICON = 'js-dtop-bar-icon'
+const CSS_CLASS_DESK_ICON = 'js-dtop-icon-list-icon-container'
+// const CSS_CLASS_BAR_ICON = 'js-dtop-bar-icon'
 const CSS_CLASS_ICON = 'js-dtop-icon'
 // const CSS_CLASS_WIN_BUT = 'js-dtop-bar-win-but'
 const CSS_CLASS_WIN_BUT_DRAWER = 'js-dtop-bar-drawer'
@@ -47,10 +47,11 @@ export default class Icon {
 
   /**
    * Constructor that takes the icon observer and the app-class as parameters.
-   * @param {typeof IIconObserver} iconObserver    the observer of the icon actions.
-   * @param {typeof AbsDtopApp} appClass the js-desktop-app class that this 'Icon' will run.
+   * @param {typeof IIconObserver} iconObserver   the observer of the icon actions.
+   * @param {typeof AbsDtopApp} appClass          the js-desktop-app class that this 'Icon' will run.
+   * @param {number} iconSize                     the size (used for width and height) of the icon in pixels
    */
-  constructor(iconObserver, appClass) {
+  constructor(iconObserver, appClass, iconSize) {
     IIconObserver.checkObjectImplements(iconObserver)
     if (!(appClass.prototype instanceof AbsDtopApp)) {
       throw new TypeError('The \'appClass\' argument must be a class that extends the \'AbsDtopApp\' abstract class.')
@@ -60,12 +61,11 @@ export default class Icon {
     /** @type {Map<Window, HTMLElement>} */
     this._windows = new Map()
 
-    this._barIcon = document.createElement('div')                               //
-    this._barIcon.classList.add(CSS_CLASS_ICON, CSS_CLASS_BAR_ICON)             //
+    this._barIcon = document.createElement('div')                      //
+    this._barIcon.classList.add(CSS_CLASS_ICON)                                 //
+    this._barIcon.style.width = iconSize + 'px'                                 // Prepare the bar-icon
+    this._barIcon.style.height = iconSize + 'px'                                //
     this._barIcon.style.backgroundImage = 'url("' + appClass.appIconURL + '")'  //
-    //this._barIcon.appClass = appClass                                           // Prepare the bar-icon
-    //this._barIcon.addWindow = this.addWindow.bind(this)                         //
-    //this._barIcon.removeWindow = this.removeWindow.bind(this)                   //
     this._barIcon.appClass = appClass // Assign the app-class to use it in the click event handler later
     this._barIcon.addEventListener('click', this.handleIconClick.bind(this))
     this._observer.placeBarIcon(this._barIcon)
@@ -77,18 +77,17 @@ export default class Icon {
       this._dtopIcon.click()
       //tmpList.dispatchEvent(new Event('click'))
     }
-    this._dtopIcon = document.createElement('li')                         //
-    this._dtopIcon.classList.add(CSS_CLASS_ICON, CSS_CLASS_DESK_ICON)     //
-    tmpLabel.innerText = appClass.appName                                 //
-    tmpIcon.style.backgroundImage = 'url("' + appClass.appIconURL + '")'  //
-    tmpIcon.classList.add(CSS_CLASS_BAR_ICON)                             //
-    tmpIcon.addEventListener('click', tmpHandler)                         //
-    tmpLabel.addEventListener('click', tmpHandler)                        // Prepare the desktop-icon
-    //this._dtopIcon.appClass = appClass                                    //
-    //this._dtopIcon.addWindow = this.addWindow.bind(this)                 //
-    //this._dtopIcon.removeWindow = this.removeWindow.bind(this)           //
-    this._dtopIcon.appendChild(tmpIcon)                                   //
-    this._dtopIcon.appendChild(tmpLabel)                                  //
+    this._dtopIcon = document.createElement('li')                  //
+    this._dtopIcon.classList.add(CSS_CLASS_DESK_ICON)                       //
+    tmpLabel.innerText = appClass.appName                                   //
+    tmpIcon.style.backgroundImage = 'url("' + appClass.appIconURL + '")'    //
+    tmpIcon.classList.add(CSS_CLASS_ICON)                                   //
+    tmpIcon.style.width = iconSize + 'px'                                   //
+    tmpIcon.style.height = iconSize + 'px'                                  //
+    tmpIcon.addEventListener('click', tmpHandler)                     //
+    tmpLabel.addEventListener('click', tmpHandler)                    // Prepare the desktop-icon
+    this._dtopIcon.appendChild(tmpIcon)                                     //
+    this._dtopIcon.appendChild(tmpLabel)                                    //
     this._dtopIcon.appClass = appClass // Assign the app-class to use it in the click event handler later
     this._dtopIcon.addEventListener('click', this.handleIconClick.bind(this))
     this._observer.placeDesktopIcon(this._dtopIcon)
@@ -162,8 +161,6 @@ export default class Icon {
    * @param {Window} theWindow
    */
   windowCreated(theWindow) {
-    // let tmpWinBut = document.createElement('div')
-    // this._windows.set(theWindow, tmpWinBut)
     this._observer.windowCreated(theWindow)
   }
 

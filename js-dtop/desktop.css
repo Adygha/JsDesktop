@@ -10,8 +10,9 @@ header {
 }
 
 .js-dtop {
-	width: 100vw;
-	height: calc(100vh - 50px);
+	position: fixed;
+	/*width: 100%;*/
+	/*height: calc(100vh - 50px);*/
 	/*min-width: 640px;*/
 	/*min-height: 480px;*/
 	background: url('desktop-background.jpg') no-repeat center center fixed;
@@ -21,19 +22,21 @@ header {
 	-moz-user-select: none;
 	-ms-user-select: none;
 	user-select: none;
-	position: fixed;
 }
 .js-dtop-bar {
 	position: fixed;
+	display: flex;
+	justify-content: space-between;
 	z-index: 9999;
-	bottom: 0;
-	width: 100%;
-	height: 40px;
-	padding: 5px;
+	/*bottom: 0;*/
+	/*width: 100%;*/
+	/*height: 40px;*/
+	/*padding: 5px;*/
 	/*padding-left: 20px;*/
-	text-align: center;
+	/*text-align: center;*/
+	align-content: center;
 	background-color: gray;
-	-webkit-touch-callout: none; /* Had to add the specific user-select */
+	-webkit-touch-callout: none;
 	-webkit-user-select: none;
 	-moz-user-select: none;
 	-ms-user-select: none;

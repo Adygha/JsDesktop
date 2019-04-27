@@ -1,17 +1,17 @@
-.js-dtop-bar-icon {
-	height: 40px;
-	width: 40px;
+.js-dtop-icon {
+	/*height: 40px;*/
+	/*width: 40px;*/
 	background-size: contain;
 	display: inline-block;
 	/*filter: grayscale(100%);*/
 	transition: all 0.3s;
-	margin-left: 10px;
-	margin-right: 10px;
+	/*margin-left: 10px;*/
+	/*margin-right: 10px;*/
 	transform-origin: 50% 100%;
 	cursor: pointer;
 }
 
-.js-dtop-bar-icon:hover {
+.js-dtop-icon:hover {
 	/*filter: saturate(50);*/
 	/*filter: grayscale(0%);*/
 	transform: scale(1.5);
@@ -19,7 +19,7 @@
 	margin-right: 20px;
 }
 
-.js-dtop-icon-list-icon {
+.js-dtop-icon-list-icon-container {
 	width: 80px;
 	height: 90px;
 	text-align: center;
@@ -29,12 +29,12 @@
 	cursor: pointer;
 }
 
-.js-dtop-icon-list-icon:hover {
+.js-dtop-icon-list-icon-container:hover {
 	border: 1px dotted;
 	padding: 2px;
 }
 
-.js-dtop-icon-list-icon:hover .js-dtop-bar-icon {
+.js-dtop-icon-list-icon-container:hover .js-dtop-icon {
 	/*filter: saturate(50);*/
 	/*filter: grayscale(0%);*/
 	transform: scale(1.2);
@@ -72,7 +72,7 @@
 	background-color: lightgray;
 }
 
-.js-dtop-bar-icon:hover .js-dtop-bar-drawer-menu-vis {
+.js-dtop-icon:hover .js-dtop-bar-drawer-menu-vis {
 	opacity: 1;
 	/*filter: saturate(1);*/
 	visibility: visible;

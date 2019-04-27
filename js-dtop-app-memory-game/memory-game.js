@@ -323,7 +323,6 @@ export default class MemoryGame extends AbsDtopApp {
           this.removeChild(this.lastChild)
         }
         this.meCardCount = parseInt(tmpChoice.options[tmpChoice.selectedIndex].value, 10)
-        console.log(this.meCardCount)
         this._renderApp()
       })
       this.insertBefore(tmpBoard, this.firstElementChild)
