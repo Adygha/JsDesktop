@@ -7,9 +7,9 @@ startUp()
 
 function startUp () {
   // let tmpDtop = new Desktop(BarPos.TOP)
-  // let tmpDtop = new Desktop(BarPos.BOTTOM)
+  let tmpDtop = new Desktop(BarPos.BOTTOM)
   // let tmpDtop = new Desktop(BarPos.LEFT)
-  let tmpDtop = new Desktop(BarPos.RIGHT)
+  // let tmpDtop = new Desktop(BarPos.RIGHT)
   tmpDtop.addApp(MemGame)
   tmpDtop.addApp(ClickGame)
   document.body.insertBefore(tmpDtop, document.body.firstChild)

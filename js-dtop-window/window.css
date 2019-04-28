@@ -144,3 +144,51 @@ js-dtop-window {
 .js-dtop-win-leftedge.js-dtop-win-moveresize {
 	cursor: ew-resize;
 }
+
+.js-dtop-win-topleftcorner {
+	position: absolute;
+	top: -5px;
+	left: -5px;
+	width: 10px;
+	height: 10px;
+}
+
+.js-dtop-win-topleftcorner.js-dtop-win-moveresize {
+	cursor: nwse-resize;
+}
+
+.js-dtop-win-toprightcorner {
+	position: absolute;
+	top: -5px;
+	right: -5px;
+	width: 10px;
+	height: 10px;
+}
+
+.js-dtop-win-toprightcorner.js-dtop-win-moveresize {
+	cursor: nesw-resize;
+}
+
+.js-dtop-win-botrightcorner {
+	position: absolute;
+	right: -5px;
+	bottom: -5px;
+	width: 10px;
+	height: 10px;
+}
+
+.js-dtop-win-botrightcorner.js-dtop-win-moveresize {
+	cursor: nwse-resize;
+}
+
+.js-dtop-win-botleftcorner {
+	position: absolute;
+	bottom: -5px;
+	left: -5px;
+	width: 10px;
+	height: 10px;
+}
+
+.js-dtop-win-botleftcorner.js-dtop-win-moveresize {
+	cursor: nesw-resize;
+}

@@ -20,16 +20,51 @@ const DESK_BAR_PAD = 5 // Desktop-bar padding in pixels
 export const BarPos = Object.freeze({
 
   /** Position the bar on top */
-  TOP: Symbol(0),
+  TOP: Symbol('TOP'),
 
   /** Position the bar on left */
-  LEFT: Symbol(1),
+  LEFT: Symbol('LEFT'),
 
   /** Position the bar on bottom */
-  BOTTOM: Symbol(2),
+  BOTTOM: Symbol('BOTTOM'),
 
   /** Position the bar on right */
-  RIGHT: Symbol(3)
+  RIGHT: Symbol('RIGHT')
+})
+
+/**
+ * An Enum used to specify which part of the window is grabbed/moved
+ * @readonly
+ * @enum {Symbol}
+ */
+const WindowGrab = Object.freeze({
+
+  /** Window is being moved */
+  WINDOW_MOVE: Symbol('WINDOW_MOVE'),
+
+  /** Top edge is being grabbed */
+  TOP_EDGE: Symbol('TOP_EDGE'),
+
+  /** Right edge is being grabbed */
+  RIGHT_EDGE: Symbol('RIGHT_EDGE'),
+
+  /** Bottom edge is being grabbed */
+  BOTTOM_EDGE: Symbol('BOTTOM_EDGE'),
+
+  /** Left edge is being grabbed */
+  LEFT_EDGE: Symbol('LEFT_EDGE'),
+
+  /** Top-left corner is being grabbed */
+  TOP_LEFT_CORNER: Symbol('TOP_LEFT_CORNER'),
+
+  /** Top-right corner is being grabbed */
+  TOP_RIGHT_CORNER: Symbol('TOP_RIGHT_CORNER'),
+
+  /** Bottom-right corner is being grabbed */
+  BOTTOM_RIGHT_CORNER: Symbol('BOTTOM_RIGHT_CORNER'),
+
+  /** Bottom-left corner is being grabbed */
+  BOTTOM_LEFT_CORNER: Symbol('BOTTOM_LEFT_CORNER')
 })
 
 /**
@@ -253,24 +288,36 @@ export default class Desktop extends HTMLElement {
             this._fakeWindow = new FakeWindow(tmpPath[i]) // Make a fake of the original
             this._deskTop.appendChild(this._fakeWindow)
             if (ev.target.classList.contains('js-dtop-win-bar')) { // The title bar is grabbed
-              document.body.style.cursor = 'move'
-              this._isWindowMoved = true // To indicate that a move in progress
+              document.body.style.cursor = 'move' // To prevent cursor change during move
+              this._winGrab = WindowGrab.WINDOW_MOVE // To indicate that a move in progress
               this._moveDif = { // Save the initial position difference for a bit later
                 x: ev.clientX - tmpPath[i].windowLeft,
                 y: ev.clientY - tmpPath[i].windowTop
               }
             } else if (ev.target.classList.contains('js-dtop-win-topedge')) { // The top edge is grabbed
-              document.body.style.cursor = 'ns-resize'
-              this._isTopEdgeGrab = true // To indicate that top resize in progress
+              document.body.style.cursor = 'ns-resize' // To prevent cursor change during grab
+              this._winGrab = WindowGrab.TOP_EDGE // To indicate that top resize in progress
             } else if (ev.target.classList.contains('js-dtop-win-rightedge')) { // The right edge is grabbed
-              document.body.style.cursor = 'ew-resize'
-              this._isRightEdgeGrab = true // To indicate that right resize in progress
+              document.body.style.cursor = 'ew-resize' // To prevent cursor change during grab
+              this._winGrab = WindowGrab.RIGHT_EDGE // To indicate that right resize in progress
             } else if (ev.target.classList.contains('js-dtop-win-botedge')) { // The bottom edge is grabbed
-              document.body.style.cursor = 'ns-resize'
-              this._isBotEdgeGrab = true // To indicate that bottom resize in progress
+              document.body.style.cursor = 'ns-resize' // To prevent cursor change during grab
+              this._winGrab = WindowGrab.BOTTOM_EDGE // To indicate that bottom resize in progress
             } else if (ev.target.classList.contains('js-dtop-win-leftedge')) { // The left edge is grabbed
-              document.body.style.cursor = 'ew-resize'
-              this._isLeftEdgeGrab = true // To indicate that left resize in progress
+              document.body.style.cursor = 'ew-resize' // To prevent cursor change during grab
+              this._winGrab = WindowGrab.LEFT_EDGE // To indicate that left resize in progress
+            } else if (ev.target.classList.contains('js-dtop-win-topleftcorner')) { // The top-left corner is grabbed
+              document.body.style.cursor = 'nwse-resize' // To prevent cursor change during grab
+              this._winGrab = WindowGrab.TOP_LEFT_CORNER
+            } else if (ev.target.classList.contains('js-dtop-win-toprightcorner')) { // The top-left corner is grabbed
+              document.body.style.cursor = 'nesw-resize' // To prevent cursor change during grab
+              this._winGrab = WindowGrab.TOP_RIGHT_CORNER
+            } else if (ev.target.classList.contains('js-dtop-win-botrightcorner')) { // The top-left corner is grabbed
+              document.body.style.cursor = 'nwse-resize' // To prevent cursor change during grab
+              this._winGrab = WindowGrab.BOTTOM_RIGHT_CORNER
+            } else if (ev.target.classList.contains('js-dtop-win-botleftcorner')) { // The top-left corner is grabbed
+              document.body.style.cursor = 'nesw-resize' // To prevent cursor change during grab
+              this._winGrab = WindowGrab.BOTTOM_LEFT_CORNER
             }
             this._deskTop.addEventListener('mousemove', this._eventTopMouseMoveHandler) // It is better to let the '_deskTop' and not the 'document' to handle it
             document.addEventListener('mouseup', this._eventDocMouseUpHandler)
@@ -279,37 +326,84 @@ export default class Desktop extends HTMLElement {
         }
       }
     }
+    let tmpTopGrab = ev => {
+      let tmpHtTE = this._fakeWindow.windowHeight + this._fakeWindow.windowTop + this._deskTop.offsetTop - ev.clientY
+      if (tmpHtTE < Window.minWindowHeight) {
+        this._fakeWindow.windowTop += this._fakeWindow.windowHeight - Window.minWindowHeight
+        this._fakeWindow.windowHeight = Window.minWindowHeight
+      } else {
+        this._fakeWindow.windowTop = ev.clientY - this._deskTop.offsetTop
+        this._fakeWindow.windowHeight = tmpHtTE
+      }
+    }
+    let tmpRightGrab = ev => {
+      let tmpWdRE = ev.clientX - this._fakeWindow.windowLeft - this._deskTop.offsetLeft
+      this._fakeWindow.windowWidth = tmpWdRE < Window.minWindowWidth ? Window.minWindowWidth : tmpWdRE
+    }
+    let tmpBotGrab = ev => {
+      let tmpHtBE = ev.clientY - this._fakeWindow.windowTop - this._deskTop.offsetTop
+      this._fakeWindow.windowHeight = tmpHtBE < Window.minWindowHeight ? Window.minWindowHeight : tmpHtBE
+    }
+    let tmpLeftGrab = ev => {
+      let tmpWdLE = this._fakeWindow.windowWidth + this._fakeWindow.windowLeft + this._deskTop.offsetLeft - ev.clientX
+      if (tmpWdLE < Window.minWindowWidth) {
+        this._fakeWindow.windowLeft += this._fakeWindow.windowWidth - Window.minWindowWidth
+        this._fakeWindow.windowWidth = Window.minWindowWidth
+      } else {
+        this._fakeWindow.windowLeft = ev.clientX - this._deskTop.offsetLeft
+        this._fakeWindow.windowWidth = tmpWdLE
+      }
+    }
     this._eventTopMouseMoveHandler = ev => { // A handler function to handle 'mousemove' event for the desktop
       if (this._fakeWindow) { // Only handle if there is a fake window
-        if (this._isWindowMoved) { // This is for moving
-          this._fakeWindow.windowLeft = ev.clientX - this._moveDif.x //
-          this._fakeWindow.windowTop = ev.clientY - this._moveDif.y  // Move the fake window according to difference
-        } else if (this._isTopEdgeGrab) { // This is for top resizing
-          let tmpHt = this._fakeWindow.windowHeight + this._fakeWindow.windowTop - ev.clientY
-          if (tmpHt < Window.minWindowHeight) {
-            this._fakeWindow.windowTop += this._fakeWindow.windowHeight - Window.minWindowHeight
-            this._fakeWindow.windowHeight = Window.minWindowHeight
-          } else {
-            this._fakeWindow.windowTop = ev.clientY
-            this._fakeWindow.windowHeight = tmpHt
-          }
-        } else if (this._isRightEdgeGrab) { // This is for right resizing
-          let tmpWd = ev.clientX - this._fakeWindow.windowLeft
-          this._fakeWindow.windowWidth = tmpWd < Window.minWindowWidth ? Window.minWindowWidth : tmpWd
-        } else if (this._isBotEdgeGrab) { // This is for bottom resizing
-          let tmpHt = ev.clientY - this._fakeWindow.windowTop
-          this._fakeWindow.windowHeight = tmpHt < Window.minWindowHeight ? Window.minWindowHeight : tmpHt
-        } else if (this._isLeftEdgeGrab) { // This is for left resizing
-          let tmpWd = this._fakeWindow.windowWidth + this._fakeWindow.windowLeft - ev.clientX
-          if (tmpWd < Window.minWindowWidth) {
-            this._fakeWindow.windowLeft += this._fakeWindow.windowWidth - Window.minWindowWidth
-            this._fakeWindow.windowWidth = Window.minWindowWidth
-          } else {
-            this._fakeWindow.windowLeft = ev.clientX
-            this._fakeWindow.windowWidth = tmpWd
-          }
+        switch (this._winGrab) {
+          case WindowGrab.WINDOW_MOVE:
+            this._fakeWindow.windowLeft = ev.clientX - this._moveDif.x //
+            this._fakeWindow.windowTop = ev.clientY - this._moveDif.y  // Move the fake window according to difference
+            break
+          case WindowGrab.TOP_EDGE:
+            tmpTopGrab(ev)
+            break
+          case WindowGrab.RIGHT_EDGE:
+            tmpRightGrab(ev)
+            break
+          case WindowGrab.BOTTOM_EDGE:
+            tmpBotGrab(ev)
+            break
+          case WindowGrab.LEFT_EDGE:
+            tmpLeftGrab(ev)
+            break
+          case WindowGrab.TOP_LEFT_CORNER:
+            tmpTopGrab(ev)
+            tmpLeftGrab(ev)
+            break
+          case WindowGrab.TOP_RIGHT_CORNER:
+            tmpTopGrab(ev)
+            tmpRightGrab(ev)
+            break
+          case WindowGrab.BOTTOM_RIGHT_CORNER:
+            tmpBotGrab(ev)
+            tmpRightGrab(ev)
+            break
+          case WindowGrab.BOTTOM_LEFT_CORNER:
+            tmpBotGrab(ev)
+            tmpLeftGrab(ev)
         }
       }
+    }
+    let tmpTopRel = () => {
+      this._fakeWindow.originalWindow.windowTop = this._fakeWindow.windowTop
+      this._fakeWindow.originalWindow.windowHeight = this._fakeWindow.windowHeight
+    }
+    let tmpRightRel = () => {
+      this._fakeWindow.originalWindow.windowWidth = this._fakeWindow.windowWidth
+    }
+    let tmpBotRel = () => {
+      this._fakeWindow.originalWindow.windowHeight = this._fakeWindow.windowHeight
+    }
+    let tmpLeftRel = () => {
+      this._fakeWindow.originalWindow.windowLeft = this._fakeWindow.windowLeft
+      this._fakeWindow.originalWindow.windowWidth = this._fakeWindow.windowWidth
     }
     this._eventDocMouseUpHandler = () => { // A handler function to handle 'mouseup' event for the 'document'
       // First, we remove the attached listener functions
@@ -317,28 +411,43 @@ export default class Desktop extends HTMLElement {
       document.removeEventListener('mouseup', this._eventDocMouseUpHandler)
       if (this._fakeWindow) { // Only handle if there is a fake window
         this._fakeWindow.originalWindow.isDisabled = false // Set original window back to normal
-        if (this._isWindowMoved) { // This is for moving
-          this._fakeWindow.originalWindow.windowLeft = this._fakeWindow.windowLeft
-          this._fakeWindow.originalWindow.windowTop = this._fakeWindow.windowTop
-          this._moveDif = undefined
-          this._isWindowMoved = false // to indicate move end
-        } else if (this._isTopEdgeGrab) { // This is for top grab
-          this._fakeWindow.originalWindow.windowTop = this._fakeWindow.windowTop
-          this._fakeWindow.originalWindow.windowHeight = this._fakeWindow.windowHeight
-          this._isTopEdgeGrab = false // to indicate grab end
-        } else if (this._isRightEdgeGrab) { // This is for right grab
-          this._fakeWindow.originalWindow.windowWidth = this._fakeWindow.windowWidth
-          this._isRightEdgeGrab = false // to indicate grab end
-        } else if (this._isBotEdgeGrab) { // This is for bottom grab
-          this._fakeWindow.originalWindow.windowHeight = this._fakeWindow.windowHeight
-          this._isBotEdgeGrab = false // to indicate grab end
-        } else if (this._isLeftEdgeGrab) { // This is for left grab
-          this._fakeWindow.originalWindow.windowLeft = this._fakeWindow.windowLeft
-          this._fakeWindow.originalWindow.windowWidth = this._fakeWindow.windowWidth
-          this._isLeftEdgeGrab = false // to indicate grab end
+        switch (this._winGrab) {
+          case WindowGrab.WINDOW_MOVE:
+            this._fakeWindow.originalWindow.windowLeft = this._fakeWindow.windowLeft
+            this._fakeWindow.originalWindow.windowTop = this._fakeWindow.windowTop
+            this._moveDif = undefined
+            break
+          case WindowGrab.TOP_EDGE:
+            tmpTopRel()
+            break
+          case WindowGrab.RIGHT_EDGE:
+            tmpRightRel()
+            break
+          case WindowGrab.BOTTOM_EDGE:
+            tmpBotRel()
+            break
+          case WindowGrab.LEFT_EDGE:
+            tmpLeftRel()
+            break
+          case WindowGrab.TOP_LEFT_CORNER:
+            tmpTopRel()
+            tmpLeftRel()
+            break
+          case WindowGrab.TOP_RIGHT_CORNER:
+            tmpTopRel()
+            tmpRightRel()
+            break
+          case WindowGrab.BOTTOM_RIGHT_CORNER:
+            tmpRightRel()
+            tmpBotRel()
+            break
+          case WindowGrab.BOTTOM_LEFT_CORNER:
+            tmpBotRel()
+            tmpLeftRel()
         }
         this._deskTop.removeChild(this._fakeWindow)
         this._fakeWindow = undefined
+        this._winGrab = undefined // To indicate move/grab end
         if (document.body.style.cursor !== 'default') {
           document.body.style.cursor = 'default'
         }
