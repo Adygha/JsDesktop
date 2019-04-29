@@ -20,7 +20,7 @@ class WindowButDrawer extends HTMLElement {
    *
    * @param {Function} [firstButCallBack]
    */
-  constructor(firstButCallBack) {
+  constructor (firstButCallBack) {
     super()
     //let tmpRad = document.createElement('input')
     //let tmpStrips = document.createElement('span')
@@ -51,15 +51,16 @@ export default class Icon {
    * @param {typeof AbsDtopApp} appClass          the js-desktop-app class that this 'Icon' will run.
    * @param {number} iconSize                     the size (used for width and height) of the icon in pixels
    */
-  constructor(iconObserver, appClass, iconSize) {
+  constructor (iconObserver, appClass, iconSize) {
     IIconObserver.checkObjectImplements(iconObserver)
     if (!(appClass.prototype instanceof AbsDtopApp)) {
       throw new TypeError('The \'appClass\' argument must be a class that extends the \'AbsDtopApp\' abstract class.')
     }
     this._appClass = appClass
+    /** @type {typeof IIconObserver} */
     this._observer = iconObserver
     /** @type {Map<Window, HTMLElement>} */
-    this._windows = new Map()
+    this._windows = new Map() // TODO: Drawer related need completion
 
     this._barIcon = document.createElement('div')                      //
     this._barIcon.classList.add(CSS_CLASS_ICON)                                 //
@@ -67,7 +68,7 @@ export default class Icon {
     this._barIcon.style.height = iconSize + 'px'                                //
     this._barIcon.style.backgroundImage = 'url("' + appClass.appIconURL + '")'  //
     this._barIcon.appClass = appClass // Assign the app-class to use it in the click event handler later
-    this._barIcon.addEventListener('click', this.handleIconClick.bind(this))
+    this._barIcon.addEventListener('click', this._handleIconClick.bind(this))
     this._observer.placeBarIcon(this._barIcon)
 
     let tmpIcon = document.createElement('div')
@@ -75,7 +76,6 @@ export default class Icon {
     let tmpHandler = ev => { // An event handler to pass the click event to 'this._dtopIcon' from its children
       ev.stopPropagation()
       this._dtopIcon.click()
-      //tmpList.dispatchEvent(new Event('click'))
     }
     this._dtopIcon = document.createElement('li')                  //
     this._dtopIcon.classList.add(CSS_CLASS_DESK_ICON)                       //
@@ -89,14 +89,14 @@ export default class Icon {
     this._dtopIcon.appendChild(tmpIcon)                                     //
     this._dtopIcon.appendChild(tmpLabel)                                    //
     this._dtopIcon.appClass = appClass // Assign the app-class to use it in the click event handler later
-    this._dtopIcon.addEventListener('click', this.handleIconClick.bind(this))
+    this._dtopIcon.addEventListener('click', this._handleIconClick.bind(this))
     this._observer.placeDesktopIcon(this._dtopIcon)
 
-    //this._drawer = document.createElement('ul')
-    this._barIcon.appendChild(new WindowButDrawer())
-    this._barIcon.addEventListener('mouseleave', () => {
-      this._barIcon.firstElementChild.classList.remove(CSS_CLASS_WIN_BUT_DRAWER_MENU_VIS)
-    })
+    // TODO: Drawer related need completion
+    // this._barIcon.appendChild(new WindowButDrawer())
+    // this._barIcon.addEventListener('mouseleave', () => {
+    //   this._barIcon.firstElementChild.classList.remove(CSS_CLASS_WIN_BUT_DRAWER_MENU_VIS)
+    // })
 
     let tmpStyle = document.querySelector('link[rel="stylesheet"][href="js-dtop-icon/icon.css"]')
     if (!tmpStyle) {
@@ -111,88 +111,71 @@ export default class Icon {
 
   /**
    * Handles the icon click event.
-   * @param {MouseEvent} ev
+   * @param {MouseEvent} ev   the mouse-event related to click
+   * @private
    */
-  handleIconClick(ev) {
-    let tmpWinBut = document.createElement('div')
-    this._windows.set(new Window(this, ev.target.appClass), tmpWinBut)
-    this._barIcon.firstElementChild.classList.add(CSS_CLASS_WIN_BUT_DRAWER_MENU_VIS)
+  _handleIconClick (ev) {
+    let tmpWinBut = document.createElement('div') // TODO: Drawer related need completion
+    this._windows.set(new Window(this, ev.target.appClass), tmpWinBut) // TODO: Drawer related need completion
+    // this._barIcon.firstElementChild.classList.add(CSS_CLASS_WIN_BUT_DRAWER_MENU_VIS) // TODO: Drawer related need completion
   }
-
-  ///**
-  // * Add an event listener for this object (only the window new/closing events for now).
-  // * @param {String} typeLabel  the event's type label.
-  // * @param {Function} callBack the event handler callback to add.
-  // */
-  //addEventListener(typeLabel, callBack) {
-  //  if (typeof typeLabel === 'string' && typeof callBack === 'function') {
-  //    this._barIcon.addEventListener(typeLabel, callBack)
-  //    if (this._dtopIcon) {
-  //      this._dtopIcon.addEventListener(typeLabel, callBack)
-  //    }
-  //  }
-  //}
-
-  ///**
-  // * Remove an event listener from this object (only the window new/closing events for now).
-  // * @param {String} typeLabel  the event's type label.
-  // * @param {Function} callBack the event handler callback to remove.
-  // */
-  //removeEventListener(typeLabel, callBack) {
-  //  if (typeof typeLabel === 'string' && typeof callBack === 'function') {
-  //    this._barIcon.removeEventListener(typeLabel, callBack)
-  //    if (this._dtopIcon) {
-  //      this._dtopIcon.removeEventListener(typeLabel, callBack)
-  //    }
-  //  }
-  //}
 
   /**
    * The js-desktop-app class that this 'Icon' will initiate.
    * @readonly
    * @type {typeof AbsDtopApp}
    */
-  get appClass() {
+  get appClass () {
     return this._appClass
   }
 
   /**
-   *
-   * @param {Window} theWindow
+   * Used to inform that the specified window is created now.
+   * @param {Window} theWindow  the window that is created
    */
-  windowCreated(theWindow) {
+  windowCreated (theWindow) {
     this._observer.windowCreated(theWindow)
   }
 
   /**
-   *
-   * @param {Window} theWindow
+   * Used to inform that the specified window is closed now.
+   * @param {Window} theWindow  the window that is closed
    */
-  windowClosed(theWindow) {
+  windowClosed (theWindow) {
     this._observer.windowClosed(theWindow)
   }
 
   /**
-   *
-   * @param {Window} theWindow
+   * Used to inform that the specified window is maximized now.
+   * @param {Window} theWindow  the window that is maximized
    */
-  windowMaximized(theWindow) {
+  windowMaximized (theWindow) {
     this._observer.windowMaximized(theWindow)
   }
 
   /**
-   *
-   * @param {Window} theWindow
+   * Used to inform that the specified window is minimized now.
+   * @param {Window} theWindow  the window that is minimized
    */
-  windowMinimized(theWindow) {
+  windowMinimized (theWindow) {
     this._observer.windowMinimized(theWindow)
   }
 
   /**
-   *
-   * @param {Window} theWindow
+   * Used to inform that the specified window has focus now.
+   * @param {Window} theWindow  the window that has focus
    */
-  windowFocused(theWindow) {
+  windowFocused (theWindow) {
     this._observer.windowFocused(theWindow)
+  }
+
+  /**
+   * Used to inform that the specified window is being grabbed now (for resizing or moving).
+   * @param {Window} theWindow          the window that has focus
+   * @param {WindowGrabType} grabType   specifies the type of grab (which part of the window is grabbed/moved)
+   * @param {MouseEvent} mouseEv        the grabbing mouse-event related to grabbing
+   */
+  windowGrabbed (theWindow, grabType, mouseEv) {
+    this._observer.windowGrabbed(theWindow, grabType, mouseEv)
   }
 }

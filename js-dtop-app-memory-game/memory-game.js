@@ -22,7 +22,7 @@ class GameCard extends HTMLElement {
    * @param {number} percentage     the percentage to split the cards to in each row (either 25 or 50 -make it better later-).
    * @param {boolean} [isNotActive] 'true' to specify if the card is not active (default is 'false').
    */
-  constructor(insideValue, percentage, isNotActive) {
+  constructor (insideValue, percentage, isNotActive) {
     super()
     this.meInVal = insideValue
     this.mePercent = percentage
@@ -44,7 +44,7 @@ class GameCard extends HTMLElement {
    * Flips this card object to shown/hidden/toggle state depending on specification.
    * @param {Boolean} [isHidden]  'true' to specify whether to flip the card to a hidden state.
    */
-  flipCard(isHidden) {
+  flipCard (isHidden) {
     if (isHidden === true) { // If hidden is requested
       this.meAnch.classList.add(CLASS_IMAGE + 0)
       this.meAnch.classList.remove(CLASS_IMAGE + this.meInVal)
@@ -61,7 +61,7 @@ class GameCard extends HTMLElement {
    * Flips this card object to error/no-error/toggle state depending on specification.
    * @param {boolean} isError 'true' to specify whether to flip the card to an error state.
    */
-  flipError(isError) {
+  flipError (isError) {
     if (isError === true) { // If error state is requested
       this.meAnch.classList.add(CLASS_ERR)
     } else if (isError === false) { // If error state is not requested
@@ -74,7 +74,7 @@ class GameCard extends HTMLElement {
   /**
    * Deactivates this card object so that no image to display (make it dissapear but its place still taken).
    */
-  deactivate() {
+  deactivate () {
     this.meAnch.classList.remove(CLASS_IMAGE + 0)
     this.meAnch.classList.remove(CLASS_IMAGE + this.meInVal)
   }
@@ -84,7 +84,7 @@ class GameCard extends HTMLElement {
    * @readonly
    * @type {Number}
    */
-  get insideValue() {
+  get insideValue () {
     return this.meInVal
   }
 
@@ -93,7 +93,7 @@ class GameCard extends HTMLElement {
    * @readonly
    * @type {Boolean}
    */
-  get isShown() {
+  get isShown () {
     return this.meAnch.classList.contains(CLASS_IMAGE + this.meInVal)
   }
 
@@ -102,7 +102,7 @@ class GameCard extends HTMLElement {
    * @readonly
    * @type {Boolean}
    */
-  get isDeactivated() {
+  get isDeactivated () {
     for (let i = 0; i < this.meAnch.classList.length; i++) {
       if (this.meAnch.classList.item(i).startsWith(CLASS_IMAGE)) {
         return false
@@ -161,7 +161,7 @@ export default class MemoryGame extends AbsDtopApp {
    * @readonly
    * @type {Object}
    */
-  static get defaultAppSize() {
+  static get defaultAppSize () {
     return {
       width: APP_WIDTH,
       height: APP_HEIGHT
@@ -170,8 +170,9 @@ export default class MemoryGame extends AbsDtopApp {
 
   /**
    * Renders the app components
+   * @private
    */
-  _renderApp() {
+  _renderApp () {
     this.meCounter = 0
     let tmpStyle = document.createElement('link')
     let tmpLeg = document.createElement('legend')
@@ -240,8 +241,9 @@ export default class MemoryGame extends AbsDtopApp {
 
   /**
    * Shuffles the cards' array
+   * @private
    */
-  _shuffleCards() {
+  _shuffleCards () {
     for (let i = this.meCards.length - 1; i > 0; i--) { // Shuffle the array. From 'https://www.frankmitchell.org/2015/01/fisher-yates/'
       let tmpRand = Math.floor(Math.random() * (i + 1))
       let tmpElem = this.meCards[i]
@@ -253,8 +255,9 @@ export default class MemoryGame extends AbsDtopApp {
   /**
    * Starts a timeout timer when the player flips a match pair.
    * @param {Array<GameCard>} shownCards an array of shown cards (it is of size two)
+   * @private
    */
-  _correctTimer(shownCards) {
+  _correctTimer (shownCards) {
     this.mePlayBoard.disabled = true
     window.setTimeout(() => {
       shownCards[0].deactivate()
@@ -282,8 +285,9 @@ export default class MemoryGame extends AbsDtopApp {
   /**
    * Starts a timeout timer when the player flips a mismatch pair
    * @param {GameCard[]} shownCards an array of shown cards (it is of size two)
+   * @private
    */
-  _wrongTimer(shownCards) {
+  _wrongTimer (shownCards) {
     this.mePlayBoard.disabled = true
     this.meScoreBoard.innerText = this.meCounter
     shownCards.forEach(elem => elem.flipError(true))
@@ -298,8 +302,9 @@ export default class MemoryGame extends AbsDtopApp {
 
   /**
    * This method is for adding the game control board.
+   * @private
    */
-  _addControlBoard() {
+  _addControlBoard () {
     fetch('js-dtop-app-memory-game/memory-game.html').then(resp => resp.text()).then(docTxt => { // fetch the game html template
       let tmpBoard = (new DOMParser()).parseFromString(docTxt, 'text/html').querySelector('#control-board').cloneNode(true)
       let tmpBut = tmpBoard.querySelector('#game-start-but')

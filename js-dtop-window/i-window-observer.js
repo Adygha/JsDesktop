@@ -1,35 +1,43 @@
 import Interface from '../js-dtop-libs/interface.js'
-// import Window from './window.js'
+// import Window, {WindowGrabType} from './window.js'
 
 export default class IWindowObserver extends Interface {
 
   /**
-   *
-   * @param {Window} theWindow
+   * Used to inform that the specified window is created now.
+   * @param {Window} theWindow  the window that is created
    */
   windowCreated (theWindow) { }
 
   /**
-   *
-   * @param {Window} theWindow
+   * Used to inform that the specified window is closed now.
+   * @param {Window} theWindow  the window that is closed
    */
   windowClosed (theWindow) { }
 
   /**
-   *
-   * @param {Window} theWindow
+   * Used to inform that the specified window is maximized now.
+   * @param {Window} theWindow  the window that is maximized
    */
   windowMaximized (theWindow) { }
 
   /**
-   *
-   * @param {Window} theWindow
+   * Used to inform that the specified window is minimized now.
+   * @param {Window} theWindow  the window that is minimized
    */
   windowMinimized (theWindow) { }
 
   /**
-   *
-   * @param {Window} theWindow
+   * Used to inform that the specified window has focus now.
+   * @param {Window} theWindow  the window that has focus
    */
   windowFocused (theWindow) { }
+
+  /**
+   * Used to inform that the specified window is being grabbed now (for resizing or moving).
+   * @param {Window} theWindow          the window that has focus
+   * @param {WindowGrabType} grabType   specifies the type of grab (which part of the window is grabbed/moved)
+   * @param {MouseEvent} mouseEv        the grabbing mouse-event related to grabbing
+   */
+  windowGrabbed (theWindow, grabType, mouseEv) { }
 }

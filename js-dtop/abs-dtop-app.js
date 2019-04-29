@@ -1,5 +1,3 @@
-// const DEF_WINDOW_WIDTH = 400
-// const DEF_WINDOW_HEIGHT = 400
 
 /**
  * An abstract (as best as I could to work with the project) class that every js-desktop-app should extend. Normally,

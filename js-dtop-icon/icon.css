@@ -1,13 +1,8 @@
 .js-dtop-icon {
-	/*height: 40px;*/
-	/*width: 40px;*/
 	background-size: contain;
 	display: inline-block;
 	/*filter: grayscale(100%);*/
 	transition: all 0.3s;
-	/*margin-left: 10px;*/
-	/*margin-right: 10px;*/
-	transform-origin: 50% 100%;
 	cursor: pointer;
 }
 
@@ -15,8 +10,6 @@
 	/*filter: saturate(50);*/
 	/*filter: grayscale(0%);*/
 	transform: scale(1.5);
-	margin-left: 20px;
-	margin-right: 20px;
 }
 
 .js-dtop-icon-list-icon-container {

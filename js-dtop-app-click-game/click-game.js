@@ -17,7 +17,7 @@ class ColorBoard {
    * @param {Element} timerNode   the element to display the timer.
    * @param {Element} outputNode  the element to output the randomly chosen color.
    */
-  constructor(brickList, timerNode, outputNode) {
+  constructor (brickList, timerNode, outputNode) {
     this.meCOLORS = { GREY: 0, RED: 1, BLUE: 2, YELLOW: 3, 0: 'grey', 1: 'red', 2: 'blue', 3: 'yellow' }
     this.meBricks = brickList
     this.meTimeDisp = timerNode
@@ -42,7 +42,7 @@ class ColorBoard {
   /**
    * Starts the click game.
    */
-  startGame() {
+  startGame () {
     this._resetGame()
     for (let i = 1; i < 4; i++) {
       for (let j = 0; j < 3; j++) {
@@ -65,7 +65,7 @@ class ColorBoard {
   /**
    * Ends the current running game.
    */
-  endGame() {
+  endGame () {
     this.meCounter = 0
     window.clearInterval(this.meInterval)
     this.meBricks.forEach(brk => brk.removeEventListener('click', this.meClickHandler))
@@ -77,8 +77,9 @@ class ColorBoard {
 
   /**
    * Resets the game to the initial state to start from scratch.
+   * @private
    */
-  _resetGame() {
+  _resetGame () {
     this.meCounter = 0
     this.meTime = 0.0
     window.clearInterval(this.meInterval)
@@ -91,8 +92,9 @@ class ColorBoard {
 
   /**
    * A method to be called when a wrong color is clicked.
+   * @private
    */
-  _wrongClick() {
+  _wrongClick () {
     this.meTimeDisp.classList.add(this.meCOLORS[1])
     this.meTime += 3.0
     this.meTimeDisp.innerText = this.meTime.toFixed(1)
@@ -106,9 +108,10 @@ class ColorBoard {
 export default class ClickGame extends AbsDtopApp {
 
   /**
-   * Default Constructor.
+   * A constructor that takes this app's HTML element that will contain it as a parameter.
+   * @param {HTMLElement} appHtmlContainer  the HTML element that will contain (or its shadow) this app
    */
-  constructor(appHtmlContainer) {
+  constructor (appHtmlContainer) {
     super(appHtmlContainer)
     appHtmlContainer.style.flex = '1 1 auto'  //
     appHtmlContainer.style.overflowY = 'auto' // Add style suitable for this app (when resizing for example)
@@ -137,7 +140,7 @@ export default class ClickGame extends AbsDtopApp {
   /**
    * Ends the application gracefully.
    */
-  endApp() {
+  endApp () {
     this._colBoard.endGame()
   }
 
@@ -146,7 +149,7 @@ export default class ClickGame extends AbsDtopApp {
    * @readonly
    * @type {String}
    */
-  static get appIconURL() {
+  static get appIconURL () {
     return APP_ICON
   }
 
@@ -155,7 +158,7 @@ export default class ClickGame extends AbsDtopApp {
    * @readonly
    * @type {String}
    */
-  static get appName() {
+  static get appName () {
     return APP_NAME
   }
 
@@ -164,7 +167,7 @@ export default class ClickGame extends AbsDtopApp {
    * @readonly
    * @type {Object}
    */
-  static get defaultAppSize() {
+  static get defaultAppSize () {
     return {
       width: APP_WIDTH,
       height: APP_HEIGHT

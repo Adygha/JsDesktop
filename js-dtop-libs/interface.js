@@ -87,6 +87,7 @@ export default class Interface {
    * @param {ObjectConstructor|Object} theClassObject the class/object to be checked
    * @param {Boolean} [isStatic=false]                'true' to get the static properties, or default 'false' for non-static
    * @returns {Map<String, Number>}                   a map containing the properties'/methods' names as keys and the number of parameters as values
+   * @private
    */
   static _getProps (theClassObject, isStatic = false) {
     let outMap = new Map()

@@ -2,25 +2,15 @@ import IWindowObserver from '../js-dtop-window/i-window-observer.js';
 
 export default class IIconObserver extends IWindowObserver {
 
-  ///**
-  // * Default constructor.
-  // */
-  //constructor() {
-  //  super()
-  //  if (new.target === IIconObserver) { // Check if an object begins to instatiate from this abstract class directly
-  //    throw new TypeError('Creating an instance of \'IIconObserver\' directly is not permitted. You must extend it first or use the \'implement\' static method.')
-  //  }
-  //}
+  /**
+   * Used to request placing the specified icon (an HTML element) on the desktop.
+   * @param {HTMLElement} iconElement   the HTML element that represent the icon
+   */
+  placeDesktopIcon (iconElement) { }
 
   /**
-   *
-   * @param {HTMLElement} iconElement
+   * Used to request placing the specified icon (an HTML element) on the desktop-bar.
+   * @param {HTMLElement} iconElement   the HTML element that represent the icon
    */
-  placeDesktopIcon(iconElement) { }
-
-  /**
-   *
-   * @param {HTMLElement} iconElement
-   */
-  placeBarIcon(iconElement) { }
+  placeBarIcon (iconElement) { }
 }

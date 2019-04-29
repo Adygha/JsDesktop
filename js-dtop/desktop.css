@@ -4,17 +4,13 @@ body {
 	cursor: default;
 }
 
-/* This one is recommended by some site */
+/* This one is recommended by some sites */
 header {
 	border: 1px black solid;
 }
 
 .js-dtop {
 	position: fixed;
-	/*width: 100%;*/
-	/*height: calc(100vh - 50px);*/
-	/*min-width: 640px;*/
-	/*min-height: 480px;*/
 	background: url('desktop-background.jpg') no-repeat center center fixed;
 	background-size: cover;
 	-webkit-touch-callout: none;
@@ -28,12 +24,6 @@ header {
 	display: flex;
 	justify-content: space-between;
 	z-index: 9999;
-	/*bottom: 0;*/
-	/*width: 100%;*/
-	/*height: 40px;*/
-	/*padding: 5px;*/
-	/*padding-left: 20px;*/
-	/*text-align: center;*/
 	align-content: center;
 	background-color: gray;
 	-webkit-touch-callout: none;
@@ -41,6 +31,46 @@ header {
 	-moz-user-select: none;
 	-ms-user-select: none;
 	user-select: none;
+}
+
+.js-dtop-bar-icon-container-center-top > * {
+	transform-origin: top;
+}
+
+.js-dtop-bar-icon-container-center-right > * {
+	transform-origin: right;
+}
+
+.js-dtop-bar-icon-container-center-bot > * {
+	transform-origin: bottom;
+}
+
+.js-dtop-bar-icon-container-center-left > * {
+	transform-origin: left;
+}
+
+.js-dtop-bar-icon-container-center-top > *,
+.js-dtop-bar-icon-container-center-bot > * {
+	margin-left: 10px;
+	margin-right: 10px;
+}
+
+.js-dtop-bar-icon-container-center-left > *,
+.js-dtop-bar-icon-container-center-right > * {
+	margin-top: 10px;
+	margin-bottom: 10px;
+}
+
+.js-dtop-bar-icon-container-center-top > *:hover,
+.js-dtop-bar-icon-container-center-bot > *:hover {
+	margin-left: 20px;
+	margin-right: 20px;
+}
+
+.js-dtop-bar-icon-container-center-left > *:hover,
+.js-dtop-bar-icon-container-center-right > *:hover {
+	margin-top: 20px;
+	margin-bottom: 20px;
 }
 
 .js-dtop-icon-list {
@@ -52,13 +82,12 @@ header {
 	top: 0;
 	height: 100%;
 	display: flex;
-	flex-direction: column;
-	flex-wrap: wrap;
+	flex-flow: column wrap;
 }
 
 .js-dtop-fake-window {
 	position: absolute;
 	border: 2px dotted;
 	background-color: burlywood;
-	opacity: .3;
+	opacity: 0.3;
 }

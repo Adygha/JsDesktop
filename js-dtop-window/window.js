@@ -3,7 +3,41 @@ import AbsDtopApp from '../js-dtop/abs-dtop-app.js'
 
 const MIN_WIDTH = 300
 const MIN_HEIGHT = 300
-//const LABEL_CLOSE_EVENT = 'window-close'
+
+/**
+ * An Enum used to specify the type of grab (which part of the window is grabbed/moved)
+ * @readonly
+ * @enum {Symbol}
+ */
+export const WindowGrabType = Object.freeze({
+
+  /** Window is being moved */
+  WINDOW_MOVE: Symbol('WINDOW_MOVE'),
+
+  /** Top edge is being grabbed */
+  TOP_EDGE: Symbol('TOP_EDGE'),
+
+  /** Right edge is being grabbed */
+  RIGHT_EDGE: Symbol('RIGHT_EDGE'),
+
+  /** Bottom edge is being grabbed */
+  BOTTOM_EDGE: Symbol('BOTTOM_EDGE'),
+
+  /** Left edge is being grabbed */
+  LEFT_EDGE: Symbol('LEFT_EDGE'),
+
+  /** Top-left corner is being grabbed */
+  TOP_LEFT_CORNER: Symbol('TOP_LEFT_CORNER'),
+
+  /** Top-right corner is being grabbed */
+  TOP_RIGHT_CORNER: Symbol('TOP_RIGHT_CORNER'),
+
+  /** Bottom-right corner is being grabbed */
+  BOTTOM_RIGHT_CORNER: Symbol('BOTTOM_RIGHT_CORNER'),
+
+  /** Bottom-left corner is being grabbed */
+  BOTTOM_LEFT_CORNER: Symbol('BOTTOM_LEFT_CORNER')
+})
 
 /**
  * A class that represents a window that can contain an application
@@ -21,9 +55,10 @@ export default class Window extends HTMLElement {
    * @param {Number} winPos.x                 the app's window X position
    * @param {Number} winPos.y                 the app's window Y position
    */
-  constructor(windowObserver, appClass, winSize, winPos) {
+  constructor (windowObserver, appClass, winSize, winPos) {
     IWindowObserver.checkObjectImplements(windowObserver)
     super()
+    /** @type {typeof IWindowObserver} */
     this._observer = windowObserver
     ///** @type {Map<HTMLElement, Function>} */
     // this._evLsn = new Map()
@@ -44,70 +79,39 @@ export default class Window extends HTMLElement {
     fetch('js-dtop-window/window.html').then(resp => resp.text()).then(docTxt => { // fetch the window html template
       this._windowOuter = (new DOMParser()).parseFromString(docTxt, 'text/html').querySelector('div.js-dtop-win').cloneNode(true)
       this._windowButClose = this._windowOuter.querySelector('label.js-dtop-win-close')
-      this._windowOuter.querySelector('label.js-dtop-win-max').addEventListener('click', () => {
-        if (this._beforeMax) {
-          let tmpEdges = this._windowOuter.querySelectorAll('div.js-dtop-win-moveresize-nocursor')
-          tmpEdges.forEach(elem => {
-            elem.classList.remove('js-dtop-win-moveresize-nocursor')
-            elem.classList.add('js-dtop-win-moveresize')
-          })
-          this.windowLeft = this._beforeMax.x
-          this.windowTop = this._beforeMax.y
-          this.windowWidth = this._beforeMax.width
-          this.windowHeight = this._beforeMax.height
-          this._beforeMax = undefined
-        } else {
-          let tmpEdges = this._windowOuter.querySelectorAll('div.js-dtop-win-moveresize')
-          tmpEdges.forEach(elem => {
-            elem.classList.remove('js-dtop-win-moveresize')
-            elem.classList.add('js-dtop-win-moveresize-nocursor')
-          })
-          this._beforeMax = {
-            x: this.windowLeft,
-            y: this.windowTop,
-            width: this.windowWidth,
-            height: this.windowHeight
-          }
-          this._observer.windowMaximized(this)
-        }
-      })
-      // this._windowInner = this._windowOuter.querySelector('div.js-dtop-win-content')
       let tmpInner = this._windowOuter.querySelector('div.js-dtop-win-content')
       this._winApp = new appClass(tmpInner)
       this._windowOuter.querySelector('div.js-dtop-win-title').textContent = appClass.appName
-      if (tmpInner.attachShadow) {
+      if (tmpInner.attachShadow) { // If 'Shadow Dom' is supported then replace 'tmpInner' with its shadow
         tmpInner = tmpInner.attachShadow({mode: 'closed'})
       }
       tmpInner.appendChild(this._winApp)
       this._windowOuter.querySelector('img.js-dtop-win-icon').setAttribute('src', appClass.appIconURL)
       // this.appendChild(this._windowOuter)
       this.appendChild(this._windowOuter)
-      this.addEventListener('click', () => {
-        if (!this.isActive) {
-          this._observer.windowFocused(this)
-        }
-      })
-      this._windowButClose.addEventListener('click', this.handleClose.bind(this))
+      this.addEventListener('click', this._handleWinClick.bind(this))
+      this.addEventListener('mousedown', this._handleWinMouseDown.bind(this))
+      this._windowOuter.querySelector('label.js-dtop-win-max').addEventListener('click', this._handleWinMaximize.bind(this))
+      this._windowButClose.addEventListener('click', this._handleWinClose.bind(this))
     })
     this._observer.windowCreated(this)
-    // this._observer.windowFocused(this)
   }
 
-  connectedCallback() {
+  connectedCallback () {
     let tmpStyle = document.querySelector('link[rel="stylesheet"][href="js-dtop-window/window.css"]')
     if (!tmpStyle) {
       tmpStyle = document.createElement('link')
       tmpStyle.setAttribute('rel', 'stylesheet')
       tmpStyle.setAttribute('href', 'js-dtop-window/Window.css')
-      // this._shadow = this.attachShadow({mode: 'open'})
-      // this._shadow.appendChild(tmpStyle)
       document.head.appendChild(tmpStyle)
     }
-    // this._observer.windowCreated(this)
-    // this._observer.windowFocused(this)
   }
 
-  handleClose() {
+  /**
+   * Supposed to handle the event of window close.
+   * @private
+   */
+  _handleWinClose () {
     // this._evLsn.forEach((lsn, elem) => {
     //   elem.removeEventListener()
     // })
@@ -115,26 +119,78 @@ export default class Window extends HTMLElement {
     this._observer.windowClosed(this)
   }
 
-  //_prepareEvents() {
-  //  this._windowButClose.addEventListener('click', () => this._winApp.endApp())
-  //}
+  /**
+   * Supposed to handle the event of window maximize.
+   * @private
+   */
+  _handleWinMaximize () {
+    if (this._beforeMax) {
+      let tmpEdges = this._windowOuter.querySelectorAll('div.js-dtop-win-moveresize-nocursor')
+      tmpEdges.forEach(elem => {
+        elem.classList.remove('js-dtop-win-moveresize-nocursor')
+        elem.classList.add('js-dtop-win-moveresize')
+      })
+      this.windowLeft = this._beforeMax.x
+      this.windowTop = this._beforeMax.y
+      this.windowWidth = this._beforeMax.width
+      this.windowHeight = this._beforeMax.height
+      this._beforeMax = undefined
+    } else {
+      let tmpEdges = this._windowOuter.querySelectorAll('div.js-dtop-win-moveresize')
+      tmpEdges.forEach(elem => {
+        elem.classList.remove('js-dtop-win-moveresize')
+        elem.classList.add('js-dtop-win-moveresize-nocursor')
+      })
+      this._beforeMax = {
+        x: this.windowLeft,
+        y: this.windowTop,
+        width: this.windowWidth,
+        height: this.windowHeight
+      }
+      this._observer.windowMaximized(this)
+    }
+  }
 
-  ///**
-  // * Closes this running window.
-  // */
-  //closeWindow () {
-  //  this._winApp.endApp()
-  //  this.dispatchEvent(new CustomEvent(LABEL_CLOSE_EVENT, { detail: this }))
-  //}
+  /**
+   * Supposed to handle the event of window click.
+   * @private
+   */
+  _handleWinClick () {
+    if (!this.isActive) {
+      this._observer.windowFocused(this)
+    }
+  }
 
-  ///**
-  // * The event label for the window closing event.
-  // * @readonly
-  // * @type {String}
-  // */
-  //static get closeWindowEventTypeLabel() {
-  //  return LABEL_CLOSE_EVENT
-  //}
+  /**
+   * Supposed to handle the event of window mouse-down.
+   * @param {MouseEvent} ev   the mouse-event related to mouse-down
+   * @private
+   */
+  _handleWinMouseDown (ev) {
+    if (!this._beforeMax && ev.target.classList.contains('js-dtop-win-moveresize')) { // Check if not maximized and in move-resize
+      let tmpGrabType
+      if (ev.target.classList.contains('js-dtop-win-bar')) { // The title bar is grabbed
+        tmpGrabType = WindowGrabType.WINDOW_MOVE
+      } else if (ev.target.classList.contains('js-dtop-win-topedge')) { // The top edge is grabbed
+        tmpGrabType = WindowGrabType.TOP_EDGE
+      } else if (ev.target.classList.contains('js-dtop-win-rightedge')) { // The right edge is grabbed
+        tmpGrabType = WindowGrabType.RIGHT_EDGE
+      } else if (ev.target.classList.contains('js-dtop-win-botedge')) { // The bottom edge is grabbed
+        tmpGrabType = WindowGrabType.BOTTOM_EDGE
+      } else if (ev.target.classList.contains('js-dtop-win-leftedge')) { // The left edge is grabbed
+        tmpGrabType = WindowGrabType.LEFT_EDGE
+      } else if (ev.target.classList.contains('js-dtop-win-topleftcorner')) { // The top-left corner is grabbed
+        tmpGrabType = WindowGrabType.TOP_LEFT_CORNER
+      } else if (ev.target.classList.contains('js-dtop-win-toprightcorner')) { // The top-right corner is grabbed
+        tmpGrabType = WindowGrabType.TOP_RIGHT_CORNER
+      } else if (ev.target.classList.contains('js-dtop-win-botrightcorner')) { // The bottom-right corner is grabbed
+        tmpGrabType = WindowGrabType.BOTTOM_RIGHT_CORNER
+      } else if (ev.target.classList.contains('js-dtop-win-botleftcorner')) { // The bottom-left corner is grabbed
+        tmpGrabType = WindowGrabType.BOTTOM_LEFT_CORNER
+      }
+      this._observer.windowGrabbed(this, tmpGrabType, ev)
+    }
+  }
 
   /**
    * The top of the window.
@@ -148,7 +204,7 @@ export default class Window extends HTMLElement {
    * The top of the window.
    * @type {Number}
    */
-  set windowTop(newTop) {
+  set windowTop (newTop) {
     this.style.top = newTop + 'px'
   }
 
@@ -156,7 +212,7 @@ export default class Window extends HTMLElement {
    * The left of the window.
    * @type {Number}
    */
-  get windowLeft() {
+  get windowLeft () {
     return parseInt(this.style.left, 10)
   }
 
@@ -164,7 +220,7 @@ export default class Window extends HTMLElement {
    * The left of the window.
    * @type {Number}
    */
-  set windowLeft(newLeft) {
+  set windowLeft (newLeft) {
     this.style.left = newLeft + 'px'
   }
 
@@ -172,7 +228,7 @@ export default class Window extends HTMLElement {
    * The width of this window.
    * @type {Number}
    */
-  get windowWidth() {
+  get windowWidth () {
     return parseInt(this.style.width, 10)
   }
 
@@ -180,7 +236,7 @@ export default class Window extends HTMLElement {
    * The width of this window.
    * @type {Number}
    */
-  set windowWidth(newWidth) {
+  set windowWidth (newWidth) {
     if (newWidth >= MIN_WIDTH) {
       this.style.width = newWidth + 'px'
     }
@@ -208,7 +264,7 @@ export default class Window extends HTMLElement {
    * The z-index of the window.
    * @type {Number}
    */
-  get windowZIndex() {
+  get windowZIndex () {
     return this.style.zIndex ? parseInt(this.style.zIndex, 10) : 0
   }
 
@@ -216,7 +272,7 @@ export default class Window extends HTMLElement {
    * The z-index of the window.
    * @type {Number}
    */
-  set windowZIndex(newZIndex) {
+  set windowZIndex (newZIndex) {
     this.style.zIndex = newZIndex.toString()
   }
 
@@ -273,7 +329,7 @@ export default class Window extends HTMLElement {
    * Specifies if the window is disabled.
    * @type {Boolean}
    */
-  get isDisabled() {
+  get isDisabled () {
     return !this.classList.contains('app-disabled')
   }
 
@@ -281,7 +337,7 @@ export default class Window extends HTMLElement {
    * Specifies if the window is disabled.
    * @type {Boolean}
    */
-  set isDisabled(newIsDisabled) {
+  set isDisabled (newIsDisabled) {
     if (newIsDisabled) {
       this.classList.add('app-disabled')
     } else {
@@ -294,7 +350,7 @@ export default class Window extends HTMLElement {
    * @readonly
    * @type {Boolean}
    */
-  get isMaximized() {
+  get isMaximized () {
     return !!this._beforeMax
   }
 
@@ -310,7 +366,7 @@ export default class Window extends HTMLElement {
    * The minimum window height.
    * @type {Number}
    */
-  static get minWindowHeight() {
+  static get minWindowHeight () {
     return MIN_HEIGHT
   }
 }

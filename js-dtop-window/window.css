@@ -1,7 +1,6 @@
 js-dtop-window {
 	position: absolute;
 	display: block;
-	/*z-index: 100;*/
 	border-style: double;
 	background-color: aliceblue;
 	left: 0;
@@ -16,7 +15,7 @@ js-dtop-window {
 	width: 100%;
 	height: 100%;
 	display: flex;
-	flex-flow: column;
+	flex-direction: column;
 }
 
 .app-inactive {
