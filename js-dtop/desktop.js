@@ -5,6 +5,7 @@ import Icon from '../js-dtop-icon/icon.js'
 const CSS_CLASS_ICON_LIST = 'js-dtop-icon-list' //
 const DESK_BAR_ICON_THICK = 40 // Desktop-bar thickness in pixels
 const DESK_BAR_PAD = 5 // Desktop-bar padding in pixels
+const EVENT_DESKBAR_MOVED = 'desktop-bar-moved'
 
 /**
  * An Enum used to position the desktop-bar on the desktop.
@@ -156,10 +157,10 @@ export default class Desktop extends HTMLElement {
     this._deskTopIconList.classList.add(CSS_CLASS_ICON_LIST)
     this._deskTop.appendChild(this._deskTopIconList)
     this._deskBar.style.padding = DESK_BAR_PAD + 'px'
-    this.changeBarPosition(barPosition)
+    this.desktopBarPosition = barPosition
     this.appendChild(this._deskTop)
     this.appendChild(this._deskBar)
-    this._prepareRemovableEvents()
+    this._prepareRemovableEventHandlers()
     window.addEventListener('resize', this._handleWebPageResize.bind(this))
   }
 
@@ -184,10 +185,10 @@ export default class Desktop extends HTMLElement {
   // }
 
   /**
-   * Prepares the desktop's events needed (intended as private)
+   * Prepares the desktop's removable event-handlers needed (intended as private)
    * @private
    */
-  _prepareRemovableEvents () {
+  _prepareRemovableEventHandlers () {
     this._handleDesktopMouseMove = ev => { // A handler function to handle 'mousemove' event for the desktop
       if (this._fakeWindow) { // Only handle if there is a fake window
         let tmpTopGrab = ev => {
@@ -361,10 +362,18 @@ export default class Desktop extends HTMLElement {
   }
 
   /**
-   * Changes the desktop-bar position on the desktop.
-   * @param {BarPos} barPosition  the new position of the desktop-bar on the desktop
+   * Specifies the desktop-bar position on the desktop.
+   * @type {BarPos}
    */
-  changeBarPosition (barPosition) {
+  get desktopBarPosition () {
+    return this._deskBarPos
+  }
+
+  /**
+   * Specifies the desktop-bar position on the desktop.
+   * @type {BarPos}
+   */
+  set desktopBarPosition (newPos) {
     let tmpHorBar = () => {
       this._deskTop.style.width = '100vw'
       this._deskTop.style.height = 'calc(100vh - ' + (2 * DESK_BAR_PAD + DESK_BAR_ICON_THICK) + 'px)'
@@ -379,30 +388,61 @@ export default class Desktop extends HTMLElement {
       this._deskBar.style.height = '100vh'
       this._deskBar.style.flexDirection = 'column'
     }
-    switch (barPosition) {
+    switch (newPos) {
       case BarPos.TOP:
         tmpHorBar()
+        this._deskTop.style.top = ''
+        this._deskTop.style.right = ''
         this._deskTop.style.bottom = '0'
+        this._deskTop.style.left = ''
+        this._deskBar.style.top = '0'
+        this._deskBar.style.right = ''
+        this._deskBar.style.bottom = ''
+        this._deskBar.style.left = ''
         this._deskBarIconsCenter.className = 'js-dtop-bar-icon-container-center-top'
         break
       case BarPos.LEFT:
         tmpVerBar()
+        this._deskTop.style.top = ''
         this._deskTop.style.right = '0'
+        this._deskTop.style.bottom = ''
+        this._deskTop.style.left = ''
+        this._deskBar.style.top = ''
+        this._deskBar.style.right = ''
+        this._deskBar.style.bottom = ''
+        this._deskBar.style.left = '0'
         this._deskBarIconsCenter.className = 'js-dtop-bar-icon-container-center-left'
         break
       case BarPos.BOTTOM:
         tmpHorBar()
+        this._deskTop.style.top = '0'
+        this._deskTop.style.right = ''
+        this._deskTop.style.bottom = ''
+        this._deskTop.style.left = ''
+        this._deskBar.style.top = ''
+        this._deskBar.style.right = ''
         this._deskBar.style.bottom = '0'
+        this._deskBar.style.left = ''
         this._deskBarIconsCenter.className = 'js-dtop-bar-icon-container-center-bot'
         break
       case BarPos.RIGHT:
         tmpVerBar()
+        this._deskTop.style.top = ''
+        this._deskTop.style.right = ''
+        this._deskTop.style.bottom = ''
+        this._deskTop.style.left = '0'
+        this._deskBar.style.top = ''
         this._deskBar.style.right = '0'
+        this._deskBar.style.bottom = ''
+        this._deskBar.style.left = ''
         this._deskBarIconsCenter.className = 'js-dtop-bar-icon-container-center-right'
         break
       default:
-        throw new TypeError('The passed \'barPosition\' value should be one of the \'BarPos\' constant values.')
+        throw new TypeError('The passed new \'desktopBarPosition\' value should be one of the \'BarPos\' constant values.')
     }
+    this._handleWebPageResize()
+    this._deskBarPos = newPos
+    this.dispatchEvent(new Event(EVENT_DESKBAR_MOVED))
   }
 
   /**
@@ -529,6 +569,14 @@ export default class Desktop extends HTMLElement {
     }
     this._deskTop.addEventListener('mousemove', this._handleDesktopMouseMove) // It is better to let the '_deskTop' and not the 'document' handle it
     document.addEventListener('mouseup', this._handleDocMouseUp)
+  }
+
+  /**
+   * Used to inform that the window's working desktop object is requested.
+   * @return {Desktop}   the requested desktop object that the window runs on
+   */
+  desktopObjectRequested () {
+    return this
   }
 }
 

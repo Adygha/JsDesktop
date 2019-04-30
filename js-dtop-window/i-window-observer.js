@@ -40,4 +40,10 @@ export default class IWindowObserver extends Interface {
    * @param {MouseEvent} mouseEv        the grabbing mouse-event related to grabbing
    */
   windowGrabbed (theWindow, grabType, mouseEv) { }
+
+  /**
+   * Used to inform that the window's working desktop object is requested.
+   * @return {Desktop}   the requested desktop object that the window runs on
+   */
+  desktopObjectRequested () { }
 }

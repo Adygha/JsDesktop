@@ -178,4 +178,12 @@ export default class Icon {
   windowGrabbed (theWindow, grabType, mouseEv) {
     this._observer.windowGrabbed(theWindow, grabType, mouseEv)
   }
+
+  /**
+   * Used to inform that the window's working desktop object is requested.
+   * @return {Desktop}   the requested desktop object that the window runs on
+   */
+  desktopObjectRequested () {
+    return this._observer.desktopObjectRequested()
+  }
 }

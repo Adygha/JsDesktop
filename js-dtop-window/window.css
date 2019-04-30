@@ -92,8 +92,10 @@ js-dtop-window {
 .js-dtop-win-content {
 	display: block;
 	width: 100%;
+	height: 100%;
 	/*flex: 1 1 auto;*/
 	/*overflow-y: auto;*/
+	overflow: hidden;
 }
 
 .js-dtop-win-topedge {

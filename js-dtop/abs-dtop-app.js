@@ -7,10 +7,9 @@
 export default class AbsDtopApp extends HTMLElement {
 
   /**
-   * A constructor that takes this app's HTML element that will contain it as a parameter.
-   * @param {HTMLElement} appHtmlContainer  the HTML element that will contain (or its shadow) this app
+   * Default Constructor.
    */
-  constructor (appHtmlContainer) {
+  constructor () {
     super()
     if (new.target === AbsDtopApp) { // Check if an object begins to instatiate from this abstract class directly
       throw new TypeError('Creating an instance of \'AbsDtopApp\' directly is not permitted. You must inherit it first.')
@@ -25,7 +24,7 @@ export default class AbsDtopApp extends HTMLElement {
   }
 
   /**
-   * Part of the madatory interface. It is used to specify the app icon's URL (static).
+   * Part of the mandatory interface. It is used to specify the app icon's URL (static).
    * @readonly
    * @type {String}
    */
@@ -43,9 +42,11 @@ export default class AbsDtopApp extends HTMLElement {
   }
 
   /**
-   * Part of the mandatory interface. It is used to specify he app's default/initial size (static).
+   * Part of the mandatory interface. It is used to specify the app's default/initial size (static).
    * @readonly
    * @type {Object}
+   * @property {Number} width
+   * @property {Number} height
    */
   static get defaultAppSize () {
     throw new Error('The derived class must override the \'defaultAppSize\' static getter or provide it as a property/field, to provide an object {width: number, height: number}')

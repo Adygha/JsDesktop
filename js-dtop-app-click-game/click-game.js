@@ -2,9 +2,17 @@ import AbsDtopApp from '../js-dtop/abs-dtop-app.js'
 
 const APP_PATH = 'js-dtop-app-click-game/' // This app's path
 const APP_NAME = 'Click Game' // App's name
-const APP_ICON = APP_PATH + 'click-game.png' // App's icon image
+const APP_ICON_FILE = APP_PATH + 'click-game.png' // App's icon image
+const APP_CSS_FILE = APP_PATH + 'click-game.css' // App's css file
+const APP_TEMPL_FILE = APP_PATH + 'click-game.html' // App's template file
 const APP_WIDTH = 400   //
 const APP_HEIGHT = 425  // App's initial/default size
+const APP_HTML_TAG = 'js-dtop-app-click-game' // App's HTML tag name
+const APP_CSS_SEL_TEMPL_BOARD = '#board' // App's template board css selector
+const APP_CSS_SEL_TEMPL_MSGS = '.messages' // App's template messages-board css selector
+const APP_CSS_SEL_TEMPL_TIME = '#time' // App's template timer css selector
+const APP_CSS_SEL_TEMPL_COLOR_MSG = '#color-to-click' // App's template color-message css selector
+const APP_CSS_SEL_TEMPL_COLORS = {GREY: 0, RED: 1, BLUE: 2, YELLOW: 3, 0: 'grey', 1: 'red', 2: 'blue', 3: 'yellow'}
 
 /**
  * A class that represents the actual game with the most game features (originally 'color-board').
@@ -18,7 +26,6 @@ class ColorBoard {
    * @param {Element} outputNode  the element to output the randomly chosen color.
    */
   constructor (brickList, timerNode, outputNode) {
-    this.meCOLORS = { GREY: 0, RED: 1, BLUE: 2, YELLOW: 3, 0: 'grey', 1: 'red', 2: 'blue', 3: 'yellow' }
     this.meBricks = brickList
     this.meTimeDisp = timerNode
     this.meOutput = outputNode
@@ -27,7 +34,7 @@ class ColorBoard {
     this.meClickHandler = (ev) => { // A click event handler to be attached with every block of the color display matrix
       if (ev.target.classList.contains(this.meOutput.innerText)) {
         ev.target.classList.remove(this.meOutput.innerText)
-        ev.target.classList.add(this.meCOLORS[0])
+        ev.target.classList.add(APP_CSS_SEL_TEMPL_COLORS[0])
         this.meCounter++
         if (this.meCounter === 3) {
           this.endGame()
@@ -49,12 +56,12 @@ class ColorBoard {
         let tmpBrk
         do {
           tmpBrk = this.meBricks[Math.floor(Math.random() * this.meBricks.length)]
-        } while (!tmpBrk.classList.contains(this.meCOLORS[0]))
-        tmpBrk.classList.remove(this.meCOLORS[0])
-        tmpBrk.classList.add(this.meCOLORS[i])
+        } while (!tmpBrk.classList.contains(APP_CSS_SEL_TEMPL_COLORS[0]))
+        tmpBrk.classList.remove(APP_CSS_SEL_TEMPL_COLORS[0])
+        tmpBrk.classList.add(APP_CSS_SEL_TEMPL_COLORS[i])
       }
     }
-    this.meOutput.innerText = this.meCOLORS[Math.floor(Math.random() * 3) + 1]
+    this.meOutput.innerText = APP_CSS_SEL_TEMPL_COLORS[Math.floor(Math.random() * 3) + 1]
     this.meBricks.forEach(brk => brk.addEventListener('click', this.meClickHandler))
     this.meInterval = window.setInterval(() => {
       this.meTime += 0.1
@@ -70,8 +77,8 @@ class ColorBoard {
     window.clearInterval(this.meInterval)
     this.meBricks.forEach(brk => brk.removeEventListener('click', this.meClickHandler))
     this.meBricks.forEach(brk => {
-      brk.classList.remove(this.meCOLORS[0], this.meCOLORS[1], this.meCOLORS[2], this.meCOLORS[3])
-      brk.classList.add(this.meCOLORS[0])
+      brk.classList.remove(APP_CSS_SEL_TEMPL_COLORS[0], APP_CSS_SEL_TEMPL_COLORS[1], APP_CSS_SEL_TEMPL_COLORS[2], APP_CSS_SEL_TEMPL_COLORS[3])
+      brk.classList.add(APP_CSS_SEL_TEMPL_COLORS[0])
     })
   }
 
@@ -85,8 +92,8 @@ class ColorBoard {
     window.clearInterval(this.meInterval)
     this.meBricks.forEach(brk => {
       brk.removeEventListener('click', this.meClickHandler)
-      brk.classList.remove(this.meCOLORS[0], this.meCOLORS[1], this.meCOLORS[2], this.meCOLORS[3])
-      brk.classList.add(this.meCOLORS[0])
+      brk.classList.remove(APP_CSS_SEL_TEMPL_COLORS[0], APP_CSS_SEL_TEMPL_COLORS[1], APP_CSS_SEL_TEMPL_COLORS[2], APP_CSS_SEL_TEMPL_COLORS[3])
+      brk.classList.add(APP_CSS_SEL_TEMPL_COLORS[0])
     })
   }
 
@@ -95,10 +102,10 @@ class ColorBoard {
    * @private
    */
   _wrongClick () {
-    this.meTimeDisp.classList.add(this.meCOLORS[1])
+    this.meTimeDisp.classList.add(APP_CSS_SEL_TEMPL_COLORS[1])
     this.meTime += 3.0
     this.meTimeDisp.innerText = this.meTime.toFixed(1)
-    window.setTimeout(() => this.meTimeDisp.classList.remove(this.meCOLORS[1]), 400)
+    window.setTimeout(() => this.meTimeDisp.classList.remove(APP_CSS_SEL_TEMPL_COLORS[1]), 400)
   }
 }
 
@@ -108,29 +115,26 @@ class ColorBoard {
 export default class ClickGame extends AbsDtopApp {
 
   /**
-   * A constructor that takes this app's HTML element that will contain it as a parameter.
-   * @param {HTMLElement} appHtmlContainer  the HTML element that will contain (or its shadow) this app
+   * Default Constructor.
    */
-  constructor (appHtmlContainer) {
-    super(appHtmlContainer)
-    appHtmlContainer.style.flex = '1 1 auto'  //
-    appHtmlContainer.style.overflowY = 'auto' // Add style suitable for this app (when resizing for example)
+  constructor () {
+    super()
     let tmpStyle = document.createElement('link')
     tmpStyle.setAttribute('rel', 'stylesheet')
-    tmpStyle.setAttribute('href', APP_PATH + 'click-game.css')
+    tmpStyle.setAttribute('href', APP_CSS_FILE)
     this.appendChild(tmpStyle)
-    fetch('js-dtop-app-click-game/click-game.html').then(resp => resp.text()).then(docTxt => {
+    fetch(APP_TEMPL_FILE).then(resp => resp.text()).then(docTxt => {
       let tmpDoc = (new DOMParser()).parseFromString(docTxt, 'text/html')
-      let tmpBoard = tmpDoc.querySelector('#board').cloneNode(true)
+      let tmpBoard = tmpDoc.querySelector(APP_CSS_SEL_TEMPL_BOARD).cloneNode(true)
       let tmpBrks = tmpBoard.querySelectorAll('div')
-      let tmpMsgs = tmpDoc.querySelector('.messages').cloneNode(true)
-      let tmpTime = tmpMsgs.querySelector('#time')
+      let tmpMsgs = tmpDoc.querySelector(APP_CSS_SEL_TEMPL_MSGS).cloneNode(true)
+      let tmpTime = tmpMsgs.querySelector(APP_CSS_SEL_TEMPL_TIME)
       let tmpColor = document.createElement('span')
       let tmpBut = document.createElement('button')
       this._colBoard = new ColorBoard(tmpBrks, tmpTime, tmpColor)
       tmpBut.innerText = 'Start New Game'
       tmpBut.addEventListener('click', () => this._colBoard.startGame())
-      tmpMsgs.querySelector('#colorToClick').appendChild(tmpColor)
+      tmpMsgs.querySelector(APP_CSS_SEL_TEMPL_COLOR_MSG).appendChild(tmpColor)
       tmpMsgs.appendChild(tmpBut)
       this.appendChild(tmpMsgs)
       this.appendChild(tmpBoard)
@@ -150,7 +154,7 @@ export default class ClickGame extends AbsDtopApp {
    * @type {String}
    */
   static get appIconURL () {
-    return APP_ICON
+    return APP_ICON_FILE
   }
 
   /**
@@ -166,6 +170,8 @@ export default class ClickGame extends AbsDtopApp {
    * Specifies the app's default/initial size (static).
    * @readonly
    * @type {Object}
+   * @property {Number} width
+   * @property {Number} height
    */
   static get defaultAppSize () {
     return {
@@ -175,4 +181,4 @@ export default class ClickGame extends AbsDtopApp {
   }
 }
 
-window.customElements.define('my-app-click-game', ClickGame)
+window.customElements.define(APP_HTML_TAG, ClickGame)

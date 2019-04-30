@@ -46,18 +46,18 @@ export default class Window extends HTMLElement {
 
   /**
    * Constructor that takes the app and its position and size as parameters.
-   * @param {typeof IWindowObserver} windowObserver  the observer object for the window
-   * @param {typeof AbsDtopApp} appClass               the js-desktop-app that is to be run in this window object
-   * @param {Object} [winSize]                the app's window size {width: number, height: number}
-   * @param {Number} winSize.width            the app's window width
-   * @param {Number} winSize.height           the app's window height
-   * @param {Object} [winPos]                 the app's window position {x: number, y: number}
-   * @param {Number} winPos.x                 the app's window X position
-   * @param {Number} winPos.y                 the app's window Y position
+   * @param {typeof IWindowObserver} windowObserver   the observer object for the window
+   * @param {typeof AbsDtopApp} appClass              the js-desktop-app that is to be run in this window object
+   * @param {Object} [winSize]                        the app's window size {width: number, height: number}
+   * @param {Number} winSize.width                    the app's window width
+   * @param {Number} winSize.height                   the app's window height
+   * @param {Object} [winPos]                         the app's window position {x: number, y: number}
+   * @param {Number} winPos.x                         the app's window X position
+   * @param {Number} winPos.y                         the app's window Y position
    */
   constructor (windowObserver, appClass, winSize, winPos) {
-    IWindowObserver.checkObjectImplements(windowObserver)
     super()
+    IWindowObserver.checkObjectImplements(windowObserver)
     /** @type {typeof IWindowObserver} */
     this._observer = windowObserver
     ///** @type {Map<HTMLElement, Function>} */
@@ -76,11 +76,11 @@ export default class Window extends HTMLElement {
       this.windowLeft = 0
       this.windowTop = 0
     }
+    this._winApp = new appClass(this)
     fetch('js-dtop-window/window.html').then(resp => resp.text()).then(docTxt => { // fetch the window html template
       this._windowOuter = (new DOMParser()).parseFromString(docTxt, 'text/html').querySelector('div.js-dtop-win').cloneNode(true)
       this._windowButClose = this._windowOuter.querySelector('label.js-dtop-win-close')
       let tmpInner = this._windowOuter.querySelector('div.js-dtop-win-content')
-      this._winApp = new appClass(tmpInner)
       this._windowOuter.querySelector('div.js-dtop-win-title').textContent = appClass.appName
       if (tmpInner.attachShadow) { // If 'Shadow Dom' is supported then replace 'tmpInner' with its shadow
         tmpInner = tmpInner.attachShadow({mode: 'closed'})
@@ -368,6 +368,22 @@ export default class Window extends HTMLElement {
    */
   static get minWindowHeight () {
     return MIN_HEIGHT
+  }
+
+  /**
+   * Used to inform that the app's working window object is requested.
+   * @return {Window}   the requested window object that the app runs on
+   */
+  windowObjectRequested () {
+    return this
+  }
+
+  /**
+   * Used to inform that the app's working desktop object is requested.
+   * @return {Desktop}   the requested desktop object that the app runs on
+   */
+  desktopObjectRequested () {
+    return this._observer.desktopObjectRequested()
   }
 }
 
