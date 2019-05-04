@@ -7,7 +7,7 @@ if ('customElements' in window) {
 function beginCustElems () {
   let tmpScr = document.createElement('script')
   tmpScr.type = 'module'
-  tmpScr.src = 'js-dtop-libs/custom-elements.min.js'
+  tmpScr.src = 'js-dtop/libs/custom-elements.min.js'
   tmpScr.addEventListener('load', beginStarter, false)
   document.head.appendChild(tmpScr)
 }

@@ -1,4 +1,4 @@
-import Interface from '../js-dtop-libs/interface.js'
+import Interface from '../libs/interface.js'
 // import Window from '../js-dtop/window/window.js'
 // import Desktop from '../js-dtop/desktop.js'
 
