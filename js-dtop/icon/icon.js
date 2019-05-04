@@ -1,5 +1,5 @@
-import AbsDtopApp from '../js-dtop/abs-dtop-app.js'
-import Window from '../js-dtop-window/window.js';
+import AbsDtopApp from '../abs-dtop-app.js'
+import Window from '../../js-dtop-window/window.js';
 import IIconObserver from './i-icon-observer.js';
 // import IWindowObserver from '../js-dtop-window/i-window-observer.js'
 
