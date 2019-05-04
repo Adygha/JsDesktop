@@ -7,15 +7,13 @@ const REGEX_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg; // From: https://stac
 /**
  * An attempt to make a JavaScript interface.
  */
-export default class Interface {
-  //constructor () {
-  //  if (new.target === Interface) { // Check if an object begins to instatiate from this abstract class directly
-  //    throw new TypeError('Creating an instance of \'Interface\' directly is not permitted. You must extend it (as another interface) then use its \'class-/objectImplement\' static methods.')
-  //  }
-  //}
+export default class JsInterface {
 
+  /**
+   * A specific constructor to prevent directly creating an object from the interface.
+   */
   constructor () {
-    throw new TypeError('Creating an instance of the interface directly is not permitted. You must use its \'class-/objectImplement\' static methods to check implementation.')
+    throw new TypeError('Creating an instance of \'JsInterface\' directly is not permitted. You must extend it (as another interface) then use its \'checkClassImplements/checkObjectImplement\' static methods.')
   }
 
   /**
@@ -23,8 +21,8 @@ export default class Interface {
    * @param {ObjectConstructor} implementingClass the class to be checked
    */
   static checkClassImplements (implementingClass) {
-    if (this === Interface) {
-      throw new TypeError('This \'classImplement\' static method should be called from the actual extended interface.' )
+    if (this === JsInterface) {
+      throw new TypeError('This \'checkClassImplements\' static method should be called from the actual extended interface.' )
     }
     let tmpReqStaticInter = this._getProps(this, true) // Required static interface
     let tmpReqInstanceInter = this._getProps(this.prototype, false) // Required instance interface
@@ -55,7 +53,7 @@ export default class Interface {
    * @param {Object} implementingObj  the object to be checked
    */
   static checkObjectImplements (implementingObj) {
-    if (this === Interface) {
+    if (this === JsInterface) {
       throw new TypeError('This \'objectImplement\' static method should be called from the actual extended interface.')
     }
     let tmpReqStaticInter = this._getProps(this, true) // Required static interface
@@ -92,8 +90,8 @@ export default class Interface {
   static _getProps (theClassObject, isStatic = false) {
     let outMap = new Map()
     let tmpIgnoreArr = isStatic ? IGNORED_STATIC : IGNORED_INSTANCE
-    while (theClassObject && theClassObject !== Interface && theClassObject !== Function.prototype && theClassObject !== Object.prototype) { // Loop throw all prototypes (except those)
-      //if (theClassObject === Interface || theClassObject === Function.prototype || theClassObject === Object.prototype) {
+    while (theClassObject && theClassObject !== JsInterface && theClassObject !== Function.prototype && theClassObject !== Object.prototype) { // Loop throw all prototypes (except those)
+      //if (theClassObject === JsInterface || theClassObject === Function.prototype || theClassObject === Object.prototype) {
       //  theClassObject = Object.getPrototypeOf(theClassObject)
       //  continue // Skip this prototype
       //}

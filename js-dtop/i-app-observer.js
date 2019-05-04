@@ -1,6 +1,6 @@
-import Interface from './libs/interface.js'
+import JsInterface from './libs/js-interface.js'
 
-export default class IAppObserver extends Interface {
+export default class IAppObserver extends JsInterface {
 
   /**
    * Used to inform that the app's working window object is requested.
