@@ -1,5 +1,5 @@
 import Interface from '../js-dtop-libs/interface.js'
-// import Window from '../js-dtop-window/window.js'
+// import Window from '../js-dtop/window/window.js'
 // import Desktop from '../js-dtop/desktop.js'
 
 export default class IAppObserver extends Interface {

@@ -1,5 +1,5 @@
 import IWindowObserver from './i-window-observer.js'
-import AbsDtopApp from '../js-dtop/abs-dtop-app.js'
+import AbsDtopApp from '../abs-dtop-app.js'
 
 const MIN_WIDTH = 300
 const MIN_HEIGHT = 300
@@ -77,7 +77,7 @@ export default class Window extends HTMLElement {
       this.windowTop = 0
     }
     this._winApp = new appClass(this)
-    fetch('js-dtop-window/window.html').then(resp => resp.text()).then(docTxt => { // fetch the window html template
+    fetch('js-dtop/window/window.html').then(resp => resp.text()).then(docTxt => { // fetch the window html template
       this._windowOuter = (new DOMParser()).parseFromString(docTxt, 'text/html').querySelector('div.js-dtop-win').cloneNode(true)
       this._windowButClose = this._windowOuter.querySelector('label.js-dtop-win-close')
       let tmpInner = this._windowOuter.querySelector('div.js-dtop-win-content')
@@ -98,11 +98,11 @@ export default class Window extends HTMLElement {
   }
 
   connectedCallback () {
-    let tmpStyle = document.querySelector('link[rel="stylesheet"][href="js-dtop-window/window.css"]')
+    let tmpStyle = document.querySelector('link[rel="stylesheet"][href="js-dtop/window/window.css"]')
     if (!tmpStyle) {
       tmpStyle = document.createElement('link')
       tmpStyle.setAttribute('rel', 'stylesheet')
-      tmpStyle.setAttribute('href', 'js-dtop-window/Window.css')
+      tmpStyle.setAttribute('href', 'js-dtop/window/window.css')
       document.head.appendChild(tmpStyle)
     }
   }

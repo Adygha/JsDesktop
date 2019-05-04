@@ -1,4 +1,4 @@
-import Interface from '../js-dtop-libs/interface.js'
+import Interface from '../../js-dtop-libs/interface.js'
 // import Window, {WindowGrabType} from './window.js'
 
 export default class IWindowObserver extends Interface {

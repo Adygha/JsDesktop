@@ -1,7 +1,7 @@
 import AbsDtopApp from '../abs-dtop-app.js'
-import Window from '../../window/window.js';
+import Window from '../window/window.js';
 import IIconObserver from './i-icon-observer.js';
-// import IWindowObserver from '../js-dtop-window/i-window-observer.js'
+// import IWindowObserver from '../window/i-window-observer.js'
 
 // const CSS_CLASS_ICON_LIST = 'js-dtop-icon-list'
 const CSS_CLASS_DESK_ICON = 'js-dtop-icon-list-icon-container'
