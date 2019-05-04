@@ -1,6 +1,6 @@
 import Window, {WindowGrabType} from '../js-dtop-window/window.js'
 import AbsDtopApp from './abs-dtop-app.js'
-import Icon from '../js-dtop-icon/icon.js'
+import Icon from '../icon/icon.js'
 
 const CSS_CLASS_ICON_LIST = 'js-dtop-icon-list' //
 const DESK_BAR_ICON_THICK = 40 // Desktop-bar thickness in pixels
