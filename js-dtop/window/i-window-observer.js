@@ -1,5 +1,4 @@
-import Interface from '../../libs/interface.js'
-// import Window, {WindowGrabType} from './window.js'
+import Interface from '../libs/interface.js'
 
 export default class IWindowObserver extends Interface {
 
