@@ -1,5 +1,5 @@
 import AbsDtopApp from '../abs-dtop-app.js'
-import Window from '../../js-dtop-window/window.js';
+import Window from '../../window/window.js';
 import IIconObserver from './i-icon-observer.js';
 // import IWindowObserver from '../js-dtop-window/i-window-observer.js'
 
@@ -98,11 +98,11 @@ export default class Icon {
     //   this._barIcon.firstElementChild.classList.remove(CSS_CLASS_WIN_BUT_DRAWER_MENU_VIS)
     // })
 
-    let tmpStyle = document.querySelector('link[rel="stylesheet"][href="js-dtop-icon/icon.css"]')
+    let tmpStyle = document.querySelector('link[rel="stylesheet"][href="js-dtop/icon/icon.css"]')
     if (!tmpStyle) {
       tmpStyle = document.createElement('link')
       tmpStyle.setAttribute('rel', 'stylesheet')
-      tmpStyle.setAttribute('href', 'js-dtop-icon/icon.css')
+      tmpStyle.setAttribute('href', 'js-dtop/icon/icon.css')
       // this._shadow = this.attachShadow({mode: 'open'})
       // this._shadow.appendChild(tmpStyle)
       document.head.appendChild(tmpStyle)

@@ -1,4 +1,4 @@
-import Window, {WindowGrabType} from '../js-dtop-window/window.js'
+import Window, {WindowGrabType} from '../window/window.js'
 import AbsDtopApp from './abs-dtop-app.js'
 import Icon from './icon/icon.js'
 

@@ -1,4 +1,4 @@
-import IWindowObserver from '../../js-dtop-window/i-window-observer.js';
+import IWindowObserver from '../../window/i-window-observer.js';
 
 export default class IIconObserver extends IWindowObserver {
 
