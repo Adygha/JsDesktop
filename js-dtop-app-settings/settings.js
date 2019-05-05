@@ -1,5 +1,5 @@
-import AbsApp from '../js-dtop/abs-dtop-app.js'
-import IAppObserver from '../js-dtop/i-app-observer.js'
+import AbsApp from '../js-dtop/app/abs-app.js'
+import IAppObserver from '../js-dtop/app/i-app-observer.js'
 import {BarPos} from '../js-dtop/desktop.js'
 
 const APP_PATH = 'js-dtop-app-settings/' // This app's path

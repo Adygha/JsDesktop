@@ -1,5 +1,5 @@
 import Window, {WindowGrabType} from './window/window.js'
-import AbsApp from './abs-dtop-app.js'
+import AbsApp from './app/abs-app.js'
 import Icon from './icon/icon.js'
 
 const DTOP_PATH = 'js-dtop/'

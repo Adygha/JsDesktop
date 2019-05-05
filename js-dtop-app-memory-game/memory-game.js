@@ -1,4 +1,4 @@
-import AbsApp from '../js-dtop/abs-dtop-app.js';
+import AbsApp from '../js-dtop/app/abs-app.js';
 
 const APP_PATH = 'js-dtop-app-memory-game/' // This app's path
 const TIMER_INCORRECT = 1000 // Timer interval when an incorrect match chosen

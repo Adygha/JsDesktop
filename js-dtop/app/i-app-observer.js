@@ -1,4 +1,4 @@
-import JsInterface from './libs/js-interface.js'
+import JsInterface from '../libs/js-interface.js'
 
 export default class IAppObserver extends JsInterface {
 

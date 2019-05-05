@@ -1,4 +1,4 @@
-import AbsApp from '../js-dtop/abs-dtop-app.js'
+import AbsApp from '../js-dtop/app/abs-app.js'
 
 const APP_PATH = 'js-dtop-app-click-game/' // This app's path
 const APP_NAME = 'Click Game' // App's name
