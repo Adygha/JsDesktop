@@ -2,10 +2,10 @@ import IWindowObserver from './i-window-observer.js'
 import AbsApp from '../app/abs-app.js'
 
 const DTOP_PATH = 'js-dtop/'
-const DTOP_WIN_CSS_PATH = DTOP_PATH + 'css/window.css'
-const DTOP_WIN_TMPL_PATH = DTOP_PATH + 'tmpl/window.html'
-const MIN_WIDTH = 300
-const MIN_HEIGHT = 300
+const WIN_CSS_PATH = DTOP_PATH + 'css/window.css'
+const WIN_TMPL_PATH = DTOP_PATH + 'tmpl/window.html'
+const WIN_MIN_WIDTH = 300
+const WIN_MIN_HEIGHT = 300
 
 /**
  * An Enum used to specify the type of grab (which part of the window is grabbed/moved)
@@ -80,7 +80,7 @@ export default class Window extends HTMLElement {
       this.windowTop = 0
     }
     this._winApp = new appClass(this)
-    fetch(DTOP_WIN_TMPL_PATH).then(resp => resp.text()).then(docTxt => { // fetch the window html template
+    fetch(WIN_TMPL_PATH).then(resp => resp.text()).then(docTxt => { // fetch the window html template
       this._windowOuter = (new DOMParser()).parseFromString(docTxt, 'text/html').querySelector('div.js-dtop-win').cloneNode(true)
       this._windowButClose = this._windowOuter.querySelector('label.js-dtop-win-close')
       let tmpInner = this._windowOuter.querySelector('div.js-dtop-win-content')
@@ -101,11 +101,11 @@ export default class Window extends HTMLElement {
   }
 
   connectedCallback () {
-    let tmpStyle = document.querySelector('link[rel="stylesheet"][href="' + DTOP_WIN_CSS_PATH + '"]')
+    let tmpStyle = document.querySelector('link[rel="stylesheet"][href="' + WIN_CSS_PATH + '"]')
     if (!tmpStyle) {
       tmpStyle = document.createElement('link')
       tmpStyle.setAttribute('rel', 'stylesheet')
-      tmpStyle.setAttribute('href', DTOP_WIN_CSS_PATH)
+      tmpStyle.setAttribute('href', WIN_CSS_PATH)
       document.head.appendChild(tmpStyle)
     }
   }
@@ -240,7 +240,7 @@ export default class Window extends HTMLElement {
    * @type {Number}
    */
   set windowWidth (newWidth) {
-    if (newWidth >= MIN_WIDTH) {
+    if (newWidth >= WIN_MIN_WIDTH) {
       this.style.width = newWidth + 'px'
     }
   }
@@ -258,7 +258,7 @@ export default class Window extends HTMLElement {
    * @type {Number}
    */
   set windowHeight (newHeight) {
-    if (newHeight >= MIN_HEIGHT) {
+    if (newHeight >= WIN_MIN_HEIGHT) {
       this.style.height = newHeight + 'px'
     }
   }
@@ -362,7 +362,7 @@ export default class Window extends HTMLElement {
    * @type {Number}
    */
   static get minWindowWidth () {
-    return MIN_WIDTH
+    return WIN_MIN_WIDTH
   }
 
   /**
@@ -370,7 +370,7 @@ export default class Window extends HTMLElement {
    * @type {Number}
    */
   static get minWindowHeight () {
-    return MIN_HEIGHT
+    return WIN_MIN_HEIGHT
   }
 
   /**

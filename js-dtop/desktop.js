@@ -5,9 +5,17 @@ import Icon from './icon/icon.js'
 const DTOP_PATH = 'js-dtop/'
 const DTOP_CSS_FILE = DTOP_PATH + 'css/desktop.css'
 const DTOP_BGROUND_FILE = DTOP_PATH + 'img/desktop-background.jpg'
+const DTOP_BAR_ICON_THICK = 40 // Desktop-bar thickness in pixels
+const DTOP_BAR_PAD = 5 // Desktop-bar padding in pixels
+const DTOP_TAG = 'js-desktop'
+const DTOP_FAKE_WIN_TAG = 'js-dtop-fake-window'
+const CSS_CLASS_DTOP = 'js-dtop' // CSS class for the desktop area
+const CSS_CLASS_DTOP_BAR = 'js-dtop-bar' // CSS class for the desktop-bar
+const CSS_CLASS_DTOP_BAR_ICONS_TOP = 'js-dtop-bar-icon-container-center-top' // CSS class for the top desktop-bar icon container
+const CSS_CLASS_DTOP_BAR_ICONS_LEFT = 'js-dtop-bar-icon-container-center-left' // CSS class for the left desktop-bar icon container
+const CSS_CLASS_DTOP_BAR_ICONS_BOT = 'js-dtop-bar-icon-container-center-bot' // CSS class for the bottom desktop-bar icon container
+const CSS_CLASS_DTOP_BAR_ICONS_RIGHT = 'js-dtop-bar-icon-container-center-right' // CSS class for the right desktop-bar icon container
 const CSS_CLASS_ICON_LIST = 'js-dtop-icon-list' // CSS class for the list that contains the desktop icons
-const DESK_BAR_ICON_THICK = 40 // Desktop-bar thickness in pixels
-const DESK_BAR_PAD = 5 // Desktop-bar padding in pixels
 const EVENT_DESKBAR_MOVED = 'desktop-bar-moved'
 
 /**
@@ -42,7 +50,6 @@ class FakeWindow extends HTMLElement {
    */
   constructor (windowToFake) {
     super()
-    this.classList.add('js-dtop-fake-window')
     this.windowLeft = windowToFake.windowLeft
     this.windowTop = windowToFake.windowTop
     this.windowWidth = windowToFake.windowWidth
@@ -125,7 +132,7 @@ class FakeWindow extends HTMLElement {
   }
 }
 
-window.customElements.define('js-dtop-fake-window', FakeWindow)
+window.customElements.define(DTOP_FAKE_WIN_TAG, FakeWindow)
 
 /**
  * A class that represents the desktop in 'JsDesktop'.
@@ -146,7 +153,7 @@ export default class Desktop extends HTMLElement {
     tmpStyle.setAttribute('href', DTOP_CSS_FILE)
     // this._shadow = this.attachShadow({mode: 'open'})
     this._deskTop = document.createElement('div')
-    this._deskTop.classList.add('js-dtop')
+    this._deskTop.classList.add(CSS_CLASS_DTOP)
     this._deskTop.style.backgroundImage = 'url(\'' + DTOP_BGROUND_FILE + '\')'
     this._deskBar = document.createElement('div')
     this._deskBarIconsStart = document.createElement('div')
@@ -155,12 +162,12 @@ export default class Desktop extends HTMLElement {
     this._deskBar.appendChild(this._deskBarIconsStart)
     this._deskBar.appendChild(this._deskBarIconsCenter)
     this._deskBar.appendChild(this._deskBarIconsEnd)
-    this._deskBar.classList.add('js-dtop-bar')
+    this._deskBar.classList.add(CSS_CLASS_DTOP_BAR)
     this._deskTopIconList = document.createElement('ul')
     document.head.appendChild(tmpStyle)
     this._deskTopIconList.classList.add(CSS_CLASS_ICON_LIST)
     this._deskTop.appendChild(this._deskTopIconList)
-    this._deskBar.style.padding = DESK_BAR_PAD + 'px'
+    this._deskBar.style.padding = DTOP_BAR_PAD + 'px'
     this.desktopBarPosition = barPosition
     this.appendChild(this._deskTop)
     this.appendChild(this._deskBar)
@@ -380,15 +387,15 @@ export default class Desktop extends HTMLElement {
   set desktopBarPosition (newPos) {
     let tmpHorBar = () => {
       this._deskTop.style.width = '100vw'
-      this._deskTop.style.height = 'calc(100vh - ' + (2 * DESK_BAR_PAD + DESK_BAR_ICON_THICK) + 'px)'
+      this._deskTop.style.height = 'calc(100vh - ' + (2 * DTOP_BAR_PAD + DTOP_BAR_ICON_THICK) + 'px)'
       this._deskBar.style.width = '100vw'
-      this._deskBar.style.height = DESK_BAR_ICON_THICK + 'px'
+      this._deskBar.style.height = DTOP_BAR_ICON_THICK + 'px'
       this._deskBar.style.flexDirection = 'row'
     }
     let tmpVerBar = () => {
-      this._deskTop.style.width = 'calc(100vw - ' + (2 * DESK_BAR_PAD + DESK_BAR_ICON_THICK) + 'px)'
+      this._deskTop.style.width = 'calc(100vw - ' + (2 * DTOP_BAR_PAD + DTOP_BAR_ICON_THICK) + 'px)'
       this._deskTop.style.height = '100vh'
-      this._deskBar.style.width = DESK_BAR_ICON_THICK + 'px'
+      this._deskBar.style.width = DTOP_BAR_ICON_THICK + 'px'
       this._deskBar.style.height = '100vh'
       this._deskBar.style.flexDirection = 'column'
     }
@@ -403,7 +410,7 @@ export default class Desktop extends HTMLElement {
         this._deskBar.style.right = ''
         this._deskBar.style.bottom = ''
         this._deskBar.style.left = ''
-        this._deskBarIconsCenter.className = 'js-dtop-bar-icon-container-center-top'
+        this._deskBarIconsCenter.className = CSS_CLASS_DTOP_BAR_ICONS_TOP
         break
       case BarPos.LEFT:
         tmpVerBar()
@@ -415,7 +422,7 @@ export default class Desktop extends HTMLElement {
         this._deskBar.style.right = ''
         this._deskBar.style.bottom = ''
         this._deskBar.style.left = '0'
-        this._deskBarIconsCenter.className = 'js-dtop-bar-icon-container-center-left'
+        this._deskBarIconsCenter.className = CSS_CLASS_DTOP_BAR_ICONS_LEFT
         break
       case BarPos.BOTTOM:
         tmpHorBar()
@@ -427,7 +434,7 @@ export default class Desktop extends HTMLElement {
         this._deskBar.style.right = ''
         this._deskBar.style.bottom = '0'
         this._deskBar.style.left = ''
-        this._deskBarIconsCenter.className = 'js-dtop-bar-icon-container-center-bot'
+        this._deskBarIconsCenter.className = CSS_CLASS_DTOP_BAR_ICONS_BOT
         break
       case BarPos.RIGHT:
         tmpVerBar()
@@ -439,7 +446,7 @@ export default class Desktop extends HTMLElement {
         this._deskBar.style.right = '0'
         this._deskBar.style.bottom = ''
         this._deskBar.style.left = ''
-        this._deskBarIconsCenter.className = 'js-dtop-bar-icon-container-center-right'
+        this._deskBarIconsCenter.className = CSS_CLASS_DTOP_BAR_ICONS_RIGHT
         break
       default:
         throw new TypeError('The passed new \'desktopBarPosition\' value should be one of the \'BarPos\' constant values.')
@@ -457,7 +464,7 @@ export default class Desktop extends HTMLElement {
     if (!(AppClass.prototype instanceof AbsApp)) { // Check if it is actually a js-desktop-app class
       throw new TypeError('The passed \'appClass\' argument must be a class that extends the \'AbsApp\' abstract class.')
     }
-    /*let tmpIcon =*/ new Icon(this, AppClass, DESK_BAR_ICON_THICK) // Prepare the app-icon (on bar and desktop) // TODO: make it better
+    /*let tmpIcon =*/ new Icon(this, AppClass, DTOP_BAR_ICON_THICK) // Prepare the app-icon (on bar and desktop) // TODO: make it better
   }
 
   /**
@@ -584,4 +591,4 @@ export default class Desktop extends HTMLElement {
   }
 }
 
-window.customElements.define('js-desktop', Desktop)
+window.customElements.define(DTOP_TAG, Desktop)
