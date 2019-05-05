@@ -1,8 +1,9 @@
-import AbsApp from '../js-dtop/app/abs-app.js'
-import IAppObserver from '../js-dtop/app/i-app-observer.js'
-import {BarPos} from '../js-dtop/desktop.js'
+import AbsApp from '../app/abs-app.js'
+import IAppObserver from '../app/i-app-observer.js'
+import {BarPos} from '../desktop.js'
 
-const APP_PATH = 'app-settings/' // This app's path
+const DTOP_PATH = 'js-dtop/'
+const APP_PATH = DTOP_PATH + 'app-settings/' // This app's path
 const APP_NAME = 'JsDesktop Settings' // App's name
 const APP_ICON_FILE = APP_PATH + 'settings.png' // App's icon image
 const APP_CSS_FILE = APP_PATH + 'settings.css' // App's css file

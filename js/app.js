@@ -1,5 +1,5 @@
 import Desktop, {BarPos} from '../js-dtop/desktop.js'
-import Settings from '../app-settings/settings.js'
+import Settings from '../js-dtop/app-settings/settings.js'
 import MemGame from '../js-dtop-app-memory-game/memory-game.js'
 import ClickGame from '../js-dtop-app-click-game/click-game.js'
 
