@@ -1,4 +1,4 @@
-import AbsDtopApp from '../js-dtop/abs-dtop-app.js';
+import AbsApp from '../js-dtop/abs-dtop-app.js';
 
 const APP_PATH = 'js-dtop-app-memory-game/' // This app's path
 const TIMER_INCORRECT = 1000 // Timer interval when an incorrect match chosen
@@ -125,7 +125,7 @@ window.customElements.define('js-dtop-app-game-card', GameCard)
 /**
  * A class that represents a memory-game app.
  */
-export default class MemoryGame extends AbsDtopApp {
+export default class MemoryGame extends AbsApp {
 
   /**
    * Default Constructor.

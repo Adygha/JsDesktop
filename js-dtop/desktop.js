@@ -1,8 +1,11 @@
 import Window, {WindowGrabType} from './window/window.js'
-import AbsDtopApp from './abs-dtop-app.js'
+import AbsApp from './abs-dtop-app.js'
 import Icon from './icon/icon.js'
 
-const CSS_CLASS_ICON_LIST = 'js-dtop-icon-list' //
+const DTOP_PATH = 'js-dtop/'
+const DTOP_CSS_FILE = DTOP_PATH + 'css/desktop.css'
+const DTOP_BGROUND_FILE = DTOP_PATH + 'img/desktop-background.jpg'
+const CSS_CLASS_ICON_LIST = 'js-dtop-icon-list' // CSS class for the list that contains the desktop icons
 const DESK_BAR_ICON_THICK = 40 // Desktop-bar thickness in pixels
 const DESK_BAR_PAD = 5 // Desktop-bar padding in pixels
 const EVENT_DESKBAR_MOVED = 'desktop-bar-moved'
@@ -140,10 +143,11 @@ export default class Desktop extends HTMLElement {
     this._nextWinX = this._nextWinY = 10 // Tracks the next position for the next open window
     let tmpStyle = document.createElement('link')
     tmpStyle.setAttribute('rel', 'stylesheet')
-    tmpStyle.setAttribute('href', 'js-dtop/desktop.css')
+    tmpStyle.setAttribute('href', DTOP_CSS_FILE)
     // this._shadow = this.attachShadow({mode: 'open'})
     this._deskTop = document.createElement('div')
     this._deskTop.classList.add('js-dtop')
+    this._deskTop.style.backgroundImage = 'url(\'' + DTOP_BGROUND_FILE + '\')'
     this._deskBar = document.createElement('div')
     this._deskBarIconsStart = document.createElement('div')
     this._deskBarIconsCenter = document.createElement('div')
@@ -447,11 +451,11 @@ export default class Desktop extends HTMLElement {
 
   /**
    * Adds an app to put inside the window.
-   * @param {typeof AbsDtopApp} AppClass the class for the application to be put in the window (must extend 'AbsDtopApp')
+   * @param {typeof AbsApp} AppClass the class for the application to be put in the window (must extend 'AbsApp')
    */
   addApp (AppClass) {
-    if (!(AppClass.prototype instanceof AbsDtopApp)) { // Check if it is actually a js-desktop-app class
-      throw new TypeError('The passed \'appClass\' argument must be a class that extends the \'AbsDtopApp\' abstract class.')
+    if (!(AppClass.prototype instanceof AbsApp)) { // Check if it is actually a js-desktop-app class
+      throw new TypeError('The passed \'appClass\' argument must be a class that extends the \'AbsApp\' abstract class.')
     }
     /*let tmpIcon =*/ new Icon(this, AppClass, DESK_BAR_ICON_THICK) // Prepare the app-icon (on bar and desktop) // TODO: make it better
   }

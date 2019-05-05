@@ -1,4 +1,4 @@
-import AbsDtopApp from '../abs-dtop-app.js'
+import AbsApp from '../abs-dtop-app.js'
 import Window from '../window/window.js';
 import IIconObserver from './i-icon-observer.js';
 // import IWindowObserver from '../window/i-window-observer.js'
@@ -48,13 +48,13 @@ export default class Icon {
   /**
    * Constructor that takes the icon observer and the app-class as parameters.
    * @param {typeof IIconObserver} iconObserver   the observer of the icon actions.
-   * @param {typeof AbsDtopApp} appClass          the js-desktop-app class that this 'Icon' will run.
+   * @param {typeof AbsApp} appClass          the js-desktop-app class that this 'Icon' will run.
    * @param {number} iconSize                     the size (used for width and height) of the icon in pixels
    */
   constructor (iconObserver, appClass, iconSize) {
     IIconObserver.checkObjectImplements(iconObserver)
-    if (!(appClass.prototype instanceof AbsDtopApp)) {
-      throw new TypeError('The \'appClass\' argument must be a class that extends the \'AbsDtopApp\' abstract class.')
+    if (!(appClass.prototype instanceof AbsApp)) {
+      throw new TypeError('The \'appClass\' argument must be a class that extends the \'AbsApp\' abstract class.')
     }
     this._appClass = appClass
     /** @type {typeof IIconObserver} */
@@ -123,7 +123,7 @@ export default class Icon {
   /**
    * The js-desktop-app class that this 'Icon' will initiate.
    * @readonly
-   * @type {typeof AbsDtopApp}
+   * @type {typeof AbsApp}
    */
   get appClass () {
     return this._appClass

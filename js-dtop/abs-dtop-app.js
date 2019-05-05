@@ -4,15 +4,15 @@
  * we cannot create an object of this class because we did not use 'window.customElements.define' for it, but even if
  * it was used, we cannot create an object from it directly, and we must extend it first.
  */
-export default class AbsDtopApp extends HTMLElement {
+export default class AbsApp extends HTMLElement {
 
   /**
    * Default Constructor.
    */
   constructor () {
     super()
-    if (new.target === AbsDtopApp) { // Check if an object begins to instatiate from this abstract class directly
-      throw new TypeError('Creating an instance of \'AbsDtopApp\' directly is not permitted. You must inherit it first.')
+    if (new.target === AbsApp) { // Check if an object begins to instatiate from this abstract class directly
+      throw new TypeError('Creating an instance of \'AbsApp\' directly is not permitted. You must inherit it first.')
     }
   }
 

@@ -1,4 +1,4 @@
-import AbsDtopApp from '../js-dtop/abs-dtop-app.js'
+import AbsApp from '../js-dtop/abs-dtop-app.js'
 import IAppObserver from '../js-dtop/i-app-observer.js'
 import {BarPos} from '../js-dtop/desktop.js'
 
@@ -13,7 +13,7 @@ const APP_HTML_TAG = 'js-dtop-app-settings' // App's HTML tag name
 const APP_CSS_SEL_TEMPL_ROOT = '#settings' // App's template root css selector
 const APP_CSS_SEL_TEMPL_BAR_POS = '#settings-desktop-bar-position' // App's template desktop-bar position drop-box css selector
 
-export default class Settings extends AbsDtopApp {
+export default class Settings extends AbsApp {
 
   /**
    * Constructor that takes an app observer object as a parameter.

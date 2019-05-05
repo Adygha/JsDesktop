@@ -1,5 +1,5 @@
 import IWindowObserver from './i-window-observer.js'
-import AbsDtopApp from '../abs-dtop-app.js'
+import AbsApp from '../abs-dtop-app.js'
 
 const MIN_WIDTH = 300
 const MIN_HEIGHT = 300
@@ -47,7 +47,7 @@ export default class Window extends HTMLElement {
   /**
    * Constructor that takes the app and its position and size as parameters.
    * @param {typeof IWindowObserver} windowObserver   the observer object for the window
-   * @param {typeof AbsDtopApp} appClass              the js-desktop-app that is to be run in this window object
+   * @param {typeof AbsApp} appClass              the js-desktop-app that is to be run in this window object
    * @param {Object} [winSize]                        the app's window size {width: number, height: number}
    * @param {Number} winSize.width                    the app's window width
    * @param {Number} winSize.height                   the app's window height

@@ -1,4 +1,4 @@
-import AbsDtopApp from '../js-dtop/abs-dtop-app.js'
+import AbsApp from '../js-dtop/abs-dtop-app.js'
 
 const APP_PATH = 'js-dtop-app-click-game/' // This app's path
 const APP_NAME = 'Click Game' // App's name
@@ -112,7 +112,7 @@ class ColorBoard {
 /**
  * A class that represents the click-game (actually, only the HTML representation of it).
  */
-export default class ClickGame extends AbsDtopApp {
+export default class ClickGame extends AbsApp {
 
   /**
    * Default Constructor.
