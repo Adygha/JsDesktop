@@ -17,14 +17,14 @@ export default class AbsApp extends HTMLElement {
   }
 
   /**
-   * Part of the mandatory interface. It is used to end the application gracefully.
+   * Must override. It is used to end the application gracefully.
    */
   endApp () {
     throw new Error('The derived class must override the \'endApp\' method.')
   }
 
   /**
-   * Part of the mandatory interface. It is used to specify the app icon's URL (static).
+   * Must override. It is used to specify the app icon's URL (static).
    * @readonly
    * @type {String}
    */
@@ -33,7 +33,7 @@ export default class AbsApp extends HTMLElement {
   }
 
   /**
-   * Part of the mandatory interface. It is used to specify the app name (static).
+   * Must override. It is used to specify the app name (static).
    * @readonly
    * @type {String}
    */
@@ -42,7 +42,7 @@ export default class AbsApp extends HTMLElement {
   }
 
   /**
-   * Part of the mandatory interface. It is used to specify the app's default/initial size (static).
+   * Must override. It is used to specify the app's default/initial size (static).
    * @readonly
    * @type {Object}
    * @property {Number} width

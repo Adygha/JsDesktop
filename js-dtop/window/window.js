@@ -56,19 +56,19 @@ export default class Window extends HTMLElement {
 
   /**
    * Constructor that takes the app and its position and size as parameters.
-   * @param {typeof IWindowObserver} windowObserver   the observer object for the window
-   * @param {typeof AbsApp} appClass              the js-desktop-app that is to be run in this window object
-   * @param {Object} [winSize]                        the app's window size {width: number, height: number}
-   * @param {Number} winSize.width                    the app's window width
-   * @param {Number} winSize.height                   the app's window height
-   * @param {Object} [winPos]                         the app's window position {x: number, y: number}
-   * @param {Number} winPos.x                         the app's window X position
-   * @param {Number} winPos.y                         the app's window Y position
+   * @param {IWindowObserver} windowObserver  the observer object for the window
+   * @param {typeof AbsApp} appClass          the js-desktop-app that is to be run in this window object
+   * @param {Object} [winSize]                the app's window size {width: number, height: number}
+   * @param {Number} winSize.width            the app's window width
+   * @param {Number} winSize.height           the app's window height
+   * @param {Object} [winPos]                 the app's window position {x: number, y: number}
+   * @param {Number} winPos.x                 the app's window X position
+   * @param {Number} winPos.y                 the app's window Y position
    */
   constructor (windowObserver, appClass, winSize, winPos) {
     super()
     IWindowObserver.checkObjectImplements(windowObserver)
-    /** @type {typeof IWindowObserver} */
+    /** @type {IWindowObserver} */
     this._observer = windowObserver
     if (winSize && winSize.width && winSize.height) {
       this.windowWidth = winSize.width

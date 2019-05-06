@@ -458,13 +458,13 @@ export default class Desktop extends HTMLElement {
 
   /**
    * Adds an app to put inside the window.
-   * @param {typeof AbsApp} AppClass the class for the application to be put in the window (must extend 'AbsApp')
+   * @param {typeof AbsApp} appClass  the class for the application to be put in the window (must extend 'AbsApp')
    */
-  addApp (AppClass) {
-    if (!(AppClass.prototype instanceof AbsApp)) { // Check if it is actually a js-desktop-app class
+  addApp (appClass) {
+    if (!(appClass.prototype instanceof AbsApp)) { // Check if it is actually a js-desktop-app class
       throw new TypeError('The passed \'appClass\' argument must be a class that extends the \'AbsApp\' abstract class.')
     }
-    /*let tmpIcon =*/ new Icon(this, AppClass, DTOP_BAR_ICON_THICK) // Prepare the app-icon (on bar and desktop) // TODO: make it better
+    /*let tmpIcon =*/ new Icon(this, appClass, DTOP_BAR_ICON_THICK) // Prepare the app-icon (on bar and desktop) // TODO: make it better
   }
 
   /**

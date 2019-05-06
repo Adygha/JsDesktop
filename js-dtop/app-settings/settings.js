@@ -18,7 +18,7 @@ export default class Settings extends AbsApp {
 
   /**
    * Constructor that takes an app observer object as a parameter.
-   * @param {typeof IAppObserver} appObserver   the observer object for the app
+   * @param {IAppObserver} appObserver   the observer object for the app
    */
   constructor (appObserver) {
     super()
@@ -65,14 +65,14 @@ export default class Settings extends AbsApp {
   }
 
   /**
-   * Part of the mandatory interface. It is used to end the application gracefully.
+   * Used to end the application gracefully.
    */
   endApp () {
     this._detachRemovableEventHandlers()
   }
 
   /**
-   * Part of the mandatory interface. It is used to specify the app icon's URL (static).
+   * Used to specify the app icon's URL (static).
    * @readonly
    * @type {String}
    */
@@ -81,7 +81,7 @@ export default class Settings extends AbsApp {
   }
 
   /**
-   * Part of the mandatory interface. It is used to specify the app name (static).
+   * Used to specify the app name (static).
    * @readonly
    * @type {String}
    */
@@ -90,7 +90,7 @@ export default class Settings extends AbsApp {
   }
 
   /**
-   * Part of the mandatory interface. It is used to specify the app's default/initial size (static).
+   * Used to specify the app's default/initial size (static).
    * @readonly
    * @type {Object}
    * @property {Number} width

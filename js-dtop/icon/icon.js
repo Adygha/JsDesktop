@@ -49,9 +49,9 @@ export default class Icon {
 
   /**
    * Constructor that takes the icon observer and the app-class as parameters.
-   * @param {typeof IIconObserver} iconObserver   the observer of the icon actions.
-   * @param {typeof AbsApp} appClass          the js-desktop-app class that this 'Icon' will run.
-   * @param {number} iconSize                     the size (used for width and height) of the icon in pixels
+   * @param {IIconObserver} iconObserver  the observer of the icon actions.
+   * @param {typeof AbsApp} appClass      the js-desktop-app class that this 'Icon' will run.
+   * @param {number} iconSize             the size (used for width and height) of the icon in pixels
    */
   constructor (iconObserver, appClass, iconSize) {
     IIconObserver.checkObjectImplements(iconObserver)
@@ -59,7 +59,7 @@ export default class Icon {
       throw new TypeError('The \'appClass\' argument must be a class that extends the \'AbsApp\' abstract class.')
     }
     this._appClass = appClass
-    /** @type {typeof IIconObserver} */
+    /** @type {IIconObserver} */
     this._observer = iconObserver
     /** @type {Map<Window, HTMLElement>} */
     this._windows = new Map() // TODO: Drawer related need completion
