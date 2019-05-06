@@ -11,8 +11,8 @@ const APP_TEMPL_FILE = APP_PATH + 'settings.html' // App's template file
 const APP_WIDTH = 400   //
 const APP_HEIGHT = 425  // App's initial/default size
 const APP_HTML_TAG = 'js-dtop-app-settings' // App's HTML tag name
-const APP_CSS_SEL_TEMPL_ROOT = '#settings' // App's template root css selector
-const APP_CSS_SEL_TEMPL_BAR_POS = '#settings-desktop-bar-position' // App's template desktop-bar position drop-box css selector
+const HTML_CLASS_ROOT = 'settings' // HTML class for the template's root element
+const HTML_CLASS_BAR_POS = 'settings-desktop-bar-position' // HTML class for desktop-bar position drop-box
 
 export default class Settings extends AbsApp {
 
@@ -25,8 +25,8 @@ export default class Settings extends AbsApp {
     IAppObserver.checkObjectImplements(appObserver)
     this._observer = appObserver
     fetch(APP_TEMPL_FILE).then(resp => resp.text()).then(docTxt => {
-      let tmpRoot = (new DOMParser()).parseFromString(docTxt, 'text/html').querySelector(APP_CSS_SEL_TEMPL_ROOT).cloneNode(true)
-      this._dtopBarPos = tmpRoot.querySelector(APP_CSS_SEL_TEMPL_BAR_POS)
+      let tmpRoot = (new DOMParser()).parseFromString(docTxt, 'text/html').querySelector('.' + HTML_CLASS_ROOT).cloneNode(true)
+      this._dtopBarPos = tmpRoot.querySelector('.' + HTML_CLASS_BAR_POS)
       Object.keys(BarPos).forEach(key => {
         let tmpOpt = document.createElement('option')
         if (BarPos[key] === this._observer.desktopObjectRequested().desktopBarPosition) {

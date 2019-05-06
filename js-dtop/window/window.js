@@ -6,6 +6,13 @@ const WIN_CSS_PATH = DTOP_PATH + 'css/window.css'
 const WIN_TMPL_PATH = DTOP_PATH + 'tmpl/window.html'
 const WIN_MIN_WIDTH = 300
 const WIN_MIN_HEIGHT = 300
+const HTML_CLASS_WIN_OUTER = 'js-dtop-win' // HTML class for the outer container of the window
+const HTML_CLASS_WIN_INNER = 'js-dtop-win-content' // HTML class for the inner container of the window
+const HTML_CLASS_WIN_TITLE = 'js-dtop-win-title' // HTML class for the title-bar
+const HTML_CLASS_WIN_ICON = 'js-dtop-win-icon' // HTML class for the title-bar's icon
+// const HTML_CLASS_WIN_MIN = 'js-dtop-win-min' // HTML class for the min button
+const HTML_CLASS_WIN_MAX = 'js-dtop-win-max' // HTML class for the max button
+const HTML_CLASS_WIN_CLOSE = 'js-dtop-win-close' // HTML class for the close button
 
 /**
  * An Enum used to specify the type of grab (which part of the window is grabbed/moved)
@@ -63,8 +70,6 @@ export default class Window extends HTMLElement {
     IWindowObserver.checkObjectImplements(windowObserver)
     /** @type {typeof IWindowObserver} */
     this._observer = windowObserver
-    ///** @type {Map<HTMLElement, Function>} */
-    // this._evLsn = new Map()
     if (winSize && winSize.width && winSize.height) {
       this.windowWidth = winSize.width
       this.windowHeight = winSize.height
@@ -81,21 +86,20 @@ export default class Window extends HTMLElement {
     }
     this._winApp = new appClass(this)
     fetch(WIN_TMPL_PATH).then(resp => resp.text()).then(docTxt => { // fetch the window html template
-      this._windowOuter = (new DOMParser()).parseFromString(docTxt, 'text/html').querySelector('div.js-dtop-win').cloneNode(true)
-      this._windowButClose = this._windowOuter.querySelector('label.js-dtop-win-close')
-      let tmpInner = this._windowOuter.querySelector('div.js-dtop-win-content')
-      this._windowOuter.querySelector('div.js-dtop-win-title').textContent = appClass.appName
+      this._windowOuter = (new DOMParser()).parseFromString(docTxt, 'text/html').querySelector('.' + HTML_CLASS_WIN_OUTER).cloneNode(true)
+      let tmpCloseBut = this._windowOuter.querySelector('.' + HTML_CLASS_WIN_CLOSE)
+      let tmpInner = this._windowOuter.querySelector('.' + HTML_CLASS_WIN_INNER)
+      this._windowOuter.querySelector('.' + HTML_CLASS_WIN_TITLE).textContent = appClass.appName
       if (tmpInner.attachShadow) { // If 'Shadow Dom' is supported then replace 'tmpInner' with its shadow
         tmpInner = tmpInner.attachShadow({mode: 'closed'})
       }
       tmpInner.appendChild(this._winApp)
-      this._windowOuter.querySelector('img.js-dtop-win-icon').setAttribute('src', appClass.appIconURL)
-      // this.appendChild(this._windowOuter)
+      this._windowOuter.querySelector('.' + HTML_CLASS_WIN_ICON).setAttribute('src', appClass.appIconURL)
       this.appendChild(this._windowOuter)
       this.addEventListener('click', this._handleWinClick.bind(this))
       this.addEventListener('mousedown', this._handleWinMouseDown.bind(this))
-      this._windowOuter.querySelector('label.js-dtop-win-max').addEventListener('click', this._handleWinMaximize.bind(this))
-      this._windowButClose.addEventListener('click', this._handleWinClose.bind(this))
+      this._windowOuter.querySelector('.' + HTML_CLASS_WIN_MAX).addEventListener('click', this._handleWinMaximize.bind(this))
+      tmpCloseBut.addEventListener('click', this._handleWinClose.bind(this))
     })
     this._observer.windowCreated(this)
   }
@@ -115,9 +119,6 @@ export default class Window extends HTMLElement {
    * @private
    */
   _handleWinClose () {
-    // this._evLsn.forEach((lsn, elem) => {
-    //   elem.removeEventListener()
-    // })
     this._winApp.endApp()
     this._observer.windowClosed(this)
   }
