@@ -1,12 +1,14 @@
 import Window, {WindowGrabType} from './window/window.js'
 import AbsApp from './app/abs-app.js'
-import Icon from './icon/icon.js'
+import Settings from './app-settings/settings.js'
 
 const DTOP_PATH = 'js-dtop/'
 const DTOP_CSS_FILE = DTOP_PATH + 'css/desktop.css'
 const DTOP_BGROUND_FILE = DTOP_PATH + 'img/desktop-background.jpg'
-const DTOP_BAR_ICON_THICK = 40 // Desktop-bar thickness in pixels
+const DTOP_BAR_ICON_THICK = 40 // Desktop-bar/icon thickness in pixels
 const DTOP_BAR_PAD = 5 // Desktop-bar padding in pixels
+const DTOP_WIN_X_SHIFT = 15 // New window X position shift from the previous window
+const DTOP_WIN_Y_SHIFT = 30 // New window Y position shift from the previous window
 const DTOP_TAG = 'js-desktop'
 const DTOP_FAKE_WIN_TAG = 'js-dtop-fake-window'
 const CSS_CLASS_DTOP = 'js-dtop' // CSS class for the desktop area
@@ -16,6 +18,8 @@ const CSS_CLASS_DTOP_BAR_ICONS_LEFT = 'js-dtop-bar-icon-container-center-left' /
 const CSS_CLASS_DTOP_BAR_ICONS_BOT = 'js-dtop-bar-icon-container-center-bot' // CSS class for the bottom desktop-bar icon container
 const CSS_CLASS_DTOP_BAR_ICONS_RIGHT = 'js-dtop-bar-icon-container-center-right' // CSS class for the right desktop-bar icon container
 const CSS_CLASS_ICON_LIST = 'js-dtop-icon-list' // CSS class for the list that contains the desktop icons
+const CSS_CLASS_ICON = 'js-dtop-icon'
+const CSS_CLASS_DESK_ICON = 'js-dtop-icon-list-icon-container'
 const EVENT_DESKBAR_MOVED = 'desktop-bar-moved'
 
 /**
@@ -147,7 +151,7 @@ export default class Desktop extends HTMLElement {
     super()
     /** @type {Array<Window>} */
     this._windows = new Array(0) // Holds references to all the open windows on desktop
-    this._nextWinX = this._nextWinY = 10 // Tracks the next position for the next open window
+    this._nextWinX = this._nextWinY = DTOP_WIN_X_SHIFT // Tracks the next position for the next open window
     let tmpStyle = document.createElement('link')
     tmpStyle.setAttribute('rel', 'stylesheet')
     tmpStyle.setAttribute('href', DTOP_CSS_FILE)
@@ -173,6 +177,7 @@ export default class Desktop extends HTMLElement {
     this.appendChild(this._deskBar)
     this._prepareRemovableEventHandlers()
     window.addEventListener('resize', this._handleWebPageResize.bind(this))
+    this._deskBarIconsStart.appendChild(this._iconFactory(Settings, true))
   }
 
   // /**
@@ -373,6 +378,35 @@ export default class Desktop extends HTMLElement {
   }
 
   /**
+   * Used to create an icon to start an app.
+   * @param {typeof AbsApp} appClass    the app's class that the created icon will run
+   * @param {Boolean} isBarIcon         'true' to create a desktop-bar icon ('false' for desktop icon)
+   * @return {HTMLElement}              the created icon for the specified app
+   * @private
+   */
+  _iconFactory (appClass, isBarIcon) {
+    let outIcon = document.createElement('div')// (isBarIcon ? 'div' : 'li')
+    outIcon.classList.add(CSS_CLASS_ICON)
+    outIcon.style.width = outIcon.style.height = DTOP_BAR_ICON_THICK + 'px'
+    outIcon.style.backgroundImage = 'url("' + appClass.appIconURL + '")'
+    outIcon.appClass = appClass
+    if (isBarIcon) {
+    } else {
+      let tmpOuter = document.createElement('li') // An outer container for the desktop icon
+      let tmpLabel = document.createElement('div') // Desktop icon label
+      tmpLabel.innerText = appClass.appName
+      tmpOuter.classList.add(CSS_CLASS_DESK_ICON)
+      tmpOuter.appendChild(outIcon)
+      tmpOuter.appendChild(tmpLabel)
+      outIcon = tmpOuter
+    }
+    outIcon.addEventListener('click', () => {
+      new Window(this, appClass) // TODO: Make it better
+    })
+    return outIcon
+  }
+
+  /**
    * Specifies the desktop-bar position on the desktop.
    * @type {BarPos}
    */
@@ -464,24 +498,8 @@ export default class Desktop extends HTMLElement {
     if (!(appClass.prototype instanceof AbsApp)) { // Check if it is actually a js-desktop-app class
       throw new TypeError('The passed \'appClass\' argument must be a class that extends the \'AbsApp\' abstract class.')
     }
-    /*let tmpIcon =*/ new Icon(this, appClass, DTOP_BAR_ICON_THICK) // Prepare the app-icon (on bar and desktop) // TODO: make it better
-  }
-
-  /**
-   * Used to request placing the specified icon (an HTML element) on the desktop.
-   * @param {HTMLElement} iconElement   the HTML element that represent the icon
-   */
-  placeDesktopIcon (iconElement) {
-    this._deskTopIconList.appendChild(iconElement)
-  }
-
-  /**
-   * Used to request placing the specified icon (an HTML element) on the desktop-bar.
-   * @param {HTMLElement} iconElement   the HTML element that represent the icon
-   */
-  placeBarIcon (iconElement) {
-    // this._deskBar.appendChild(iconElement)
-    this._deskBarIconsCenter.appendChild(iconElement)
+    this._deskBarIconsCenter.appendChild(this._iconFactory(appClass, true)) // Add desktop-bar icon
+    this._deskTopIconList.appendChild(this._iconFactory(appClass, false)) // Add desktop icon
   }
 
   /**
@@ -492,12 +510,9 @@ export default class Desktop extends HTMLElement {
     if (this._windows.indexOf(theWindow) === -1) { // Extra check just in case
       theWindow.windowLeft = this._nextWinX
       theWindow.windowTop = this._nextWinY
-      this._nextWinX = (this._nextWinX + 20) % (this._deskTop.clientWidth / 3 * 2)
-      this._nextWinY = (this._nextWinY + 10) % (this._deskTop.clientHeight / 3 * 2)
-      // theWindow.windowZIndex = 100
+      this._nextWinX = (this._nextWinX + DTOP_WIN_Y_SHIFT) % (this._deskTop.clientWidth / 3 * 2) // Set next window X
+      this._nextWinY = (this._nextWinY + DTOP_WIN_X_SHIFT) % (this._deskTop.clientHeight / 3 * 2) // Set next window Y
       this._deskTop.appendChild(theWindow)
-      // this._windows.push(theWindow)
-      // this._windows.unshift(theWindow)
       this._putWinOnTop(theWindow)
     }
   }
