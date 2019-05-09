@@ -2,7 +2,7 @@ import AbsApp from '../js-dtop/app/abs-app.js'
 
 const APP_PATH = 'js-dtop-app-click-game/' // This app's path
 const APP_NAME = 'Click Game' // App's name
-const APP_ICON_FILE = APP_PATH + 'click-game.png' // App's icon image
+const APP_ICON_FILE = APP_PATH + 'click-game-icon.png' // App's icon image
 const APP_CSS_FILE = APP_PATH + 'click-game.css' // App's css file
 const APP_TEMPL_FILE = APP_PATH + 'click-game.html' // App's template file
 const APP_WIDTH = 400   //
