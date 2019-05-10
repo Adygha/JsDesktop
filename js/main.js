@@ -1,20 +1,17 @@
-if ('customElements' in window) {
-  beginStarter()
-} else {
-  beginCustElems()
-}
+import Desktop, {BarPos} from '../js-dtop/desktop.js'
+// import Settings from '../js-dtop/app-settings/settings.js'
+import MemGame from '../js-dtop-app-memory-game/memory-game.js'
+import ClickGame from '../js-dtop-app-click-game/click-game.js'
 
-function beginCustElems () {
-  let tmpScr = document.createElement('script')
-  tmpScr.type = 'module'
-  tmpScr.src = 'js-dtop/libs/custom-elements.min.js'
-  tmpScr.addEventListener('load', beginStarter, false)
-  document.head.appendChild(tmpScr)
-}
+startUp()
 
-function beginStarter () {
-  let tmpScr = document.createElement('script')
-  tmpScr.type = 'module'
-  tmpScr.src = 'js/app.js'
-  document.head.appendChild(tmpScr)
+function startUp () {
+  // let tmpDtop = new Desktop(BarPos.TOP)
+  let tmpDtop = new Desktop(BarPos.BOTTOM)
+  // let tmpDtop = new Desktop(BarPos.LEFT)
+  // let tmpDtop = new Desktop(BarPos.RIGHT)
+  // tmpDtop.addApp(Settings)
+  tmpDtop.addApp(MemGame)
+  tmpDtop.addApp(ClickGame)
+  document.body.insertBefore(tmpDtop, document.body.firstChild)
 }
