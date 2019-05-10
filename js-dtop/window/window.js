@@ -1,4 +1,3 @@
-import IWindowObserver from './i-window-observer.js'
 import AbsApp from '../app/abs-app.js'
 
 const DTOP_PATH = 'js-dtop/'
@@ -6,11 +5,19 @@ const WIN_CSS_PATH = DTOP_PATH + 'css/window.css'
 const WIN_TMPL_PATH = DTOP_PATH + 'tmpl/window.html'
 const WIN_MIN_WIDTH = 300
 const WIN_MIN_HEIGHT = 300
+export const WIN_EVENTS = {
+  // EVENT_WIN_CREATED: 'window-created',
+  EVENT_WIN_FOCUSED: 'window-focused',
+  EVENT_WIN_MAXIMIZED: 'window-maximized',
+  EVENT_WIN_MINIMIZED: 'window-minimized',
+  EVENT_WIN_CLOSED: 'window-closed',
+  EVENT_WIN_GRABBED: 'window-grabbed'
+}
 const HTML_CLASS_WIN_OUTER = 'js-dtop-win' // HTML class for the outer container of the window
 const HTML_CLASS_WIN_INNER = 'js-dtop-win-content' // HTML class for the inner container of the window
 const HTML_CLASS_WIN_TITLE = 'js-dtop-win-title' // HTML class for the title-bar
 const HTML_CLASS_WIN_ICON = 'js-dtop-win-icon' // HTML class for the title-bar's icon
-// const HTML_CLASS_WIN_MIN = 'js-dtop-win-min' // HTML class for the min button
+const HTML_CLASS_WIN_MIN = 'js-dtop-win-min' // HTML class for the min button
 const HTML_CLASS_WIN_MAX = 'js-dtop-win-max' // HTML class for the max button
 const HTML_CLASS_WIN_CLOSE = 'js-dtop-win-close' // HTML class for the close button
 
@@ -56,20 +63,16 @@ export default class Window extends HTMLElement {
 
   /**
    * Constructor that takes the app and its position and size as parameters.
-   * @param {IWindowObserver} windowObserver  the observer object for the window
    * @param {typeof AbsApp} appClass          the js-desktop-app that is to be run in this window object
-   * @param {Object} [winSize]                the app's window size {width: number, height: number}
-   * @param {Number} winSize.width            the app's window width
-   * @param {Number} winSize.height           the app's window height
    * @param {Object} [winPos]                 the app's window position {x: number, y: number}
    * @param {Number} winPos.x                 the app's window X position
    * @param {Number} winPos.y                 the app's window Y position
+   * @param {Object} [winSize]                the app's window size {width: number, height: number}
+   * @param {Number} winSize.width            the app's window width
+   * @param {Number} winSize.height           the app's window height
    */
-  constructor (windowObserver, appClass, winSize, winPos) {
+  constructor (appClass, winPos, winSize) {
     super()
-    IWindowObserver.checkObjectImplements(windowObserver)
-    /** @type {IWindowObserver} */
-    this._observer = windowObserver
     if (winSize && winSize.width && winSize.height) {
       this.windowWidth = winSize.width
       this.windowHeight = winSize.height
@@ -84,7 +87,7 @@ export default class Window extends HTMLElement {
       this.windowLeft = 0
       this.windowTop = 0
     }
-    this._winApp = new appClass(this)
+    this._winApp = new appClass()
     fetch(WIN_TMPL_PATH).then(resp => resp.text()).then(docTxt => { // fetch the window html template
       this._windowOuter = (new DOMParser()).parseFromString(docTxt, 'text/html').querySelector('.' + HTML_CLASS_WIN_OUTER).cloneNode(true)
       let tmpCloseBut = this._windowOuter.querySelector('.' + HTML_CLASS_WIN_CLOSE)
@@ -98,10 +101,11 @@ export default class Window extends HTMLElement {
       this.appendChild(this._windowOuter)
       this.addEventListener('click', this._handleWinClick.bind(this))
       this.addEventListener('mousedown', this._handleWinMouseDown.bind(this))
+      this._windowOuter.querySelector('.' + HTML_CLASS_WIN_MIN).addEventListener('click', this._handleWinMinimize.bind(this))
       this._windowOuter.querySelector('.' + HTML_CLASS_WIN_MAX).addEventListener('click', this._handleWinMaximize.bind(this))
-      tmpCloseBut.addEventListener('click', this._handleWinClose.bind(this))
+      this._windowOuter.querySelector('.' + HTML_CLASS_WIN_CLOSE).addEventListener('click', this._handleWinClose.bind(this))
     })
-    this._observer.windowCreated(this)
+    // this.dispatchEvent(new Event(WIN_EVENTS.EVENT_WIN_CREATED))
   }
 
   connectedCallback () {
@@ -112,15 +116,60 @@ export default class Window extends HTMLElement {
       tmpStyle.setAttribute('href', WIN_CSS_PATH)
       document.head.appendChild(tmpStyle)
     }
+    this.isActive = false
+    this.dispatchEvent(new Event(WIN_EVENTS.EVENT_WIN_FOCUSED))
   }
 
   /**
-   * Supposed to handle the event of window close.
+   * Supposed to handle the event of window click.
    * @private
    */
-  _handleWinClose () {
-    this._winApp.endApp()
-    this._observer.windowClosed(this)
+  _handleWinClick () {
+    if (!this.isActive) {
+      this.dispatchEvent(new Event(WIN_EVENTS.EVENT_WIN_FOCUSED))
+    }
+  }
+
+  /**
+   * Supposed to handle the event of window mouse-down.
+   * @param {MouseEvent} ev   the mouse-event related to mouse-down
+   * @private
+   */
+  _handleWinMouseDown (ev) {
+    if (!this._beforeMax && ev.target && ev.target.classList && ev.target.classList.contains('js-dtop-win-moveresize')) { // Check if not maximized and in move-resize
+      let tmpGrabType
+      if (ev.target.classList.contains('js-dtop-win-bar')) { // The title bar is grabbed
+        tmpGrabType = WindowGrabType.WINDOW_MOVE
+      } else if (ev.target.classList.contains('js-dtop-win-topedge')) { // The top edge is grabbed
+        tmpGrabType = WindowGrabType.TOP_EDGE
+      } else if (ev.target.classList.contains('js-dtop-win-rightedge')) { // The right edge is grabbed
+        tmpGrabType = WindowGrabType.RIGHT_EDGE
+      } else if (ev.target.classList.contains('js-dtop-win-botedge')) { // The bottom edge is grabbed
+        tmpGrabType = WindowGrabType.BOTTOM_EDGE
+      } else if (ev.target.classList.contains('js-dtop-win-leftedge')) { // The left edge is grabbed
+        tmpGrabType = WindowGrabType.LEFT_EDGE
+      } else if (ev.target.classList.contains('js-dtop-win-topleftcorner')) { // The top-left corner is grabbed
+        tmpGrabType = WindowGrabType.TOP_LEFT_CORNER
+      } else if (ev.target.classList.contains('js-dtop-win-toprightcorner')) { // The top-right corner is grabbed
+        tmpGrabType = WindowGrabType.TOP_RIGHT_CORNER
+      } else if (ev.target.classList.contains('js-dtop-win-botrightcorner')) { // The bottom-right corner is grabbed
+        tmpGrabType = WindowGrabType.BOTTOM_RIGHT_CORNER
+      } else if (ev.target.classList.contains('js-dtop-win-botleftcorner')) { // The bottom-left corner is grabbed
+        tmpGrabType = WindowGrabType.BOTTOM_LEFT_CORNER
+      }
+      // this._observer.windowGrabbed(this, tmpGrabType, ev)
+      // this.dispatchEvent(new Event(WIN_EVENTS.EVENT_WIN_GRABBED))
+      this.dispatchEvent(new CustomEvent(WIN_EVENTS.EVENT_WIN_GRABBED, {detail: {grabType: tmpGrabType, mouseEvent: ev}}))
+    }
+  }
+
+  /**
+   * Supposed to handle the event of window minimize.
+   * @private
+   */
+  _handleWinMinimize () {
+    // TODO: Fill for minimize
+    this.dispatchEvent(new Event(WIN_EVENTS.EVENT_WIN_MINIMIZED))
   }
 
   /**
@@ -151,49 +200,17 @@ export default class Window extends HTMLElement {
         width: this.windowWidth,
         height: this.windowHeight
       }
-      this._observer.windowMaximized(this)
+      this.dispatchEvent(new Event(WIN_EVENTS.EVENT_WIN_MAXIMIZED))
     }
   }
 
   /**
-   * Supposed to handle the event of window click.
+   * Supposed to handle the event of window close.
    * @private
    */
-  _handleWinClick () {
-    if (!this.isActive) {
-      this._observer.windowFocused(this)
-    }
-  }
-
-  /**
-   * Supposed to handle the event of window mouse-down.
-   * @param {MouseEvent} ev   the mouse-event related to mouse-down
-   * @private
-   */
-  _handleWinMouseDown (ev) {
-    if (!this._beforeMax && ev.target.classList.contains('js-dtop-win-moveresize')) { // Check if not maximized and in move-resize
-      let tmpGrabType
-      if (ev.target.classList.contains('js-dtop-win-bar')) { // The title bar is grabbed
-        tmpGrabType = WindowGrabType.WINDOW_MOVE
-      } else if (ev.target.classList.contains('js-dtop-win-topedge')) { // The top edge is grabbed
-        tmpGrabType = WindowGrabType.TOP_EDGE
-      } else if (ev.target.classList.contains('js-dtop-win-rightedge')) { // The right edge is grabbed
-        tmpGrabType = WindowGrabType.RIGHT_EDGE
-      } else if (ev.target.classList.contains('js-dtop-win-botedge')) { // The bottom edge is grabbed
-        tmpGrabType = WindowGrabType.BOTTOM_EDGE
-      } else if (ev.target.classList.contains('js-dtop-win-leftedge')) { // The left edge is grabbed
-        tmpGrabType = WindowGrabType.LEFT_EDGE
-      } else if (ev.target.classList.contains('js-dtop-win-topleftcorner')) { // The top-left corner is grabbed
-        tmpGrabType = WindowGrabType.TOP_LEFT_CORNER
-      } else if (ev.target.classList.contains('js-dtop-win-toprightcorner')) { // The top-right corner is grabbed
-        tmpGrabType = WindowGrabType.TOP_RIGHT_CORNER
-      } else if (ev.target.classList.contains('js-dtop-win-botrightcorner')) { // The bottom-right corner is grabbed
-        tmpGrabType = WindowGrabType.BOTTOM_RIGHT_CORNER
-      } else if (ev.target.classList.contains('js-dtop-win-botleftcorner')) { // The bottom-left corner is grabbed
-        tmpGrabType = WindowGrabType.BOTTOM_LEFT_CORNER
-      }
-      this._observer.windowGrabbed(this, tmpGrabType, ev)
-    }
+  _handleWinClose () {
+    this._winApp.endApp()
+    this.dispatchEvent(new Event(WIN_EVENTS.EVENT_WIN_CLOSED))
   }
 
   /**
@@ -380,14 +397,6 @@ export default class Window extends HTMLElement {
    */
   windowObjectRequested () {
     return this
-  }
-
-  /**
-   * Used to inform that the app's working desktop object is requested.
-   * @return {Desktop}   the requested desktop object that the app runs on
-   */
-  desktopObjectRequested () {
-    return this._observer.desktopObjectRequested()
   }
 }
 

@@ -1,5 +1,4 @@
 import AbsApp from '../app/abs-app.js'
-import IAppObserver from '../app/i-app-observer.js'
 import {BarPos} from '../desktop.js'
 
 const DTOP_PATH = 'js-dtop/'
@@ -17,12 +16,10 @@ const HTML_CLASS_BAR_POS = 'settings-desktop-bar-position' // HTML class for des
 export default class Settings extends AbsApp {
 
   /**
-   * Constructor that takes an app observer object as a parameter.
-   * @param {IAppObserver} appObserver   the observer object for the app
+   * Default Constructor.
    */
-  constructor (appObserver) {
+  constructor () {
     super()
-    IAppObserver.checkObjectImplements(appObserver)
     this._observer = appObserver
     fetch(APP_TEMPL_FILE).then(resp => resp.text()).then(docTxt => {
       let tmpRoot = (new DOMParser()).parseFromString(docTxt, 'text/html').querySelector('.' + HTML_CLASS_ROOT).cloneNode(true)
