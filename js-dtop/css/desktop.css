@@ -89,7 +89,7 @@ header {
 	flex-flow: column wrap;
 }
 
-js-dtop-fake-window {
+js-dtop-silhouette-window {
 	position: absolute;
 	border: 2px dotted;
 	background-color: burlywood;

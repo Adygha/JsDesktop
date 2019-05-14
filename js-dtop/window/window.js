@@ -7,11 +7,11 @@ const WIN_MIN_WIDTH = 300
 const WIN_MIN_HEIGHT = 300
 export const WIN_EVENTS = {
   // EVENT_WIN_CREATED: 'window-created',
-  EVENT_WIN_FOCUSED: 'window-focused',
-  EVENT_WIN_MAXIMIZED: 'window-maximized',
-  EVENT_WIN_MINIMIZED: 'window-minimized',
-  EVENT_WIN_CLOSED: 'window-closed',
-  EVENT_WIN_GRABBED: 'window-grabbed'
+  WIN_FOCUSED: 'window-focused',
+  WIN_MAXIMIZED: 'window-maximized',
+  WIN_MINIMIZED: 'window-minimized',
+  WIN_CLOSED: 'window-closed',
+  WIN_GRABBED: 'window-grabbed'
 }
 const HTML_CLASS_WIN_OUTER = 'js-dtop-win' // HTML class for the outer container of the window
 const HTML_CLASS_WIN_INNER = 'js-dtop-win-content' // HTML class for the inner container of the window
@@ -57,28 +57,52 @@ export const WindowGrabType = Object.freeze({
 })
 
 /**
+ * A class that represents an event dispatched when a window is grabbed/moved.
+ */
+export class WindowGrabEvent extends MouseEvent {
+
+  /**
+   * Constructor that takes the event-type, the grab-type, and the MouseEventInit dictionary (or a MouseEvent) as parameters.
+   * @param {WindowGrabType} grabType                   the type of grab (which part of the window is grabbed/moved) that triggered the event
+   * @param {MouseEventInit|MouseEvent} mouseEventInit  a MouseEventInit dictionary (or a MouseEvent Object) to build this event on
+   */
+  constructor (grabType, mouseEventInit) {
+    super(WIN_EVENTS.WIN_GRABBED, mouseEventInit)
+    this._grabType = grabType
+  }
+
+  /**
+   * the type of grab (which part of the window is grabbed/moved) that triggered the event.
+   * @return {WindowGrabType}
+   */
+  get grabType () {
+    return this._grabType
+  }
+}
+
+/**
  * A class that represents a window that can contain an application
  */
 export default class Window extends HTMLElement {
 
   /**
    * Constructor that takes the app and its position and size as parameters.
-   * @param {typeof AbsApp} appClass          the js-desktop-app that is to be run in this window object
-   * @param {Object} [winPos]                 the app's window position {x: number, y: number}
-   * @param {Number} winPos.x                 the app's window X position
-   * @param {Number} winPos.y                 the app's window Y position
-   * @param {Object} [winSize]                the app's window size {width: number, height: number}
-   * @param {Number} winSize.width            the app's window width
-   * @param {Number} winSize.height           the app's window height
+   * @param {AbsApp} appObj           the js-desktop-app object that is to be run in this window object
+   * @param {Object} [winPos]         the app's window position {x: number, y: number}
+   * @param {Number} winPos.x         the app's window X position
+   * @param {Number} winPos.y         the app's window Y position
+   * @param {Object} [winSize]        the app's window size {width: number, height: number}
+   * @param {Number} winSize.width    the app's window width
+   * @param {Number} winSize.height   the app's window height
    */
-  constructor (appClass, winPos, winSize) {
+  constructor (appObj, winPos, winSize) {
     super()
     if (winSize && winSize.width && winSize.height) {
       this.windowWidth = winSize.width
       this.windowHeight = winSize.height
     } else {
-      this.windowWidth = appClass.defaultAppSize.width
-      this.windowHeight = appClass.defaultAppSize.height
+      this.windowWidth = appObj.constructor.defaultAppSize.width
+      this.windowHeight = appObj.constructor.defaultAppSize.height
     }
     if (winPos && winPos.x && winPos.y) {
       this.windowLeft = winPos.x
@@ -87,17 +111,17 @@ export default class Window extends HTMLElement {
       this.windowLeft = 0
       this.windowTop = 0
     }
-    this._winApp = new appClass()
     fetch(WIN_TMPL_PATH).then(resp => resp.text()).then(docTxt => { // fetch the window html template
       this._windowOuter = (new DOMParser()).parseFromString(docTxt, 'text/html').querySelector('.' + HTML_CLASS_WIN_OUTER).cloneNode(true)
       let tmpCloseBut = this._windowOuter.querySelector('.' + HTML_CLASS_WIN_CLOSE)
       let tmpInner = this._windowOuter.querySelector('.' + HTML_CLASS_WIN_INNER)
-      this._windowOuter.querySelector('.' + HTML_CLASS_WIN_TITLE).textContent = appClass.appName
+      this._windowOuter.querySelector('.' + HTML_CLASS_WIN_TITLE).textContent = appObj.constructor.appName
       if (tmpInner.attachShadow) { // If 'Shadow Dom' is supported then replace 'tmpInner' with its shadow
         tmpInner = tmpInner.attachShadow({mode: 'closed'})
       }
-      tmpInner.appendChild(this._winApp)
-      this._windowOuter.querySelector('.' + HTML_CLASS_WIN_ICON).setAttribute('src', appClass.appIconURL)
+      tmpInner.appendChild(appObj)
+      this._winApp = appObj
+      this._windowOuter.querySelector('.' + HTML_CLASS_WIN_ICON).setAttribute('src', appObj.constructor.appIconURL)
       this.appendChild(this._windowOuter)
       this.addEventListener('click', this._handleWinClick.bind(this))
       this.addEventListener('mousedown', this._handleWinMouseDown.bind(this))
@@ -117,7 +141,7 @@ export default class Window extends HTMLElement {
       document.head.appendChild(tmpStyle)
     }
     this.isActive = false
-    this.dispatchEvent(new Event(WIN_EVENTS.EVENT_WIN_FOCUSED))
+    this.dispatchEvent(new Event(WIN_EVENTS.WIN_FOCUSED))
   }
 
   /**
@@ -126,7 +150,7 @@ export default class Window extends HTMLElement {
    */
   _handleWinClick () {
     if (!this.isActive) {
-      this.dispatchEvent(new Event(WIN_EVENTS.EVENT_WIN_FOCUSED))
+      this.dispatchEvent(new Event(WIN_EVENTS.WIN_FOCUSED))
     }
   }
 
@@ -157,9 +181,7 @@ export default class Window extends HTMLElement {
       } else if (ev.target.classList.contains('js-dtop-win-botleftcorner')) { // The bottom-left corner is grabbed
         tmpGrabType = WindowGrabType.BOTTOM_LEFT_CORNER
       }
-      // this._observer.windowGrabbed(this, tmpGrabType, ev)
-      // this.dispatchEvent(new Event(WIN_EVENTS.EVENT_WIN_GRABBED))
-      this.dispatchEvent(new CustomEvent(WIN_EVENTS.EVENT_WIN_GRABBED, {detail: {grabType: tmpGrabType, mouseEvent: ev}}))
+      this.dispatchEvent(new WindowGrabEvent(tmpGrabType, ev))
     }
   }
 
@@ -169,7 +191,7 @@ export default class Window extends HTMLElement {
    */
   _handleWinMinimize () {
     // TODO: Fill for minimize
-    this.dispatchEvent(new Event(WIN_EVENTS.EVENT_WIN_MINIMIZED))
+    this.dispatchEvent(new Event(WIN_EVENTS.WIN_MINIMIZED))
   }
 
   /**
@@ -200,7 +222,7 @@ export default class Window extends HTMLElement {
         width: this.windowWidth,
         height: this.windowHeight
       }
-      this.dispatchEvent(new Event(WIN_EVENTS.EVENT_WIN_MAXIMIZED))
+      this.dispatchEvent(new Event(WIN_EVENTS.WIN_MAXIMIZED))
     }
   }
 
@@ -210,7 +232,7 @@ export default class Window extends HTMLElement {
    */
   _handleWinClose () {
     this._winApp.endApp()
-    this.dispatchEvent(new Event(WIN_EVENTS.EVENT_WIN_CLOSED))
+    this.dispatchEvent(new Event(WIN_EVENTS.WIN_CLOSED))
   }
 
   /**

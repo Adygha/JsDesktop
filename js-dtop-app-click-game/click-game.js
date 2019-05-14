@@ -31,7 +31,7 @@ class ColorBoard {
     this.meOutput = outputNode
     this.meCounter = 0
 
-    this.meClickHandler = (ev) => { // A click event handler to be attached with every block of the color display matrix
+    this.meHandleClick = (ev) => { // A click event handler to be attached with every block of the color display matrix
       if (ev.target.classList.contains(this.meOutput.innerText)) {
         ev.target.classList.remove(this.meOutput.innerText)
         ev.target.classList.add(HTML_CLASS_COLORS[0])
@@ -62,7 +62,7 @@ class ColorBoard {
       }
     }
     this.meOutput.innerText = HTML_CLASS_COLORS[Math.floor(Math.random() * 3) + 1]
-    this.meBricks.forEach(brk => brk.addEventListener('click', this.meClickHandler))
+    this.meBricks.forEach(brk => brk.addEventListener('click', this.meHandleClick))
     this.meInterval = window.setInterval(() => {
       this.meTime += 0.1
       this.meTimeDisp.innerText = this.meTime.toFixed(1)
@@ -75,7 +75,7 @@ class ColorBoard {
   endGame () {
     this.meCounter = 0
     window.clearInterval(this.meInterval)
-    this.meBricks.forEach(brk => brk.removeEventListener('click', this.meClickHandler))
+    this.meBricks.forEach(brk => brk.removeEventListener('click', this.meHandleClick))
     this.meBricks.forEach(brk => {
       brk.classList.remove(HTML_CLASS_COLORS[0], HTML_CLASS_COLORS[1], HTML_CLASS_COLORS[2], HTML_CLASS_COLORS[3])
       brk.classList.add(HTML_CLASS_COLORS[0])
@@ -91,7 +91,7 @@ class ColorBoard {
     this.meTime = 0.0
     window.clearInterval(this.meInterval)
     this.meBricks.forEach(brk => {
-      brk.removeEventListener('click', this.meClickHandler)
+      brk.removeEventListener('click', this.meHandleClick)
       brk.classList.remove(HTML_CLASS_COLORS[0], HTML_CLASS_COLORS[1], HTML_CLASS_COLORS[2], HTML_CLASS_COLORS[3])
       brk.classList.add(HTML_CLASS_COLORS[0])
     })

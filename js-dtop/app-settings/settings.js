@@ -1,5 +1,6 @@
 import AbsApp from '../app/abs-app.js'
 import {BarPos} from '../desktop.js'
+import {CONF_KEYS_EVENTS} from '../config-storage.js'
 
 const DTOP_PATH = 'js-dtop/'
 const APP_PATH = DTOP_PATH + 'app-settings/' // This app's path
@@ -16,28 +17,29 @@ const HTML_CLASS_BAR_POS = 'settings-desktop-bar-position' // HTML class for des
 export default class Settings extends AbsApp {
 
   /**
-   * Default Constructor.
+   * Constructor that takes a ConfigStorage object as a parameter.
+   * @param {ConfigStorage} confObj   the ConfigStorage object
    */
-  constructor () {
+  constructor (confObj) {
     super()
-    this._observer = appObserver
+    this._conf = confObj
     fetch(APP_TEMPL_FILE).then(resp => resp.text()).then(docTxt => {
       let tmpRoot = (new DOMParser()).parseFromString(docTxt, 'text/html').querySelector('.' + HTML_CLASS_ROOT).cloneNode(true)
-      this._dtopBarPos = tmpRoot.querySelector('.' + HTML_CLASS_BAR_POS)
+      let tmpCurBarPos = this._conf.desktopBarPosition
+      this._ctrlBarPos = tmpRoot.querySelector('.' + HTML_CLASS_BAR_POS)
       Object.keys(BarPos).forEach(key => {
         let tmpOpt = document.createElement('option')
-        if (BarPos[key] === this._observer.desktopObjectRequested().desktopBarPosition) {
-          tmpOpt.selected = true
-        }
-        tmpOpt.value = BarPos[key].toString()
-        tmpOpt.textContent = key
-        this._dtopBarPos.add(tmpOpt)
+        if (BarPos[key] === tmpCurBarPos) tmpOpt.selected = true
+        // tmpOpt.value = BarPos[key].toString() // Will use crooked 'Symbol.toString' for now (may fix later)
+        // tmpOpt.textContent = key
+        tmpOpt.value = key                //
+        tmpOpt.textContent = BarPos[key]  // They are both the same now (but in case I changed them later)
+        this._ctrlBarPos.add(tmpOpt)
       })
       tmpRoot.querySelector('#settings-style').href = APP_CSS_FILE
       this.appendChild(tmpRoot)
-      this._dtopBarPos.addEventListener('change', () => {
-        this._observer.desktopObjectRequested().desktopBarPosition = BarPos[this._dtopBarPos.options[this._dtopBarPos.selectedIndex].textContent]
-      })
+      // this._ctrlBarPos.addEventListener('change', () => this._conf.desktopBarPosition = BarPos[this._ctrlBarPos.options[this._ctrlBarPos.selectedIndex].textContent])
+      this._ctrlBarPos.addEventListener('change', () => this._conf.desktopBarPosition = BarPos[this._ctrlBarPos.value])
       this._attachRemovableEventHandlers()
     })
   }
@@ -47,10 +49,9 @@ export default class Settings extends AbsApp {
    * @private
    */
   _attachRemovableEventHandlers () {
-    this._handleDtopBarMoved = () => {
-      this._dtopBarPos.value = this._observer.desktopObjectRequested().desktopBarPosition.toString()
-    }
-    this._observer.desktopObjectRequested().addEventListener('desktop-bar-moved', this._handleDtopBarMoved)
+    // this._handleDtopBarMoved = (ev) => this._ctrlBarPos.value = ev.newValue.toString() // Will use crooked 'Symbol.toString' for now (may fix later)
+    this._handleDtopBarMoved = () => this._ctrlBarPos.value = this._conf.desktopBarPosition
+    this._conf.addEventListener(CONF_KEYS_EVENTS.DTOP_BAR_POS, this._handleDtopBarMoved)
   }
 
   /**
@@ -58,7 +59,7 @@ export default class Settings extends AbsApp {
    * @private
    */
   _detachRemovableEventHandlers () {
-    this._observer.desktopObjectRequested().removeEventListener('desktop-bar-moved', this._handleDtopBarMoved)
+    this._conf.removeEventListener(CONF_KEYS_EVENTS.DTOP_BAR_POS, this._handleDtopBarMoved)
   }
 
   /**

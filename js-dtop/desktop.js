@@ -1,6 +1,7 @@
 import Window, {WIN_EVENTS, WindowGrabType} from './window/window.js'
 import AbsApp from './app/abs-app.js'
 import Settings from './app-settings/settings.js'
+import ConfigStorage, {CONF_KEYS_EVENTS} from './config-storage.js'
 
 const DTOP_PATH = 'js-dtop/'
 const DTOP_CSS_FILE = DTOP_PATH + 'css/desktop.css'
@@ -10,60 +11,63 @@ const DTOP_BAR_PAD = 5 // Desktop-bar padding in pixels
 const DTOP_WIN_X_SHIFT = 15 // New window X position shift from the previous window
 const DTOP_WIN_Y_SHIFT = 30 // New window Y position shift from the previous window
 const DTOP_TAG = 'js-desktop'
-const DTOP_FAKE_WIN_TAG = 'js-dtop-fake-window'
+const DTOP_SILH_WIN_TAG = 'js-dtop-silhouette-window' // The HTML tag for the
 const CSS_CLASS_DTOP = 'js-dtop' // CSS class for the desktop area
 const CSS_CLASS_DTOP_BAR = 'js-dtop-bar' // CSS class for the desktop-bar
-const CSS_CLASS_DTOP_BAR_ICONS_TOP = 'js-dtop-bar-icon-container-center-top' // CSS class for the top desktop-bar icon container
-const CSS_CLASS_DTOP_BAR_ICONS_LEFT = 'js-dtop-bar-icon-container-center-left' // CSS class for the left desktop-bar icon container
-const CSS_CLASS_DTOP_BAR_ICONS_BOT = 'js-dtop-bar-icon-container-center-bot' // CSS class for the bottom desktop-bar icon container
-const CSS_CLASS_DTOP_BAR_ICONS_RIGHT = 'js-dtop-bar-icon-container-center-right' // CSS class for the right desktop-bar icon container
+const CSS_CLASS_DTOP_BAR_ICONS_TOP = 'js-dtop-bar-icon-container-center-top' // HTML/CSS class for the top desktop-bar icon container
+const CSS_CLASS_DTOP_BAR_ICONS_LEFT = 'js-dtop-bar-icon-container-center-left' // HTML/CSS class for the left desktop-bar icon container
+const CSS_CLASS_DTOP_BAR_ICONS_BOT = 'js-dtop-bar-icon-container-center-bot' // HTML/CSS class for the bottom desktop-bar icon container
+const CSS_CLASS_DTOP_BAR_ICONS_RIGHT = 'js-dtop-bar-icon-container-center-right' // HTML/CSS class for the right desktop-bar icon container
 const CSS_CLASS_ICON_LIST = 'js-dtop-icon-list' // CSS class for the list that contains the desktop icons
 const CSS_CLASS_ICON = 'js-dtop-icon'
 const CSS_CLASS_DESK_ICON = 'js-dtop-icon-list-icon-container'
-const EVENT_DESKBAR_MOVED = 'desktop-bar-moved'
 
 /**
  * An Enum used to position the desktop-bar on the desktop.
  * @readonly
  * @enum {Symbol}
  */
-export const BarPos = Object.freeze({
+export const BarPos = Object.freeze({ // Some sites recommended 'freeze' to prevent accidentally adding properties
 
   /** Position the bar on top */
-  TOP: Symbol('TOP'),
+  TOP: 'TOP',
+  // TOP: Symbol('TOP'),
 
   /** Position the bar on left */
-  LEFT: Symbol('LEFT'),
+  LEFT: 'LEFT',
+  // LEFT: Symbol('LEFT'),
 
   /** Position the bar on bottom */
-  BOTTOM: Symbol('BOTTOM'),
+  BOTTOM: 'BOTTOM',
+  // BOTTOM: Symbol('BOTTOM'),
 
   /** Position the bar on right */
-  RIGHT: Symbol('RIGHT')
+  RIGHT: 'RIGHT'
+  // RIGHT: Symbol('RIGHT')
 })
 
 /**
- * A class that represents a fake window to show when an actual window is resized.
+ * A class that represents a silhouette window to show when an actual window is re-sized.
  */
-class FakeWindow extends HTMLElement {
+class SilhouetteWindow extends HTMLElement {
 
   /**
-   * Constructor that takes the actual window to fake as a parameter (made just
-   * to handle the size and position easily).
-   * @param {Window} windowToFake  the actual window to fake
+   * Constructor that takes the actual window to make a silhouette of as a
+   * parameter (made just to handle the size and position easily).
+   * @param {Window} windowToSilhouette  the actual window to make a silhouette of
    */
-  constructor (windowToFake) {
+  constructor (windowToSilhouette) {
     super()
-    this.windowLeft = windowToFake.windowLeft
-    this.windowTop = windowToFake.windowTop
-    this.windowWidth = windowToFake.windowWidth
-    this.windowHeight = windowToFake.windowHeight
-    this.style.zIndex = windowToFake.windowZIndex + 1
-    this._origWindow = windowToFake
+    this.windowLeft = windowToSilhouette.windowLeft
+    this.windowTop = windowToSilhouette.windowTop
+    this.windowWidth = windowToSilhouette.windowWidth
+    this.windowHeight = windowToSilhouette.windowHeight
+    this.style.zIndex = windowToSilhouette.windowZIndex + 1
+    this._origWindow = windowToSilhouette
   }
 
   /**
-   * The fake window's left.
+   * The silhouette window's left.
    * @type {Number}
    */
   get windowLeft () {
@@ -71,7 +75,7 @@ class FakeWindow extends HTMLElement {
   }
 
   /**
-   * The fake window's left.
+   * The silhouette window's left.
    * @type {Number}
    */
   set windowLeft (newLeft) {
@@ -79,7 +83,7 @@ class FakeWindow extends HTMLElement {
   }
 
   /**
-   * The fake window's top.
+   * The silhouette window's top.
    * @type {Number}
    */
   get windowTop () {
@@ -87,7 +91,7 @@ class FakeWindow extends HTMLElement {
   }
 
   /**
-   * The fake window's top.
+   * The silhouette window's top.
    * @type {Number}
    */
   set windowTop (newTop) {
@@ -95,7 +99,7 @@ class FakeWindow extends HTMLElement {
   }
 
   /**
-   * The fake window's width.
+   * The silhouette window's width.
    * @type {Number}
    */
   get windowWidth () {
@@ -103,7 +107,7 @@ class FakeWindow extends HTMLElement {
   }
 
   /**
-   * The fake window's width.
+   * The silhouette window's width.
    * @type {Number}
    */
   set windowWidth (newWidth) {
@@ -111,7 +115,7 @@ class FakeWindow extends HTMLElement {
   }
 
   /**
-   * The fake window's height.
+   * The silhouette window's height.
    * @type {Number}
    */
   get windowHeight () {
@@ -119,7 +123,7 @@ class FakeWindow extends HTMLElement {
   }
 
   /**
-   * The fake window's height.
+   * The silhouette window's height.
    * @type {Number}
    */
   set windowHeight (newHeight) {
@@ -127,7 +131,7 @@ class FakeWindow extends HTMLElement {
   }
 
   /**
-   * The original window that this fake object imitates.
+   * The original window that this silhouette window object imitates.
    * @readonly
    * @type {Window}
    */
@@ -136,7 +140,7 @@ class FakeWindow extends HTMLElement {
   }
 }
 
-window.customElements.define(DTOP_FAKE_WIN_TAG, FakeWindow)
+window.customElements.define(DTOP_SILH_WIN_TAG, SilhouetteWindow)
 
 /**
  * A class that represents the desktop in 'JsDesktop'.
@@ -144,14 +148,14 @@ window.customElements.define(DTOP_FAKE_WIN_TAG, FakeWindow)
 export default class Desktop extends HTMLElement {
 
   /**
-   * Constructor that takes the desktop-bar position as a parameter.
-   * @param {BarPos} [barPosition]  the position of the desktop-bar on the desktop (default is BOTTOM)
+   * Default Constructor.
    */
-  constructor (barPosition = BarPos.BOTTOM) {
+  constructor () {
     super()
     /** @type {Array<Window>} */
     this._windows = new Array(0) // Holds references to all the open windows on desktop
-    this._nextWinX = this._nextWinY = DTOP_WIN_X_SHIFT // Tracks the next position for the next open window
+    this._conf = new ConfigStorage() // Object that holds the desktop configurations
+    this._nextWinY = this._nextWinX = DTOP_WIN_X_SHIFT // Tracks the next position for the next open window
     let tmpStyle = document.createElement('link')
     tmpStyle.setAttribute('rel', 'stylesheet')
     tmpStyle.setAttribute('href', DTOP_CSS_FILE)
@@ -172,13 +176,21 @@ export default class Desktop extends HTMLElement {
     this._deskTopIconList.classList.add(CSS_CLASS_ICON_LIST)
     this._deskTop.appendChild(this._deskTopIconList)
     this._deskBar.style.padding = DTOP_BAR_PAD + 'px'
-    this.desktopBarPosition = barPosition
+    this._updateDtopBarPos()
     this.appendChild(this._deskTop)
     this.appendChild(this._deskBar)
     this._prepareRemovableEventHandlers()
+    this._conf.addEventListener(CONF_KEYS_EVENTS.DTOP_BAR_POS, this._updateDtopBarPos.bind(this)) // Update desktop-bar position when changed
     window.addEventListener('resize', this._handleWebPageResize.bind(this))
-    this._deskBarIconsStart.appendChild(this._iconFactory(Settings, true))
+    this._deskBarIconsStart.appendChild(this._iconFactory(Settings, true, this._conf))
   }
+
+  // connectedCallback () {
+  //   let tmpStyle = document.createElement('link')
+  //   tmpStyle.setAttribute('rel', 'stylesheet')
+  //   tmpStyle.setAttribute('href', DTOP_CSS_FILE)
+  //   document.head.appendChild(tmpStyle)
+  // }
 
   // /**
   //  * Composes the path if not supported for the event. From:
@@ -206,39 +218,39 @@ export default class Desktop extends HTMLElement {
    */
   _prepareRemovableEventHandlers () {
     this._handleDesktopMouseMove = ev => { // A handler function to handle 'mousemove' event for the desktop
-      if (this._fakeWindow) { // Only handle if there is a fake window
+      if (this._silhWin) { // Only handle if there is a silhouette window
         let tmpTopGrab = ev => {
-          let tmpHtTE = this._fakeWindow.windowHeight + this._fakeWindow.windowTop + this._deskTop.offsetTop - ev.clientY
+          let tmpHtTE = this._silhWin.windowHeight + this._silhWin.windowTop + this._deskTop.offsetTop - ev.clientY
           if (tmpHtTE < Window.minWindowHeight) {
-            this._fakeWindow.windowTop += this._fakeWindow.windowHeight - Window.minWindowHeight
-            this._fakeWindow.windowHeight = Window.minWindowHeight
+            this._silhWin.windowTop += this._silhWin.windowHeight - Window.minWindowHeight
+            this._silhWin.windowHeight = Window.minWindowHeight
           } else {
-            this._fakeWindow.windowTop = ev.clientY - this._deskTop.offsetTop
-            this._fakeWindow.windowHeight = tmpHtTE
+            this._silhWin.windowTop = ev.clientY - this._deskTop.offsetTop
+            this._silhWin.windowHeight = tmpHtTE
           }
         }
         let tmpRightGrab = ev => {
-          let tmpWdRE = ev.clientX - this._fakeWindow.windowLeft - this._deskTop.offsetLeft
-          this._fakeWindow.windowWidth = tmpWdRE < Window.minWindowWidth ? Window.minWindowWidth : tmpWdRE
+          let tmpWdRE = ev.clientX - this._silhWin.windowLeft - this._deskTop.offsetLeft
+          this._silhWin.windowWidth = tmpWdRE < Window.minWindowWidth ? Window.minWindowWidth : tmpWdRE
         }
         let tmpBotGrab = ev => {
-          let tmpHtBE = ev.clientY - this._fakeWindow.windowTop - this._deskTop.offsetTop
-          this._fakeWindow.windowHeight = tmpHtBE < Window.minWindowHeight ? Window.minWindowHeight : tmpHtBE
+          let tmpHtBE = ev.clientY - this._silhWin.windowTop - this._deskTop.offsetTop
+          this._silhWin.windowHeight = tmpHtBE < Window.minWindowHeight ? Window.minWindowHeight : tmpHtBE
         }
         let tmpLeftGrab = ev => {
-          let tmpWdLE = this._fakeWindow.windowWidth + this._fakeWindow.windowLeft + this._deskTop.offsetLeft - ev.clientX
+          let tmpWdLE = this._silhWin.windowWidth + this._silhWin.windowLeft + this._deskTop.offsetLeft - ev.clientX
           if (tmpWdLE < Window.minWindowWidth) {
-            this._fakeWindow.windowLeft += this._fakeWindow.windowWidth - Window.minWindowWidth
-            this._fakeWindow.windowWidth = Window.minWindowWidth
+            this._silhWin.windowLeft += this._silhWin.windowWidth - Window.minWindowWidth
+            this._silhWin.windowWidth = Window.minWindowWidth
           } else {
-            this._fakeWindow.windowLeft = ev.clientX - this._deskTop.offsetLeft
-            this._fakeWindow.windowWidth = tmpWdLE
+            this._silhWin.windowLeft = ev.clientX - this._deskTop.offsetLeft
+            this._silhWin.windowWidth = tmpWdLE
           }
         }
         switch (this._winGrab) {
           case WindowGrabType.WINDOW_MOVE:
-            this._fakeWindow.windowLeft = ev.clientX - this._moveDif.x //
-            this._fakeWindow.windowTop = ev.clientY - this._moveDif.y  // Move the fake window according to difference
+            this._silhWin.windowLeft = ev.clientX - this._moveDif.x //
+            this._silhWin.windowTop = ev.clientY - this._moveDif.y  // Move the silhouette window according to difference
             break
           case WindowGrabType.TOP_EDGE:
             tmpTopGrab(ev)
@@ -274,26 +286,26 @@ export default class Desktop extends HTMLElement {
       // First, we remove the attached listener functions
       this._deskTop.removeEventListener('mousemove', this._handleDesktopMouseMove)
       document.removeEventListener('mouseup', this._handleDocMouseUp)
-      if (this._fakeWindow) { // Only handle if there is a fake window
+      if (this._silhWin) { // Only handle if there is a silhouette window
         let tmpTopRel = () => {
-          this._fakeWindow.originalWindow.windowTop = this._fakeWindow.windowTop
-          this._fakeWindow.originalWindow.windowHeight = this._fakeWindow.windowHeight
+          this._silhWin.originalWindow.windowTop = this._silhWin.windowTop
+          this._silhWin.originalWindow.windowHeight = this._silhWin.windowHeight
         }
         let tmpRightRel = () => {
-          this._fakeWindow.originalWindow.windowWidth = this._fakeWindow.windowWidth
+          this._silhWin.originalWindow.windowWidth = this._silhWin.windowWidth
         }
         let tmpBotRel = () => {
-          this._fakeWindow.originalWindow.windowHeight = this._fakeWindow.windowHeight
+          this._silhWin.originalWindow.windowHeight = this._silhWin.windowHeight
         }
         let tmpLeftRel = () => {
-          this._fakeWindow.originalWindow.windowLeft = this._fakeWindow.windowLeft
-          this._fakeWindow.originalWindow.windowWidth = this._fakeWindow.windowWidth
+          this._silhWin.originalWindow.windowLeft = this._silhWin.windowLeft
+          this._silhWin.originalWindow.windowWidth = this._silhWin.windowWidth
         }
-        this._fakeWindow.originalWindow.isDisabled = false // Set original window back to normal
+        this._silhWin.originalWindow.isDisabled = false // Set original window back to normal
         switch (this._winGrab) {
           case WindowGrabType.WINDOW_MOVE:
-            this._fakeWindow.originalWindow.windowLeft = this._fakeWindow.windowLeft
-            this._fakeWindow.originalWindow.windowTop = this._fakeWindow.windowTop
+            this._silhWin.originalWindow.windowLeft = this._silhWin.windowLeft
+            this._silhWin.originalWindow.windowTop = this._silhWin.windowTop
             this._moveDif = undefined
             break
           case WindowGrabType.TOP_EDGE:
@@ -324,8 +336,8 @@ export default class Desktop extends HTMLElement {
             tmpBotRel()
             tmpLeftRel()
         }
-        this._deskTop.removeChild(this._fakeWindow)
-        this._fakeWindow = undefined
+        this._deskTop.removeChild(this._silhWin)
+        this._silhWin = undefined
         this._winGrab = undefined // To indicate move/grab end
         if (document.body.style.cursor !== 'default') {
           document.body.style.cursor = 'default'
@@ -350,133 +362,10 @@ export default class Desktop extends HTMLElement {
   }
 
   /**
-   * Puts a window on top of all other windows (or add it to the other windows and put it on top)
-   * @param {Window} [theWindow] the window to be put on top (or added on top). If omitted, the last window will be used.
+   * Handles changing desktop-bar position.
    * @private
    */
-  _putWinOnTop (theWindow) {
-    theWindow = !theWindow && this._windows.length ? this._windows[this._windows.length - 1] : theWindow // If 'theWindow' is omitted, use the last window
-    if (theWindow) {
-      let tmpIndex = this._windows.indexOf(theWindow)
-      if (this._windows.length && this._windows[this._windows.length - 1].isActive) {
-        this._windows[this._windows.length - 1].isActive = false
-      }
-      if (tmpIndex === -1) {
-        theWindow.windowZIndex = 100 + this._windows.length
-        this._windows.push(theWindow)
-      } else {
-        theWindow.windowZIndex = 99 + this._windows.length
-        for (let i = tmpIndex; i < this._windows.length - 1; i++) { // Loop and decrease the zIndex of the rest of windows
-          this._windows[i] = this._windows[i + 1]
-          this._windows[i].windowZIndex--
-        }
-        this._windows[this._windows.length - 1] = theWindow
-        // this._windows.sort((win1, win2) => win1.windowZIndex - win2.windowZIndex) // Sort with provided comparer (according to zIndex)
-      }
-      theWindow.isActive = true
-    }
-  }
-
-  /**
-   * Used to create an icon to start an app.
-   * @param {typeof AbsApp} appClass    the app's class that the created icon will run
-   * @param {Boolean} isBarIcon         'true' to create a desktop-bar icon ('false' for desktop icon)
-   * @return {HTMLElement}              the created icon for the specified app
-   * @private
-   */
-  _iconFactory (appClass, isBarIcon) {
-    let outIcon = document.createElement('div')// (isBarIcon ? 'div' : 'li')
-    outIcon.classList.add(CSS_CLASS_ICON)
-    outIcon.style.width = outIcon.style.height = DTOP_BAR_ICON_THICK + 'px'
-    outIcon.style.backgroundImage = 'url("' + appClass.appIconURL + '")'
-    outIcon.appClass = appClass
-    if (isBarIcon) {
-    } else {
-      let tmpOuter = document.createElement('li') // An outer container for the desktop icon
-      let tmpLabel = document.createElement('div') // Desktop icon label
-      tmpLabel.innerText = appClass.appName
-      tmpOuter.classList.add(CSS_CLASS_DESK_ICON)
-      tmpOuter.appendChild(outIcon)
-      tmpOuter.appendChild(tmpLabel)
-      outIcon = tmpOuter
-    }
-    outIcon.addEventListener('click', () => {
-      let tmpWin = new Window(appClass, {x: this._nextWinX, y: this._nextWinY})
-      tmpWin.addEventListener(WIN_EVENTS.EVENT_WIN_FOCUSED, () => {
-        if (!tmpWin.isActive) {
-          this._putWinOnTop(tmpWin)
-        }
-      })
-      tmpWin.addEventListener(WIN_EVENTS.EVENT_WIN_MINIMIZED, () => {
-        // TODO: Fill for window minimized
-      })
-      tmpWin.addEventListener(WIN_EVENTS.EVENT_WIN_MAXIMIZED, () => {
-        tmpWin.windowLeft = 0
-        tmpWin.windowTop = 0
-        tmpWin.windowWidth = this._deskTop.clientWidth
-        tmpWin.windowHeight = this._deskTop.clientHeight
-      })
-      tmpWin.addEventListener(WIN_EVENTS.EVENT_WIN_CLOSED, () => {
-        this._putWinOnTop(tmpWin)
-        if (this._windows.length && this._windows[this._windows.length - 1] === tmpWin) {
-          this._windows.pop() // Remove 'tmpWin' window (it is on top now)
-        }
-        this._deskTop.removeChild(tmpWin)
-        this._putWinOnTop() // Put the other last window on top (if any)
-      })
-      tmpWin.addEventListener(WIN_EVENTS.EVENT_WIN_GRABBED, ev => {
-        this._putWinOnTop(tmpWin) // First put window on top
-        tmpWin.isDisabled = true // Disable the window (until mouseup)
-        this._fakeWindow = new FakeWindow(tmpWin) // Make a fake of the original
-        this._deskTop.appendChild(this._fakeWindow)
-        this._winGrab = ev.detail.grabType // To indicate that a move/grab in progress
-        switch (ev.detail.grabType) {
-          case WindowGrabType.WINDOW_MOVE: // The title bar is grabbed (moving)
-            document.body.style.cursor = 'move' // To prevent cursor change during move
-            this._moveDif = { // Save the initial position difference for a bit later
-              x: ev.detail.mouseEvent.clientX - tmpWin.windowLeft,
-              y: ev.detail.mouseEvent.clientY - tmpWin.windowTop
-            }
-            break
-          case WindowGrabType.TOP_EDGE: // The top edge is grabbed
-          case WindowGrabType.BOTTOM_EDGE: // The bottom edge is grabbed
-            document.body.style.cursor = 'ns-resize' // To prevent cursor change during grab
-            break
-          case WindowGrabType.LEFT_EDGE: // The left edge is grabbed
-          case WindowGrabType.RIGHT_EDGE: // The right edge is grabbed
-            document.body.style.cursor = 'ew-resize' // To prevent cursor change during grab
-            break
-          case WindowGrabType.TOP_LEFT_CORNER: // The top-left corner is grabbed
-          case WindowGrabType.BOTTOM_RIGHT_CORNER: // The bottom-right corner is grabbed
-            document.body.style.cursor = 'nwse-resize' // To prevent cursor change during grab
-            break
-          case WindowGrabType.TOP_RIGHT_CORNER: // The top-right corner is grabbed
-          case WindowGrabType.BOTTOM_LEFT_CORNER: // The bottom-left corner is grabbed
-            document.body.style.cursor = 'nesw-resize' // To prevent cursor change during grab
-        }
-        this._deskTop.addEventListener('mousemove', this._handleDesktopMouseMove) // It is better to let the '_deskTop' and not the 'document' handle it
-        document.addEventListener('mouseup', this._handleDocMouseUp)
-      })
-      this._nextWinX = (this._nextWinX + DTOP_WIN_Y_SHIFT) % (this._deskTop.clientWidth / 3 * 2) // Set next window X
-      this._nextWinY = (this._nextWinY + DTOP_WIN_X_SHIFT) % (this._deskTop.clientHeight / 3 * 2) // Set next window Y
-      this._deskTop.appendChild(tmpWin)
-    })
-    return outIcon
-  }
-
-  /**
-   * Specifies the desktop-bar position on the desktop.
-   * @type {BarPos}
-   */
-  get desktopBarPosition () {
-    return this._deskBarPos
-  }
-
-  /**
-   * Specifies the desktop-bar position on the desktop.
-   * @type {BarPos}
-   */
-  set desktopBarPosition (newPos) {
+  _updateDtopBarPos () {
     let tmpHorBar = () => {
       this._deskTop.style.width = '100vw'
       this._deskTop.style.height = 'calc(100vh - ' + (2 * DTOP_BAR_PAD + DTOP_BAR_ICON_THICK) + 'px)'
@@ -491,7 +380,7 @@ export default class Desktop extends HTMLElement {
       this._deskBar.style.height = '100vh'
       this._deskBar.style.flexDirection = 'column'
     }
-    switch (newPos) {
+    switch (this._conf.desktopBarPosition) {
       case BarPos.TOP:
         tmpHorBar()
         this._deskTop.style.top = ''
@@ -541,11 +430,126 @@ export default class Desktop extends HTMLElement {
         this._deskBarIconsCenter.className = CSS_CLASS_DTOP_BAR_ICONS_RIGHT
         break
       default:
-        throw new TypeError('The passed new \'desktopBarPosition\' value should be one of the \'BarPos\' constant values.')
+        throw new TypeError('The passed new desktop-bar position value should be one of the \'BarPos\' constant values.')
     }
     this._handleWebPageResize()
-    this._deskBarPos = newPos
-    this.dispatchEvent(new Event(EVENT_DESKBAR_MOVED))
+  }
+
+  /**
+   * Puts a window on top of all other windows (or add it to the other windows and put it on top)
+   * @param {Window} [theWindow] the window to be put on top (or added on top). If omitted, the last window will be used.
+   * @private
+   */
+  _putWinOnTop (theWindow) {
+    theWindow = !theWindow && this._windows.length ? this._windows[this._windows.length - 1] : theWindow // If 'theWindow' is omitted, use the last window
+    if (theWindow) {
+      let tmpIndex = this._windows.indexOf(theWindow)
+      if (this._windows.length && this._windows[this._windows.length - 1].isActive) {
+        this._windows[this._windows.length - 1].isActive = false
+      }
+      if (tmpIndex === -1) {
+        theWindow.windowZIndex = 100 + this._windows.length
+        this._windows.push(theWindow)
+      } else {
+        theWindow.windowZIndex = 99 + this._windows.length
+        for (let i = tmpIndex; i < this._windows.length - 1; i++) { // Loop and decrease the zIndex of the rest of windows
+          this._windows[i] = this._windows[i + 1]
+          this._windows[i].windowZIndex--
+        }
+        this._windows[this._windows.length - 1] = theWindow
+        // this._windows.sort((win1, win2) => win1.windowZIndex - win2.windowZIndex) // Sort with provided comparer (according to zIndex)
+      }
+      theWindow.isActive = true
+    }
+  }
+
+  /**
+   * Used to create an icon to start an app.
+   * @param {typeof AbsApp} appClass    the app's class that the created icon will run
+   * @param {Boolean} isBarIcon         'true' to create a desktop-bar icon ('false' for desktop icon)
+   * @param {...*} appParams            parameter to pass to the app constructor
+   * @return {HTMLElement}              the created icon for the specified app
+   * @private
+   */
+  _iconFactory (appClass, isBarIcon, ...appParams) {
+    let outIcon = document.createElement('div')// (isBarIcon ? 'div' : 'li')
+    outIcon.classList.add(CSS_CLASS_ICON)
+    outIcon.style.width = outIcon.style.height = DTOP_BAR_ICON_THICK + 'px'
+    outIcon.style.backgroundImage = 'url("' + appClass.appIconURL + '")'
+    // outIcon.appClass = appClass
+    if (isBarIcon) {
+    } else {
+      let tmpOuter = document.createElement('li') // An outer container for the desktop icon
+      let tmpLabel = document.createElement('div') // Desktop icon label
+      tmpLabel.innerText = appClass.appName
+      tmpOuter.classList.add(CSS_CLASS_DESK_ICON)
+      tmpOuter.appendChild(outIcon)
+      tmpOuter.appendChild(tmpLabel)
+      outIcon = tmpOuter
+    }
+    outIcon.addEventListener('click', () => {
+      // let tmpWin = new Window(appClass, {x: this._nextWinX, y: this._nextWinY})
+      let tmpWin = new Window(new appClass(...appParams), {x: this._nextWinX, y: this._nextWinY})
+      tmpWin.addEventListener(WIN_EVENTS.WIN_FOCUSED, () => {
+        if (!tmpWin.isActive) {
+          this._putWinOnTop(tmpWin)
+        }
+      })
+      tmpWin.addEventListener(WIN_EVENTS.WIN_MINIMIZED, () => {
+        // TODO: Fill for window minimized
+      })
+      tmpWin.addEventListener(WIN_EVENTS.WIN_MAXIMIZED, () => {
+        tmpWin.windowLeft = 0
+        tmpWin.windowTop = 0
+        tmpWin.windowWidth = this._deskTop.clientWidth
+        tmpWin.windowHeight = this._deskTop.clientHeight
+      })
+      tmpWin.addEventListener(WIN_EVENTS.WIN_CLOSED, () => {
+        this._putWinOnTop(tmpWin)
+        if (this._windows.length && this._windows[this._windows.length - 1] === tmpWin) {
+          this._windows.pop() // Remove 'tmpWin' window (it is on top now)
+        }
+        this._deskTop.removeChild(tmpWin)
+        this._putWinOnTop() // Put the other last window on top (if any)
+      })
+      tmpWin.addEventListener(WIN_EVENTS.WIN_GRABBED, ev => {
+        this._putWinOnTop(tmpWin) // First put window on top
+        tmpWin.isDisabled = true // Disable the window (until mouseup)
+        this._silhWin = new SilhouetteWindow(tmpWin) // Make a silhouette of the original
+        this._deskTop.appendChild(this._silhWin)
+        this._winGrab = ev.grabType // To indicate that a move/grab in progress
+        switch (ev.grabType) {
+          case WindowGrabType.WINDOW_MOVE: // The title bar is grabbed (moving)
+            document.body.style.cursor = 'move' // To prevent cursor change during move
+            this._moveDif = { // Save the initial position difference for a bit later
+              x: ev.clientX - tmpWin.windowLeft,
+              y: ev.clientY - tmpWin.windowTop
+            }
+            break
+          case WindowGrabType.TOP_EDGE: // The top edge is grabbed
+          case WindowGrabType.BOTTOM_EDGE: // The bottom edge is grabbed
+            document.body.style.cursor = 'ns-resize' // To prevent cursor change during grab
+            break
+          case WindowGrabType.LEFT_EDGE: // The left edge is grabbed
+          case WindowGrabType.RIGHT_EDGE: // The right edge is grabbed
+            document.body.style.cursor = 'ew-resize' // To prevent cursor change during grab
+            break
+          case WindowGrabType.TOP_LEFT_CORNER: // The top-left corner is grabbed
+          case WindowGrabType.BOTTOM_RIGHT_CORNER: // The bottom-right corner is grabbed
+            document.body.style.cursor = 'nwse-resize' // To prevent cursor change during grab
+            break
+          case WindowGrabType.TOP_RIGHT_CORNER: // The top-right corner is grabbed
+          case WindowGrabType.BOTTOM_LEFT_CORNER: // The bottom-left corner is grabbed
+            document.body.style.cursor = 'nesw-resize' // To prevent cursor change during grab
+        }
+        this._deskTop.addEventListener('mousemove', this._handleDesktopMouseMove) // It is better to let the '_deskTop' and not the 'document' handle it
+        document.addEventListener('mouseup', this._handleDocMouseUp)
+      })
+      this._nextWinX = (this._nextWinX + DTOP_WIN_Y_SHIFT) % (this._deskTop.clientWidth / 3 * 2) // Set next window X
+      this._nextWinY = (this._nextWinY + DTOP_WIN_X_SHIFT) % (this._deskTop.clientHeight / 3 * 2) // Set next window Y
+      this._deskTop.appendChild(tmpWin)
+    })
+    return outIcon
   }
 
   /**
@@ -559,46 +563,6 @@ export default class Desktop extends HTMLElement {
     this._deskBarIconsCenter.appendChild(this._iconFactory(appClass, true)) // Add desktop-bar icon
     this._deskTopIconList.appendChild(this._iconFactory(appClass, false)) // Add desktop icon
   }
-
-  // /**
-  //  * Used to inform that the specified window is being grabbed now (for resizing or moving).
-  //  * @param {Window} theWindow          the window that has focus
-  //  * @param {WindowGrabType} grabType   specifies the type of grab (which part of the window is grabbed/moved)
-  //  * @param {MouseEvent} mouseEv        the grabbing mouse-event related to grabbing
-  //  */
-  // windowGrabbed (theWindow, grabType, mouseEv) {
-  //   this._putWinOnTop(theWindow) // First put window on top
-  //   theWindow.isDisabled = true // Disable the window (until mouseup)
-  //   this._fakeWindow = new FakeWindow(theWindow) // Make a fake of the original
-  //   this._deskTop.appendChild(this._fakeWindow)
-  //   this._winGrab = grabType // To indicate that a move/grab in progress
-  //   switch (grabType) {
-  //     case WindowGrabType.WINDOW_MOVE: // The title bar is grabbed (moving)
-  //       document.body.style.cursor = 'move' // To prevent cursor change during move
-  //       this._moveDif = { // Save the initial position difference for a bit later
-  //         x: mouseEv.clientX - theWindow.windowLeft,
-  //         y: mouseEv.clientY - theWindow.windowTop
-  //       }
-  //       break
-  //     case WindowGrabType.TOP_EDGE: // The top edge is grabbed
-  //     case WindowGrabType.BOTTOM_EDGE: // The bottom edge is grabbed
-  //       document.body.style.cursor = 'ns-resize' // To prevent cursor change during grab
-  //       break
-  //     case WindowGrabType.LEFT_EDGE: // The left edge is grabbed
-  //     case WindowGrabType.RIGHT_EDGE: // The right edge is grabbed
-  //       document.body.style.cursor = 'ew-resize' // To prevent cursor change during grab
-  //       break
-  //     case WindowGrabType.TOP_LEFT_CORNER: // The top-left corner is grabbed
-  //     case WindowGrabType.BOTTOM_RIGHT_CORNER: // The bottom-right corner is grabbed
-  //       document.body.style.cursor = 'nwse-resize' // To prevent cursor change during grab
-  //       break
-  //     case WindowGrabType.TOP_RIGHT_CORNER: // The top-right corner is grabbed
-  //     case WindowGrabType.BOTTOM_LEFT_CORNER: // The bottom-left corner is grabbed
-  //       document.body.style.cursor = 'nesw-resize' // To prevent cursor change during grab
-  //   }
-  //   this._deskTop.addEventListener('mousemove', this._handleDesktopMouseMove) // It is better to let the '_deskTop' and not the 'document' handle it
-  //   document.addEventListener('mouseup', this._handleDocMouseUp)
-  // }
 }
 
 window.customElements.define(DTOP_TAG, Desktop)
