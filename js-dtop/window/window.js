@@ -59,15 +59,18 @@ export const WindowGrabType = Object.freeze({
 /**
  * A class that represents an event dispatched when a window is grabbed/moved.
  */
-export class WindowGrabEvent extends MouseEvent {
+export class WindowGrabEvent extends (window.PointerEvent ? PointerEvent : MouseEvent) {
 
   /**
-   * Constructor that takes the event-type, the grab-type, and the MouseEventInit dictionary (or a MouseEvent) as parameters.
-   * @param {WindowGrabType} grabType                   the type of grab (which part of the window is grabbed/moved) that triggered the event
-   * @param {MouseEventInit|MouseEvent} mouseEventInit  a MouseEventInit dictionary (or a MouseEvent Object) to build this event on
+   * Constructor that takes the event-type, the grab-type, and the PointerEventInit/MouseEventInit dictionary (or a PointerEvent/MouseEvent) as parameters.
+   * @param {WindowGrabType} grabType   the type of grab (which part of the window is grabbed/moved) that triggered the event
+   * @param {PointerEventInit|
+   *          MouseEventInit|
+   *          PointerEvent|
+   *          MouseEvent} eventInit     a PointerEventInit/MouseEventInit dictionary (or a PointerEvent/MouseEvent Object) to build this event on
    */
-  constructor (grabType, mouseEventInit) {
-    super(WIN_EVENTS.WIN_GRABBED, mouseEventInit)
+  constructor (grabType, eventInit) {
+    super(WIN_EVENTS.WIN_GRABBED, eventInit)
     this._grabType = grabType
   }
 
@@ -124,7 +127,7 @@ export default class Window extends HTMLElement {
       this._windowOuter.querySelector('.' + HTML_CLASS_WIN_ICON).setAttribute('src', appObj.constructor.appIconURL)
       this.appendChild(this._windowOuter)
       this.addEventListener('click', this._handleWinClick.bind(this))
-      this.addEventListener('mousedown', this._handleWinMouseDown.bind(this))
+      this.addEventListener(window.PointerEvent ? 'pointerdown' : 'mousedown', this._handleWinPointerDown.bind(this))
       this._windowOuter.querySelector('.' + HTML_CLASS_WIN_MIN).addEventListener('click', this._handleWinMinimize.bind(this))
       this._windowOuter.querySelector('.' + HTML_CLASS_WIN_MAX).addEventListener('click', this._handleWinMaximize.bind(this))
       this._windowOuter.querySelector('.' + HTML_CLASS_WIN_CLOSE).addEventListener('click', this._handleWinClose.bind(this))
@@ -155,11 +158,11 @@ export default class Window extends HTMLElement {
   }
 
   /**
-   * Supposed to handle the event of window mouse-down.
-   * @param {MouseEvent} ev   the mouse-event related to mouse-down
+   * Supposed to handle the event of window pointer-/mouse-down event.
+   * @param {PointerEvent|MouseEvent} ev    the mouse-event related to pointer-/mouse-down
    * @private
    */
-  _handleWinMouseDown (ev) {
+  _handleWinPointerDown (ev) {
     if (!this._beforeMax && ev.target && ev.target.classList && ev.target.classList.contains('js-dtop-win-moveresize')) { // Check if not maximized and in move-resize
       let tmpGrabType
       if (ev.target.classList.contains('js-dtop-win-bar')) { // The title bar is grabbed

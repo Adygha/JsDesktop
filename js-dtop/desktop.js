@@ -217,7 +217,7 @@ export default class Desktop extends HTMLElement {
    * @private
    */
   _prepareRemovableEventHandlers () {
-    this._handleDesktopMouseMove = ev => { // A handler function to handle 'mousemove' event for the desktop
+    this._handleDesktopPointerMove = ev => { // A handler function to handle pointer-/mouse-move event for the desktop
       if (this._silhWin) { // Only handle if there is a silhouette window
         let tmpTopGrab = ev => {
           let tmpHtTE = this._silhWin.windowHeight + this._silhWin.windowTop + this._deskTop.offsetTop - ev.clientY
@@ -282,10 +282,10 @@ export default class Desktop extends HTMLElement {
         }
       }
     }
-    this._handleDocMouseUp = () => { // A handler function to handle 'mouseup' event for the 'document'
+    this._handleDocPointerUp = () => { // A handler function to handle pointer-/mouse-up event for the 'document'
       // First, we remove the attached listener functions
-      this._deskTop.removeEventListener('mousemove', this._handleDesktopMouseMove)
-      document.removeEventListener('mouseup', this._handleDocMouseUp)
+      this._deskTop.removeEventListener(window.PointerEvent ? 'pointermove' : 'mousemove', this._handleDesktopPointerMove)
+      document.removeEventListener(window.PointerEvent ? 'pointerup' : 'mouseup', this._handleDocPointerUp)
       if (this._silhWin) { // Only handle if there is a silhouette window
         let tmpTopRel = () => {
           this._silhWin.originalWindow.windowTop = this._silhWin.windowTop
@@ -514,7 +514,7 @@ export default class Desktop extends HTMLElement {
       })
       tmpWin.addEventListener(WIN_EVENTS.WIN_GRABBED, ev => {
         this._putWinOnTop(tmpWin) // First put window on top
-        tmpWin.isDisabled = true // Disable the window (until mouseup)
+        tmpWin.isDisabled = true // Disable the window (until pointer/mouse is up)
         this._silhWin = new SilhouetteWindow(tmpWin) // Make a silhouette of the original
         this._deskTop.appendChild(this._silhWin)
         this._winGrab = ev.grabType // To indicate that a move/grab in progress
@@ -542,8 +542,8 @@ export default class Desktop extends HTMLElement {
           case WindowGrabType.BOTTOM_LEFT_CORNER: // The bottom-left corner is grabbed
             document.body.style.cursor = 'nesw-resize' // To prevent cursor change during grab
         }
-        this._deskTop.addEventListener('mousemove', this._handleDesktopMouseMove) // It is better to let the '_deskTop' and not the 'document' handle it
-        document.addEventListener('mouseup', this._handleDocMouseUp)
+        this._deskTop.addEventListener(window.PointerEvent ? 'pointermove' : 'mousemove', this._handleDesktopPointerMove) // It is better to let the '_deskTop' and not the 'document' handle it
+        document.addEventListener(window.PointerEvent ? 'pointerup' : 'mouseup', this._handleDocPointerUp)
       })
       this._nextWinX = (this._nextWinX + DTOP_WIN_Y_SHIFT) % (this._deskTop.clientWidth / 3 * 2) // Set next window X
       this._nextWinY = (this._nextWinY + DTOP_WIN_X_SHIFT) % (this._deskTop.clientHeight / 3 * 2) // Set next window Y
