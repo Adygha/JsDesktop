@@ -10,7 +10,7 @@ const APP_TEMPL_FILE = APP_PATH + 'memory-game.html' // App's template file
 const APP_CARD_CSS_FILE = APP_PATH + 'game-card.css' // App's icon image
 const APP_WIDTH = 320   //
 const APP_HEIGHT = 420  // App's initial/default size
-const APP_HTML_TAG = 'js-dtop-app-memory-game' // App's HTML tag name
+const HTML_TAG_APP = 'js-dtop-app-memory-game' // App's HTML tag name
 const HTML_CLASS_IMAGE = 'img'       //
 const HTML_CLASS_CARD = 'game-card-' // HTML classes for the cards and their images
 const HTML_CLASS_ERR = 'img-error'   //
@@ -342,4 +342,4 @@ export default class MemoryGame extends AbsApp {
   }
 }
 
-window.customElements.define(APP_HTML_TAG, MemoryGame)
+window.customElements.define(HTML_TAG_APP, MemoryGame)

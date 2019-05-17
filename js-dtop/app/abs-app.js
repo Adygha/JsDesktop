@@ -11,7 +11,7 @@ export default class AbsApp extends HTMLElement {
    */
   constructor () {
     super()
-    if (new.target === AbsApp) { // Check if an object begins to instatiate from this abstract class directly
+    if (new.target === AbsApp) { // Check if an object begins to instantiate from this abstract class directly
       throw new TypeError('Creating an instance of \'AbsApp\' directly is not permitted. You must inherit it first.')
     }
   }

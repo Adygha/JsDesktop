@@ -88,13 +88,6 @@ header {
 	display: flex;
 	flex-flow: column wrap;
 }
-
-js-dtop-silhouette-window {
-	position: absolute;
-	border: 2px dotted;
-	background-color: burlywood;
-	opacity: 0.3;
-}
 /* ^^^^^^^^^^^ End desktop part ^^^^^^^^^^^ */
 
 /* vvvvvvvvvv Start icon part vvvvvvvvvv */

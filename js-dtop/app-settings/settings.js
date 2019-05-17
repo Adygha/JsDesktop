@@ -10,7 +10,7 @@ const APP_CSS_FILE = APP_PATH + 'settings.css' // App's css file
 const APP_TEMPL_FILE = APP_PATH + 'settings.html' // App's template file
 const APP_WIDTH = 400   //
 const APP_HEIGHT = 425  // App's initial/default size
-const APP_HTML_TAG = 'js-dtop-app-settings' // App's HTML tag name
+const HTML_TAG_APP = 'js-dtop-app-settings' // App's HTML tag name
 const HTML_CLASS_ROOT = 'settings' // HTML class for the template's root element
 const HTML_CLASS_BAR_POS = 'settings-desktop-bar-position' // HTML class for desktop-bar position drop-box
 
@@ -102,4 +102,4 @@ export default class Settings extends AbsApp {
   }
 }
 
-window.customElements.define(APP_HTML_TAG, Settings)
+window.customElements.define(HTML_TAG_APP, Settings)

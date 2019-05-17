@@ -13,6 +13,7 @@ export const WIN_EVENTS = {
   WIN_CLOSED: 'window-closed',
   WIN_GRABBED: 'window-grabbed'
 }
+const HTML_TAG_WIN = 'js-dtop-window' // Window's HTML tag name
 const HTML_CLASS_WIN_OUTER = 'js-dtop-win' // HTML class for the outer container of the window
 const HTML_CLASS_WIN_INNER = 'js-dtop-win-content' // HTML class for the inner container of the window
 const HTML_CLASS_WIN_TITLE = 'js-dtop-win-title' // HTML class for the title-bar
@@ -239,22 +240,6 @@ export default class Window extends HTMLElement {
   }
 
   /**
-   * The top of the window.
-   * @type {Number}
-   */
-  get windowTop () {
-    return parseInt(this.style.top, 10)
-  }
-
-  /**
-   * The top of the window.
-   * @type {Number}
-   */
-  set windowTop (newTop) {
-    this.style.top = newTop + 'px'
-  }
-
-  /**
    * The left of the window.
    * @type {Number}
    */
@@ -268,6 +253,22 @@ export default class Window extends HTMLElement {
    */
   set windowLeft (newLeft) {
     this.style.left = newLeft + 'px'
+  }
+
+  /**
+   * The top of the window.
+   * @type {Number}
+   */
+  get windowTop () {
+    return parseInt(this.style.top, 10)
+  }
+
+  /**
+   * The top of the window.
+   * @type {Number}
+   */
+  set windowTop (newTop) {
+    this.style.top = newTop + 'px'
   }
 
   /**
@@ -351,25 +352,25 @@ export default class Window extends HTMLElement {
     }
   }
 
-  // /**
-  //  * Specifies if the window is transparent (can be set when moving).
-  //  * @type {Boolean}
-  //  */
-  // get isTransparent () {
-  //   return this.classList.contains('app-transp')
-  // }
-  //
-  // /**
-  //  * Specifies if the window is transparent (can be set when moving).
-  //  * @type {Boolean}
-  //  */
-  // set isTransparent (newIsTransparent) {
-  //   if (newIsTransparent) {
-  //     this.classList.add('app-transp')
-  //   } else {
-  //     this.classList.remove('app-transp')
-  //   }
-  // }
+  /**
+   * Specifies if the window is transparent (can be set when moving).
+   * @type {Boolean}
+   */
+  get isTransparent () {
+    return this.classList.contains('app-transp')
+  }
+
+  /**
+   * Specifies if the window is transparent (can be set when moving).
+   * @type {Boolean}
+   */
+  set isTransparent (newIsTransparent) {
+    if (newIsTransparent) {
+      this.classList.add('app-transp')
+    } else {
+      this.classList.remove('app-transp')
+    }
+  }
 
   /**
    * Specifies if the window is disabled.
@@ -415,14 +416,6 @@ export default class Window extends HTMLElement {
   static get minWindowHeight () {
     return WIN_MIN_HEIGHT
   }
-
-  /**
-   * Used to inform that the app's working window object is requested.
-   * @return {Window}   the requested window object that the app runs on
-   */
-  windowObjectRequested () {
-    return this
-  }
 }
 
-window.customElements.define('js-dtop-window', Window)
+window.customElements.define(HTML_TAG_WIN, Window)

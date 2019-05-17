@@ -1,4 +1,5 @@
 import Window, {WIN_EVENTS, WindowGrabType} from './window/window.js'
+import SilhouetteWindow from './window/silhouette-window.js'
 import AbsApp from './app/abs-app.js'
 import Settings from './app-settings/settings.js'
 import ConfigStorage, {CONF_KEYS_EVENTS} from './config-storage.js'
@@ -10,17 +11,16 @@ const DTOP_BAR_ICON_THICK = 40 // Desktop-bar/icon thickness in pixels
 const DTOP_BAR_PAD = 5 // Desktop-bar padding in pixels
 const DTOP_WIN_X_SHIFT = 15 // New window X position shift from the previous window
 const DTOP_WIN_Y_SHIFT = 30 // New window Y position shift from the previous window
-const DTOP_TAG = 'js-desktop'
-const DTOP_SILH_WIN_TAG = 'js-dtop-silhouette-window' // The HTML tag for the
-const CSS_CLASS_DTOP = 'js-dtop' // CSS class for the desktop area
-const CSS_CLASS_DTOP_BAR = 'js-dtop-bar' // CSS class for the desktop-bar
-const CSS_CLASS_DTOP_BAR_ICONS_TOP = 'js-dtop-bar-icon-container-center-top' // HTML/CSS class for the top desktop-bar icon container
-const CSS_CLASS_DTOP_BAR_ICONS_LEFT = 'js-dtop-bar-icon-container-center-left' // HTML/CSS class for the left desktop-bar icon container
-const CSS_CLASS_DTOP_BAR_ICONS_BOT = 'js-dtop-bar-icon-container-center-bot' // HTML/CSS class for the bottom desktop-bar icon container
-const CSS_CLASS_DTOP_BAR_ICONS_RIGHT = 'js-dtop-bar-icon-container-center-right' // HTML/CSS class for the right desktop-bar icon container
-const CSS_CLASS_ICON_LIST = 'js-dtop-icon-list' // CSS class for the list that contains the desktop icons
-const CSS_CLASS_ICON = 'js-dtop-icon'
-const CSS_CLASS_DESK_ICON = 'js-dtop-icon-list-icon-container'
+const HTML_TAG_DTOP = 'js-desktop' // Desktop's HTML tag name
+const HTML_CLASS_DTOP = 'js-dtop' // HTML/CSS class for the desktop area
+const HTML_CLASS_DTOP_BAR = 'js-dtop-bar' // HTML/CSS class for the desktop-bar
+const HTML_CLASS_DTOP_BAR_ICONS_TOP = 'js-dtop-bar-icon-container-center-top' // HTML/CSS class for the top desktop-bar icon container
+const HTML_CLASS_DTOP_BAR_ICONS_LEFT = 'js-dtop-bar-icon-container-center-left' // HTML/CSS class for the left desktop-bar icon container
+const HTML_CLASS_DTOP_BAR_ICONS_BOT = 'js-dtop-bar-icon-container-center-bot' // HTML/CSS class for the bottom desktop-bar icon container
+const HTML_CLASS_DTOP_BAR_ICONS_RIGHT = 'js-dtop-bar-icon-container-center-right' // HTML/CSS class for the right desktop-bar icon container
+const HTML_CLASS_ICON_LIST = 'js-dtop-icon-list' // HTML/CSS class for the list that contains the desktop icons
+const HTML_CLASS_ICON = 'js-dtop-icon' // HTML/CSS class for the icon
+const HTML_CLASS_DESK_ICON = 'js-dtop-icon-list-icon-container' // HTML/CSS class for the frame around each desktop icon
 
 /**
  * An Enum used to position the desktop-bar on the desktop.
@@ -47,102 +47,6 @@ export const BarPos = Object.freeze({ // Some sites recommended 'freeze' to prev
 })
 
 /**
- * A class that represents a silhouette window to show when an actual window is re-sized.
- */
-class SilhouetteWindow extends HTMLElement {
-
-  /**
-   * Constructor that takes the actual window to make a silhouette of as a
-   * parameter (made just to handle the size and position easily).
-   * @param {Window} windowToSilhouette  the actual window to make a silhouette of
-   */
-  constructor (windowToSilhouette) {
-    super()
-    this.windowLeft = windowToSilhouette.windowLeft
-    this.windowTop = windowToSilhouette.windowTop
-    this.windowWidth = windowToSilhouette.windowWidth
-    this.windowHeight = windowToSilhouette.windowHeight
-    this.style.zIndex = windowToSilhouette.windowZIndex + 1
-    this._origWindow = windowToSilhouette
-  }
-
-  /**
-   * The silhouette window's left.
-   * @type {Number}
-   */
-  get windowLeft () {
-    return parseInt(this.style.left, 10)
-  }
-
-  /**
-   * The silhouette window's left.
-   * @type {Number}
-   */
-  set windowLeft (newLeft) {
-    this.style.left = newLeft + 'px'
-  }
-
-  /**
-   * The silhouette window's top.
-   * @type {Number}
-   */
-  get windowTop () {
-    return parseInt(this.style.top, 10)
-  }
-
-  /**
-   * The silhouette window's top.
-   * @type {Number}
-   */
-  set windowTop (newTop) {
-    this.style.top = newTop + 'px'
-  }
-
-  /**
-   * The silhouette window's width.
-   * @type {Number}
-   */
-  get windowWidth () {
-    return parseInt(this.style.width, 10)
-  }
-
-  /**
-   * The silhouette window's width.
-   * @type {Number}
-   */
-  set windowWidth (newWidth) {
-    this.style.width = newWidth + 'px'
-  }
-
-  /**
-   * The silhouette window's height.
-   * @type {Number}
-   */
-  get windowHeight () {
-    return parseInt(this.style.height, 10)
-  }
-
-  /**
-   * The silhouette window's height.
-   * @type {Number}
-   */
-  set windowHeight (newHeight) {
-    this.style.height = newHeight + 'px'
-  }
-
-  /**
-   * The original window that this silhouette window object imitates.
-   * @readonly
-   * @type {Window}
-   */
-  get originalWindow () {
-    return this._origWindow
-  }
-}
-
-window.customElements.define(DTOP_SILH_WIN_TAG, SilhouetteWindow)
-
-/**
  * A class that represents the desktop in 'JsDesktop'.
  */
 export default class Desktop extends HTMLElement {
@@ -156,12 +60,8 @@ export default class Desktop extends HTMLElement {
     this._windows = new Array(0) // Holds references to all the open windows on desktop
     this._conf = new ConfigStorage() // Object that holds the desktop configurations
     this._nextWinY = this._nextWinX = DTOP_WIN_X_SHIFT // Tracks the next position for the next open window
-    let tmpStyle = document.createElement('link')
-    tmpStyle.setAttribute('rel', 'stylesheet')
-    tmpStyle.setAttribute('href', DTOP_CSS_FILE)
-    // this._shadow = this.attachShadow({mode: 'open'})
     this._deskTop = document.createElement('div')
-    this._deskTop.classList.add(CSS_CLASS_DTOP)
+    this._deskTop.classList.add(HTML_CLASS_DTOP)
     this._deskTop.style.backgroundImage = 'url(\'' + DTOP_BGROUND_FILE + '\')'
     this._deskBar = document.createElement('div')
     this._deskBarIconsStart = document.createElement('div')
@@ -170,10 +70,9 @@ export default class Desktop extends HTMLElement {
     this._deskBar.appendChild(this._deskBarIconsStart)
     this._deskBar.appendChild(this._deskBarIconsCenter)
     this._deskBar.appendChild(this._deskBarIconsEnd)
-    this._deskBar.classList.add(CSS_CLASS_DTOP_BAR)
+    this._deskBar.classList.add(HTML_CLASS_DTOP_BAR)
     this._deskTopIconList = document.createElement('ul')
-    document.head.appendChild(tmpStyle)
-    this._deskTopIconList.classList.add(CSS_CLASS_ICON_LIST)
+    this._deskTopIconList.classList.add(HTML_CLASS_ICON_LIST)
     this._deskTop.appendChild(this._deskTopIconList)
     this._deskBar.style.padding = DTOP_BAR_PAD + 'px'
     this._updateDtopBarPos()
@@ -185,12 +84,12 @@ export default class Desktop extends HTMLElement {
     this._deskBarIconsStart.appendChild(this._iconFactory(Settings, true, this._conf))
   }
 
-  // connectedCallback () {
-  //   let tmpStyle = document.createElement('link')
-  //   tmpStyle.setAttribute('rel', 'stylesheet')
-  //   tmpStyle.setAttribute('href', DTOP_CSS_FILE)
-  //   document.head.appendChild(tmpStyle)
-  // }
+  connectedCallback () {
+    let tmpStyle = document.createElement('link')
+    tmpStyle.setAttribute('rel', 'stylesheet')
+    tmpStyle.setAttribute('href', DTOP_CSS_FILE)
+    document.head.appendChild(tmpStyle)
+  }
 
   // /**
   //  * Composes the path if not supported for the event. From:
@@ -391,7 +290,7 @@ export default class Desktop extends HTMLElement {
         this._deskBar.style.right = ''
         this._deskBar.style.bottom = ''
         this._deskBar.style.left = ''
-        this._deskBarIconsCenter.className = CSS_CLASS_DTOP_BAR_ICONS_TOP
+        this._deskBarIconsCenter.className = HTML_CLASS_DTOP_BAR_ICONS_TOP
         break
       case BarPos.LEFT:
         tmpVerBar()
@@ -403,7 +302,7 @@ export default class Desktop extends HTMLElement {
         this._deskBar.style.right = ''
         this._deskBar.style.bottom = ''
         this._deskBar.style.left = '0'
-        this._deskBarIconsCenter.className = CSS_CLASS_DTOP_BAR_ICONS_LEFT
+        this._deskBarIconsCenter.className = HTML_CLASS_DTOP_BAR_ICONS_LEFT
         break
       case BarPos.BOTTOM:
         tmpHorBar()
@@ -415,7 +314,7 @@ export default class Desktop extends HTMLElement {
         this._deskBar.style.right = ''
         this._deskBar.style.bottom = '0'
         this._deskBar.style.left = ''
-        this._deskBarIconsCenter.className = CSS_CLASS_DTOP_BAR_ICONS_BOT
+        this._deskBarIconsCenter.className = HTML_CLASS_DTOP_BAR_ICONS_BOT
         break
       case BarPos.RIGHT:
         tmpVerBar()
@@ -427,7 +326,7 @@ export default class Desktop extends HTMLElement {
         this._deskBar.style.right = '0'
         this._deskBar.style.bottom = ''
         this._deskBar.style.left = ''
-        this._deskBarIconsCenter.className = CSS_CLASS_DTOP_BAR_ICONS_RIGHT
+        this._deskBarIconsCenter.className = HTML_CLASS_DTOP_BAR_ICONS_RIGHT
         break
       default:
         throw new TypeError('The passed new desktop-bar position value should be one of the \'BarPos\' constant values.')
@@ -473,7 +372,7 @@ export default class Desktop extends HTMLElement {
    */
   _iconFactory (appClass, isBarIcon, ...appParams) {
     let outIcon = document.createElement('div')// (isBarIcon ? 'div' : 'li')
-    outIcon.classList.add(CSS_CLASS_ICON)
+    outIcon.classList.add(HTML_CLASS_ICON)
     outIcon.style.width = outIcon.style.height = DTOP_BAR_ICON_THICK + 'px'
     outIcon.style.backgroundImage = 'url("' + appClass.appIconURL + '")'
     // outIcon.appClass = appClass
@@ -482,7 +381,7 @@ export default class Desktop extends HTMLElement {
       let tmpOuter = document.createElement('li') // An outer container for the desktop icon
       let tmpLabel = document.createElement('div') // Desktop icon label
       tmpLabel.innerText = appClass.appName
-      tmpOuter.classList.add(CSS_CLASS_DESK_ICON)
+      tmpOuter.classList.add(HTML_CLASS_DESK_ICON)
       tmpOuter.appendChild(outIcon)
       tmpOuter.appendChild(tmpLabel)
       outIcon = tmpOuter
@@ -565,4 +464,4 @@ export default class Desktop extends HTMLElement {
   }
 }
 
-window.customElements.define(DTOP_TAG, Desktop)
+window.customElements.define(HTML_TAG_DTOP, Desktop)

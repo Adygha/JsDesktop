@@ -7,7 +7,7 @@ const APP_CSS_FILE = APP_PATH + 'click-game.css' // App's css file
 const APP_TEMPL_FILE = APP_PATH + 'click-game.html' // App's template file
 const APP_WIDTH = 400   //
 const APP_HEIGHT = 425  // App's initial/default size
-const APP_HTML_TAG = 'js-dtop-app-click-game' // App's HTML tag name
+const HTML_TAG_APP = 'js-dtop-app-click-game' // App's HTML tag name
 const HTML_ID_BOARD = 'board' // HTML ID for main game board
 const HTML_CLASS_MSGS = 'messages' // HTML class for messages-board
 const HTML_ID_TIME = 'time' // HTML ID for timer placeholder
@@ -30,7 +30,6 @@ class ColorBoard {
     this.meTimeDisp = timerNode
     this.meOutput = outputNode
     this.meCounter = 0
-
     this.meHandleClick = (ev) => { // A click event handler to be attached with every block of the color display matrix
       if (ev.target.classList.contains(this.meOutput.innerText)) {
         ev.target.classList.remove(this.meOutput.innerText)
@@ -181,4 +180,4 @@ export default class ClickGame extends AbsApp {
   }
 }
 
-window.customElements.define(APP_HTML_TAG, ClickGame)
+window.customElements.define(HTML_TAG_APP, ClickGame)
