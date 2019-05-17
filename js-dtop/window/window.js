@@ -5,14 +5,6 @@ const WIN_CSS_PATH = DTOP_PATH + 'css/window.css'
 const WIN_TMPL_PATH = DTOP_PATH + 'tmpl/window.html'
 const WIN_MIN_WIDTH = 300
 const WIN_MIN_HEIGHT = 300
-export const WIN_EVENTS = {
-  // EVENT_WIN_CREATED: 'window-created',
-  WIN_FOCUSED: 'window-focused',
-  WIN_MAXIMIZED: 'window-maximized',
-  WIN_MINIMIZED: 'window-minimized',
-  WIN_CLOSED: 'window-closed',
-  WIN_GRABBED: 'window-grabbed'
-}
 const HTML_TAG_WIN = 'js-dtop-window' // Window's HTML tag name
 const HTML_CLASS_WIN_OUTER = 'js-dtop-win' // HTML class for the outer container of the window
 const HTML_CLASS_WIN_INNER = 'js-dtop-win-content' // HTML class for the inner container of the window
@@ -21,6 +13,14 @@ const HTML_CLASS_WIN_ICON = 'js-dtop-win-icon' // HTML class for the title-bar's
 const HTML_CLASS_WIN_MIN = 'js-dtop-win-min' // HTML class for the min button
 const HTML_CLASS_WIN_MAX = 'js-dtop-win-max' // HTML class for the max button
 const HTML_CLASS_WIN_CLOSE = 'js-dtop-win-close' // HTML class for the close button
+export const WIN_EVENTS = {
+  // EVENT_WIN_CREATED: 'window-created',
+  WIN_FOCUSED: 'window-focused',
+  WIN_MAXIMIZED: 'window-maximized',
+  WIN_MINIMIZED: 'window-minimized',
+  WIN_CLOSED: 'window-closed',
+  WIN_GRABBED: 'window-grabbed'
+}
 
 /**
  * An Enum used to specify the type of grab (which part of the window is grabbed/moved)
@@ -117,12 +117,9 @@ export default class Window extends HTMLElement {
     }
     fetch(WIN_TMPL_PATH).then(resp => resp.text()).then(docTxt => { // fetch the window html template
       this._windowOuter = (new DOMParser()).parseFromString(docTxt, 'text/html').querySelector('.' + HTML_CLASS_WIN_OUTER).cloneNode(true)
-      let tmpCloseBut = this._windowOuter.querySelector('.' + HTML_CLASS_WIN_CLOSE)
       let tmpInner = this._windowOuter.querySelector('.' + HTML_CLASS_WIN_INNER)
       this._windowOuter.querySelector('.' + HTML_CLASS_WIN_TITLE).textContent = appObj.constructor.appName
-      if (tmpInner.attachShadow) { // If 'Shadow Dom' is supported then replace 'tmpInner' with its shadow
-        tmpInner = tmpInner.attachShadow({mode: 'closed'})
-      }
+      if (tmpInner.attachShadow) tmpInner = tmpInner.attachShadow({mode: 'closed'}) // If 'Shadow Dom' is supported then replace 'tmpInner' with its shadow
       tmpInner.appendChild(appObj)
       this._winApp = appObj
       this._windowOuter.querySelector('.' + HTML_CLASS_WIN_ICON).setAttribute('src', appObj.constructor.appIconURL)
@@ -153,9 +150,7 @@ export default class Window extends HTMLElement {
    * @private
    */
   _handleWinClick () {
-    if (!this.isActive) {
-      this.dispatchEvent(new Event(WIN_EVENTS.WIN_FOCUSED))
-    }
+    if (!this.isActive) this.dispatchEvent(new Event(WIN_EVENTS.WIN_FOCUSED))
   }
 
   /**
@@ -284,9 +279,7 @@ export default class Window extends HTMLElement {
    * @type {Number}
    */
   set windowWidth (newWidth) {
-    if (newWidth >= WIN_MIN_WIDTH) {
-      this.style.width = newWidth + 'px'
-    }
+    if (newWidth >= WIN_MIN_WIDTH) this.style.width = newWidth + 'px'
   }
 
   /**
@@ -302,9 +295,7 @@ export default class Window extends HTMLElement {
    * @type {Number}
    */
   set windowHeight (newHeight) {
-    if (newHeight >= WIN_MIN_HEIGHT) {
-      this.style.height = newHeight + 'px'
-    }
+    if (newHeight >= WIN_MIN_HEIGHT) this.style.height = newHeight + 'px'
   }
 
   /**

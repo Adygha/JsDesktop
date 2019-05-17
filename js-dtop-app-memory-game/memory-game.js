@@ -43,9 +43,7 @@ class GameCard extends HTMLElement {
     this.meAnch.classList.add(HTML_CLASS_CARD + this.mePercent)
     this.meAnch.classList.add(HTML_CLASS_IMAGE + 0)
     this.appendChild(this.meAnch)
-    if (isNotActive) {
-      this.flipCard(false)
-    }
+    if (isNotActive) this.flipCard(false)
   }
 
   /**
@@ -112,9 +110,7 @@ class GameCard extends HTMLElement {
    */
   get isDeactivated () {
     for (let i = 0; i < this.meAnch.classList.length; i++) {
-      if (this.meAnch.classList.item(i).startsWith(HTML_CLASS_IMAGE)) {
-        return false
-      }
+      if (this.meAnch.classList.item(i).startsWith(HTML_CLASS_IMAGE)) return false
     }
     return true
   }
@@ -208,8 +204,7 @@ export default class MemoryGame extends AbsApp {
       this.meCards[i] = new GameCard(Math.floor(i / 2) + 1, this.meCardCount === 4 ? 50 : 25)
     }
     this.mePlayBoard.addEventListener('click', ev => {
-      if (ev.target.parentNode instanceof GameCard &&
-        !ev.target.parentNode.isDeactivated && !ev.target.parentNode.isShown) {
+      if (ev.target.parentNode instanceof GameCard && !ev.target.parentNode.isDeactivated && !ev.target.parentNode.isShown) {
         if (!this.meInterval) {
           this.meInterval = window.setInterval(() => {
             this.meTime += 0.1

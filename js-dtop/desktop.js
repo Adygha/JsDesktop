@@ -238,9 +238,7 @@ export default class Desktop extends HTMLElement {
         this._deskTop.removeChild(this._silhWin)
         this._silhWin = undefined
         this._winGrab = undefined // To indicate move/grab end
-        if (document.body.style.cursor !== 'default') {
-          document.body.style.cursor = 'default'
-        }
+        if (document.body.style.cursor !== 'default') document.body.style.cursor = 'default'
       }
     }
   }
@@ -343,9 +341,7 @@ export default class Desktop extends HTMLElement {
     theWindow = !theWindow && this._windows.length ? this._windows[this._windows.length - 1] : theWindow // If 'theWindow' is omitted, use the last window
     if (theWindow) {
       let tmpIndex = this._windows.indexOf(theWindow)
-      if (this._windows.length && this._windows[this._windows.length - 1].isActive) {
-        this._windows[this._windows.length - 1].isActive = false
-      }
+      if (this._windows.length && this._windows[this._windows.length - 1].isActive) this._windows[this._windows.length - 1].isActive = false
       if (tmpIndex === -1) {
         theWindow.windowZIndex = 100 + this._windows.length
         this._windows.push(theWindow)
@@ -376,8 +372,7 @@ export default class Desktop extends HTMLElement {
     outIcon.style.width = outIcon.style.height = DTOP_BAR_ICON_THICK + 'px'
     outIcon.style.backgroundImage = 'url("' + appClass.appIconURL + '")'
     // outIcon.appClass = appClass
-    if (isBarIcon) {
-    } else {
+    if (!isBarIcon) {
       let tmpOuter = document.createElement('li') // An outer container for the desktop icon
       let tmpLabel = document.createElement('div') // Desktop icon label
       tmpLabel.innerText = appClass.appName
@@ -390,9 +385,7 @@ export default class Desktop extends HTMLElement {
       // let tmpWin = new Window(appClass, {x: this._nextWinX, y: this._nextWinY})
       let tmpWin = new Window(new appClass(...appParams), {x: this._nextWinX, y: this._nextWinY})
       tmpWin.addEventListener(WIN_EVENTS.WIN_FOCUSED, () => {
-        if (!tmpWin.isActive) {
-          this._putWinOnTop(tmpWin)
-        }
+        if (!tmpWin.isActive) this._putWinOnTop(tmpWin)
       })
       tmpWin.addEventListener(WIN_EVENTS.WIN_MINIMIZED, () => {
         // TODO: Fill for window minimized
@@ -405,9 +398,7 @@ export default class Desktop extends HTMLElement {
       })
       tmpWin.addEventListener(WIN_EVENTS.WIN_CLOSED, () => {
         this._putWinOnTop(tmpWin)
-        if (this._windows.length && this._windows[this._windows.length - 1] === tmpWin) {
-          this._windows.pop() // Remove 'tmpWin' window (it is on top now)
-        }
+        if (this._windows.length && this._windows[this._windows.length - 1] === tmpWin) this._windows.pop() // Remove 'tmpWin' window (it is on top now)
         this._deskTop.removeChild(tmpWin)
         this._putWinOnTop() // Put the other last window on top (if any)
       })
@@ -456,9 +447,7 @@ export default class Desktop extends HTMLElement {
    * @param {typeof AbsApp} appClass  the class for the application to be put in the window (must extend 'AbsApp')
    */
   addApp (appClass) {
-    if (!(appClass.prototype instanceof AbsApp)) { // Check if it is actually a js-desktop-app class
-      throw new TypeError('The passed \'appClass\' argument must be a class that extends the \'AbsApp\' abstract class.')
-    }
+    if (!(appClass.prototype instanceof AbsApp)) throw new TypeError('The passed \'appClass\' argument must be a class that extends the \'AbsApp\' abstract class.') // Check if it is actually a js-desktop-app class
     this._deskBarIconsCenter.appendChild(this._iconFactory(appClass, true)) // Add desktop-bar icon
     this._deskTopIconList.appendChild(this._iconFactory(appClass, false)) // Add desktop icon
   }

@@ -35,9 +35,7 @@ class ColorBoard {
         ev.target.classList.remove(this.meOutput.innerText)
         ev.target.classList.add(HTML_CLASS_COLORS[0])
         this.meCounter++
-        if (this.meCounter === 3) {
-          this.endGame()
-        }
+        if (this.meCounter === 3) this.endGame()
       } else {
         this._wrongClick()
       }
