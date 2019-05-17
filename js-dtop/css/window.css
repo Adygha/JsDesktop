@@ -18,18 +18,18 @@ js-dtop-window {
 	flex-direction: column;
 }
 
-.app-inactive {
+.js-dtop-win-inactive {
 	/* filter: blur(2px); */
 	filter: grayscale(100%);
 	box-shadow: 2px 2px 3px lightgray;
 }
 
-.app-transp {
+.js-dtop-win-transp {
 	filter: grayscale(100%);
 	opacity: .8;
 }
 
-.app-disabled {
+.js-dtop-win-disabled {
 	filter: grayscale(100%);
 	box-shadow: 2px 2px 3px lightgray;
 	pointer-events: none;

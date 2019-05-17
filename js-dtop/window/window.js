@@ -13,6 +13,9 @@ const HTML_CLASS_WIN_ICON = 'js-dtop-win-icon' // HTML class for the title-bar's
 const HTML_CLASS_WIN_MIN = 'js-dtop-win-min' // HTML class for the min button
 const HTML_CLASS_WIN_MAX = 'js-dtop-win-max' // HTML class for the max button
 const HTML_CLASS_WIN_CLOSE = 'js-dtop-win-close' // HTML class for the close button
+const HTML_CLASS_WIN_INACTIVE = 'js-dtop-win-inactive' // HTML class for inactive window
+const HTML_CLASS_WIN_TRANSP = 'js-dtop-win-transp' // HTML class for transparent window
+const HTML_CLASS_WIN_DISABLED = 'js-dtop-win-disabled' // HTML class for disabled window
 export const WIN_EVENTS = {
   // EVENT_WIN_CREATED: 'window-created',
   WIN_FOCUSED: 'window-focused',
@@ -59,6 +62,7 @@ export const WindowGrabType = Object.freeze({
 
 /**
  * A class that represents an event dispatched when a window is grabbed/moved.
+ * @extends {Event}
  */
 export class WindowGrabEvent extends (window.PointerEvent ? PointerEvent : MouseEvent) {
 
@@ -328,7 +332,7 @@ export default class Window extends HTMLElement {
    * @type {Boolean}
    */
   get isActive () {
-    return !this.classList.contains('app-inactive')
+    return !this.classList.contains(HTML_CLASS_WIN_INACTIVE)
   }
 
   /**
@@ -337,9 +341,9 @@ export default class Window extends HTMLElement {
    */
   set isActive (newIsActive) {
     if (newIsActive) {
-      this.classList.remove('app-inactive')
+      this.classList.remove(HTML_CLASS_WIN_INACTIVE)
     } else {
-      this.classList.add('app-inactive')
+      this.classList.add(HTML_CLASS_WIN_INACTIVE)
     }
   }
 
@@ -348,7 +352,7 @@ export default class Window extends HTMLElement {
    * @type {Boolean}
    */
   get isTransparent () {
-    return this.classList.contains('app-transp')
+    return this.classList.contains(HTML_CLASS_WIN_TRANSP)
   }
 
   /**
@@ -357,9 +361,9 @@ export default class Window extends HTMLElement {
    */
   set isTransparent (newIsTransparent) {
     if (newIsTransparent) {
-      this.classList.add('app-transp')
+      this.classList.add(HTML_CLASS_WIN_TRANSP)
     } else {
-      this.classList.remove('app-transp')
+      this.classList.remove(HTML_CLASS_WIN_TRANSP)
     }
   }
 
@@ -368,7 +372,7 @@ export default class Window extends HTMLElement {
    * @type {Boolean}
    */
   get isDisabled () {
-    return !this.classList.contains('app-disabled')
+    return !this.classList.contains(HTML_CLASS_WIN_DISABLED)
   }
 
   /**
@@ -377,9 +381,9 @@ export default class Window extends HTMLElement {
    */
   set isDisabled (newIsDisabled) {
     if (newIsDisabled) {
-      this.classList.add('app-disabled')
+      this.classList.add(HTML_CLASS_WIN_DISABLED)
     } else {
-      this.classList.remove('app-disabled')
+      this.classList.remove(HTML_CLASS_WIN_DISABLED)
     }
   }
 

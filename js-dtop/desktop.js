@@ -57,7 +57,7 @@ export default class Desktop extends HTMLElement {
   constructor () {
     super()
     /** @type {Array<Window>} */
-    this._windows = new Array(0) // Holds references to all the open windows on desktop
+    this._windows = [] // Holds references to all the open windows on desktop
     this._conf = new ConfigStorage() // Object that holds the desktop configurations
     this._nextWinY = this._nextWinX = DTOP_WIN_X_SHIFT // Tracks the next position for the next open window
     this._deskTop = document.createElement('div')
@@ -384,62 +384,97 @@ export default class Desktop extends HTMLElement {
     outIcon.addEventListener('click', () => {
       // let tmpWin = new Window(appClass, {x: this._nextWinX, y: this._nextWinY})
       let tmpWin = new Window(new appClass(...appParams), {x: this._nextWinX, y: this._nextWinY})
-      tmpWin.addEventListener(WIN_EVENTS.WIN_FOCUSED, () => {
-        if (!tmpWin.isActive) this._putWinOnTop(tmpWin)
-      })
-      tmpWin.addEventListener(WIN_EVENTS.WIN_MINIMIZED, () => {
-        // TODO: Fill for window minimized
-      })
-      tmpWin.addEventListener(WIN_EVENTS.WIN_MAXIMIZED, () => {
-        tmpWin.windowLeft = 0
-        tmpWin.windowTop = 0
-        tmpWin.windowWidth = this._deskTop.clientWidth
-        tmpWin.windowHeight = this._deskTop.clientHeight
-      })
-      tmpWin.addEventListener(WIN_EVENTS.WIN_CLOSED, () => {
-        this._putWinOnTop(tmpWin)
-        if (this._windows.length && this._windows[this._windows.length - 1] === tmpWin) this._windows.pop() // Remove 'tmpWin' window (it is on top now)
-        this._deskTop.removeChild(tmpWin)
-        this._putWinOnTop() // Put the other last window on top (if any)
-      })
-      tmpWin.addEventListener(WIN_EVENTS.WIN_GRABBED, ev => {
-        this._putWinOnTop(tmpWin) // First put window on top
-        tmpWin.isDisabled = true // Disable the window (until pointer/mouse is up)
-        this._silhWin = new SilhouetteWindow(tmpWin) // Make a silhouette of the original
-        this._deskTop.appendChild(this._silhWin)
-        this._winGrab = ev.grabType // To indicate that a move/grab in progress
-        switch (ev.grabType) {
-          case WindowGrabType.WINDOW_MOVE: // The title bar is grabbed (moving)
-            document.body.style.cursor = 'move' // To prevent cursor change during move
-            this._moveDif = { // Save the initial position difference for a bit later
-              x: ev.clientX - tmpWin.windowLeft,
-              y: ev.clientY - tmpWin.windowTop
-            }
-            break
-          case WindowGrabType.TOP_EDGE: // The top edge is grabbed
-          case WindowGrabType.BOTTOM_EDGE: // The bottom edge is grabbed
-            document.body.style.cursor = 'ns-resize' // To prevent cursor change during grab
-            break
-          case WindowGrabType.LEFT_EDGE: // The left edge is grabbed
-          case WindowGrabType.RIGHT_EDGE: // The right edge is grabbed
-            document.body.style.cursor = 'ew-resize' // To prevent cursor change during grab
-            break
-          case WindowGrabType.TOP_LEFT_CORNER: // The top-left corner is grabbed
-          case WindowGrabType.BOTTOM_RIGHT_CORNER: // The bottom-right corner is grabbed
-            document.body.style.cursor = 'nwse-resize' // To prevent cursor change during grab
-            break
-          case WindowGrabType.TOP_RIGHT_CORNER: // The top-right corner is grabbed
-          case WindowGrabType.BOTTOM_LEFT_CORNER: // The bottom-left corner is grabbed
-            document.body.style.cursor = 'nesw-resize' // To prevent cursor change during grab
-        }
-        this._deskTop.addEventListener(window.PointerEvent ? 'pointermove' : 'mousemove', this._handleDesktopPointerMove) // It is better to let the '_deskTop' and not the 'document' handle it
-        document.addEventListener(window.PointerEvent ? 'pointerup' : 'mouseup', this._handleDocPointerUp)
-      })
+      tmpWin.addEventListener(WIN_EVENTS.WIN_FOCUSED, this._handleWinFocused.bind(this))
+      tmpWin.addEventListener(WIN_EVENTS.WIN_MINIMIZED, this._handleWinMinimized.bind(this))
+      tmpWin.addEventListener(WIN_EVENTS.WIN_MAXIMIZED, this._handleWinMaximized.bind(this))
+      tmpWin.addEventListener(WIN_EVENTS.WIN_CLOSED, this._handleWinClosed.bind(this))
+      tmpWin.addEventListener(WIN_EVENTS.WIN_GRABBED, this._handleWinGrabbed.bind(this))
       this._nextWinX = (this._nextWinX + DTOP_WIN_Y_SHIFT) % (this._deskTop.clientWidth / 3 * 2) // Set next window X
       this._nextWinY = (this._nextWinY + DTOP_WIN_X_SHIFT) % (this._deskTop.clientHeight / 3 * 2) // Set next window Y
       this._deskTop.appendChild(tmpWin)
     })
     return outIcon
+  }
+
+  /**
+   * Handles the event when a window is focused.
+   * @param {Event} ev    the event dispatched by the window
+   * @private
+   */
+  _handleWinFocused (ev) {
+    if (!ev.target.isActive) this._putWinOnTop(/** @type {Window} */ev.target)
+  }
+
+  /**
+   * Handles the event when a window is minimized.
+   * @param {Event} ev    the event dispatched by the window
+   * @private
+   */
+  _handleWinMinimized (ev) {
+    // TODO: Fill for window minimized
+  }
+
+  /**
+   * Handles the event when a window is maximized.
+   * @param {Event} ev    the event dispatched by the window
+   * @private
+   */
+  _handleWinMaximized (ev) {
+    ev.target.windowLeft = 0
+    ev.target.windowTop = 0
+    ev.target.windowWidth = this._deskTop.clientWidth
+    ev.target.windowHeight = this._deskTop.clientHeight
+  }
+
+  /**
+   * Handles the event when a window is closed.
+   * @param {Event} ev    the event dispatched by the window
+   * @private
+   */
+  _handleWinClosed (ev) {
+    this._putWinOnTop(/** @type {Window} */ev.target)
+    if (this._windows.length && this._windows[this._windows.length - 1] === ev.target) this._windows.pop() // Remove 'tmpWin' window (it is on top now)
+    this._deskTop.removeChild(/** @type {Window} */ev.target)
+    this._putWinOnTop() // Put the other last window on top (if any)
+  }
+
+  /**
+   * Handles the event when a window is grabbed for move/resize.
+   * @param {Event|WindowGrabEvent} ev    the event dispatched by the window
+   * @private
+   */
+  _handleWinGrabbed (ev) {
+    this._putWinOnTop(/** @type {Window} */ev.target) // First put window on top
+    ev.target.isDisabled = true // Disable the window (until pointer/mouse is up)
+    this._silhWin = new SilhouetteWindow(/** @type {Window} */ev.target) // Make a silhouette of the original
+    this._deskTop.appendChild(this._silhWin)
+    this._winGrab = ev.grabType // To indicate that a move/grab in progress
+    switch (ev.grabType) {
+      case WindowGrabType.WINDOW_MOVE: // The title bar is grabbed (moving)
+        document.body.style.cursor = 'move' // To prevent cursor change during move
+        this._moveDif = { // Save the initial position difference for a bit later
+          x: ev.clientX - ev.target.windowLeft,
+          y: ev.clientY - ev.target.windowTop
+        }
+        break
+      case WindowGrabType.TOP_EDGE: // The top edge is grabbed
+      case WindowGrabType.BOTTOM_EDGE: // The bottom edge is grabbed
+        document.body.style.cursor = 'ns-resize' // To prevent cursor change during grab
+        break
+      case WindowGrabType.LEFT_EDGE: // The left edge is grabbed
+      case WindowGrabType.RIGHT_EDGE: // The right edge is grabbed
+        document.body.style.cursor = 'ew-resize' // To prevent cursor change during grab
+        break
+      case WindowGrabType.TOP_LEFT_CORNER: // The top-left corner is grabbed
+      case WindowGrabType.BOTTOM_RIGHT_CORNER: // The bottom-right corner is grabbed
+        document.body.style.cursor = 'nwse-resize' // To prevent cursor change during grab
+        break
+      case WindowGrabType.TOP_RIGHT_CORNER: // The top-right corner is grabbed
+      case WindowGrabType.BOTTOM_LEFT_CORNER: // The bottom-left corner is grabbed
+        document.body.style.cursor = 'nesw-resize' // To prevent cursor change during grab
+    }
+    this._deskTop.addEventListener(window.PointerEvent ? 'pointermove' : 'mousemove', this._handleDesktopPointerMove) // It is better to let the '_deskTop' and not the 'document' handle it
+    document.addEventListener(window.PointerEvent ? 'pointerup' : 'mouseup', this._handleDocPointerUp)
   }
 
   /**
