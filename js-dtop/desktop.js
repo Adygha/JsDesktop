@@ -3,6 +3,7 @@ import SilhouetteWindow from './window/silhouette-window.js'
 import AbsApp from './app/abs-app.js'
 import Settings from './app-settings/settings.js'
 import ConfigStorage, {CONF_KEYS_EVENTS} from './config-storage.js'
+import DocTools from './lib/doc-tools.js'
 
 const DTOP_PATH = 'js-dtop/'
 const DTOP_CSS_FILE = DTOP_PATH + 'css/desktop.css'
@@ -85,10 +86,7 @@ export default class Desktop extends HTMLElement {
   }
 
   connectedCallback () {
-    let tmpStyle = document.createElement('link')
-    tmpStyle.setAttribute('rel', 'stylesheet')
-    tmpStyle.setAttribute('href', DTOP_CSS_FILE)
-    document.head.appendChild(tmpStyle)
+    DocTools.singleCss(DTOP_CSS_FILE)
   }
 
   // /**
