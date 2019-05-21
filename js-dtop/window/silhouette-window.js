@@ -1,5 +1,3 @@
-import DocTools from '../lib/doc-tools.js'
-
 const DTOP_PATH = 'js-dtop/'
 const SILH_WIN_CSS_PATH = DTOP_PATH + 'css/silhouette-window.css'
 const HTML_TAG_SILH_WIN = 'js-dtop-silhouette-window' // The HTML tag for the silhouette window
@@ -25,7 +23,13 @@ export default class SilhouetteWindow extends HTMLElement {
   }
 
   connectedCallback () {
-    DocTools.singleCss(SILH_WIN_CSS_PATH)
+    let tmpStyle = document.querySelector('link[rel="stylesheet"][href="' + SILH_WIN_CSS_PATH + '"]')
+    if (!tmpStyle) {
+      tmpStyle = document.createElement('link')
+      tmpStyle.setAttribute('rel', 'stylesheet')
+      tmpStyle.setAttribute('href', SILH_WIN_CSS_PATH)
+      document.head.appendChild(tmpStyle)
+    }
   }
 
   /**

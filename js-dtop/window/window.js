@@ -1,5 +1,4 @@
 import AbsApp from '../app/abs-app.js'
-import DocTools from '../lib/doc-tools.js'
 
 const DTOP_PATH = 'js-dtop/'
 const WIN_CSS_PATH = DTOP_PATH + 'css/window.css'
@@ -139,7 +138,13 @@ export default class Window extends HTMLElement {
   }
 
   connectedCallback () {
-    DocTools.singleCss(WIN_CSS_PATH)
+    let tmpStyle = document.querySelector('link[rel="stylesheet"][href="' + WIN_CSS_PATH + '"]')
+    if (!tmpStyle) {
+      tmpStyle = document.createElement('link')
+      tmpStyle.setAttribute('rel', 'stylesheet')
+      tmpStyle.setAttribute('href', WIN_CSS_PATH)
+      document.head.appendChild(tmpStyle)
+    }
     this.isActive = false
     this.dispatchEvent(new Event(WIN_EVENTS.WIN_FOCUSED))
   }
