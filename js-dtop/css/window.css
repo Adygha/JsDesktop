@@ -35,6 +35,10 @@ js-dtop-window {
 	pointer-events: none;
 }
 
+.js-dtop-win-hidden {
+	visibility: hidden;
+}
+
 .js-dtop-win-icon {
 	float: left;
 	box-sizing: border-box;
@@ -192,4 +196,23 @@ js-dtop-window {
 
 .js-dtop-win-botleftcorner.js-dtop-win-moveresize {
 	cursor: nesw-resize;
+}
+
+.js-dtop-win-bar-drawer-but {
+	display: block;
+	/*float: initial;*/
+	padding: 5px;
+	color: white;
+	font-size: 10px;
+	border-radius: 3px;
+	border-style: outset;
+	text-decoration: none;
+}
+
+.js-dtop-win-bar-drawer-but-active {
+	border-style: inset;
+}
+
+.js-dtop-win-bar-drawer-but:hover {
+	background-color: lightgray;
 }

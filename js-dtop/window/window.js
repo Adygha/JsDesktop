@@ -16,6 +16,9 @@ const HTML_CLASS_WIN_CLOSE = 'js-dtop-win-close' // HTML class for the close but
 const HTML_CLASS_WIN_INACTIVE = 'js-dtop-win-inactive' // HTML class for inactive window
 const HTML_CLASS_WIN_TRANSP = 'js-dtop-win-transp' // HTML class for transparent window
 const HTML_CLASS_WIN_DISABLED = 'js-dtop-win-disabled' // HTML class for disabled window
+const HTML_CLASS_WIN_HIDDEN = 'js-dtop-win-hidden' // HTML class for disabled window
+const HTML_CLASS_WIN_BAR_BUT = 'js-dtop-win-bar-drawer-but' // HTML class for window's bar drawer button
+const HTML_CLASS_WIN_BAR_BUT_ACT = 'js-dtop-win-bar-drawer-but-active' // HTML class for active window's bar drawer button
 export const WIN_EVENTS = {
   // EVENT_WIN_CREATED: 'window-created',
   WIN_FOCUSED: 'window-focused',
@@ -119,6 +122,12 @@ export default class Window extends HTMLElement {
       this.windowLeft = 0
       this.windowTop = 0
     }
+    this._barDrawerBut = document.createElement('div')
+    this._barDrawerBut.classList.add(HTML_CLASS_WIN_BAR_BUT)
+    this._barDrawerBut.textContent = appObj.constructor.appName
+    this._barDrawerBut.addEventListener('click', () => {
+      if (!this.isActive) this.dispatchEvent(new Event(WIN_EVENTS.WIN_FOCUSED))
+    })
     fetch(WIN_TMPL_PATH).then(resp => resp.text()).then(docTxt => { // fetch the window html template
       this._windowOuter = (new DOMParser()).parseFromString(docTxt, 'text/html').querySelector('.' + HTML_CLASS_WIN_OUTER).cloneNode(true)
       let tmpInner = this._windowOuter.querySelector('.' + HTML_CLASS_WIN_INNER)
@@ -193,7 +202,7 @@ export default class Window extends HTMLElement {
    * @private
    */
   _handleWinMinimize () {
-    // TODO: Fill for minimize
+    this.classList.add(HTML_CLASS_WIN_HIDDEN)
     this.dispatchEvent(new Event(WIN_EVENTS.WIN_MINIMIZED))
   }
 
@@ -236,6 +245,14 @@ export default class Window extends HTMLElement {
   _handleWinClose () {
     this._winApp.endApp()
     this.dispatchEvent(new Event(WIN_EVENTS.WIN_CLOSED))
+  }
+
+  /**
+   * The window's bar drawer button (that you can bring a minimized window back with).
+   * @type {HTMLElement}
+   */
+  get windowBarDrawerButton () {
+    return this._barDrawerBut
   }
 
   /**
@@ -341,9 +358,11 @@ export default class Window extends HTMLElement {
    */
   set isActive (newIsActive) {
     if (newIsActive) {
-      this.classList.remove(HTML_CLASS_WIN_INACTIVE)
+      this.classList.remove(HTML_CLASS_WIN_INACTIVE, HTML_CLASS_WIN_HIDDEN)
+      this._barDrawerBut.classList.add(HTML_CLASS_WIN_BAR_BUT_ACT)
     } else {
       this.classList.add(HTML_CLASS_WIN_INACTIVE)
+      this._barDrawerBut.classList.remove(HTML_CLASS_WIN_BAR_BUT_ACT)
     }
   }
 
@@ -385,6 +404,10 @@ export default class Window extends HTMLElement {
     } else {
       this.classList.remove(HTML_CLASS_WIN_DISABLED)
     }
+  }
+
+  get isMinimized () {
+    this.classList.contains(HTML_CLASS_WIN_HIDDEN)
   }
 
   /**

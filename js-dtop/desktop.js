@@ -3,6 +3,7 @@ import SilhouetteWindow from './window/silhouette-window.js'
 import AbsApp from './app/abs-app.js'
 import Settings from './app-settings/settings.js'
 import ConfigStorage, {CONF_KEYS_EVENTS} from './config-storage.js'
+import BarIcon from './icon/bar-icon.js'
 
 const DTOP_PATH = 'js-dtop/'
 const DTOP_CSS_FILE = DTOP_PATH + 'css/desktop.css'
@@ -20,7 +21,7 @@ const HTML_CLASS_DTOP_BAR_ICONS_BOT = 'js-dtop-bar-icon-container-center-bot' //
 const HTML_CLASS_DTOP_BAR_ICONS_RIGHT = 'js-dtop-bar-icon-container-center-right' // HTML/CSS class for the right desktop-bar icon container
 const HTML_CLASS_ICON_LIST = 'js-dtop-icon-list' // HTML/CSS class for the list that contains the desktop icons
 const HTML_CLASS_ICON = 'js-dtop-icon' // HTML/CSS class for the icon
-const HTML_CLASS_DESK_ICON = 'js-dtop-icon-list-icon-container' // HTML/CSS class for the frame around each desktop icon
+const HTML_CLASS_DESK_ICON = 'js-dtop-icon-list-icon-frame' // HTML/CSS class for the frame around each desktop icon
 
 /**
  * An Enum used to position the desktop-bar on the desktop.
@@ -367,33 +368,48 @@ export default class Desktop extends HTMLElement {
    * @private
    */
   _iconFactory (appClass, isBarIcon, ...appParams) {
-    let outIcon = document.createElement('div')// (isBarIcon ? 'div' : 'li')
-    outIcon.classList.add(HTML_CLASS_ICON)
-    outIcon.style.width = outIcon.style.height = DTOP_BAR_ICON_THICK + 'px'
-    outIcon.style.backgroundImage = 'url("' + appClass.appIconURL + '")'
-    // outIcon.appClass = appClass
-    if (!isBarIcon) {
-      let tmpOuter = document.createElement('li') // An outer container for the desktop icon
-      let tmpLabel = document.createElement('div') // Desktop icon label
-      tmpLabel.innerText = appClass.appName
-      tmpOuter.classList.add(HTML_CLASS_DESK_ICON)
-      tmpOuter.appendChild(outIcon)
-      tmpOuter.appendChild(tmpLabel)
-      outIcon = tmpOuter
+    if (isBarIcon) {
+      let outIcon = new BarIcon(appClass.appIconURL, DTOP_BAR_ICON_THICK)
+      outIcon.addEventListener('click', () => {
+        let tmpWin = new Window(new appClass(...appParams), {x: this._nextWinX, y: this._nextWinY})
+        tmpWin.addEventListener(WIN_EVENTS.WIN_FOCUSED, this._handleWinFocused.bind(this))
+        tmpWin.addEventListener(WIN_EVENTS.WIN_MINIMIZED, this._handleWinMinimized.bind(this))
+        tmpWin.addEventListener(WIN_EVENTS.WIN_MAXIMIZED, this._handleWinMaximized.bind(this))
+        tmpWin.addEventListener(WIN_EVENTS.WIN_CLOSED, this._handleWinClosed.bind(this))
+        tmpWin.addEventListener(WIN_EVENTS.WIN_GRABBED, this._handleWinGrabbed.bind(this))
+        this._nextWinX = (this._nextWinX + DTOP_WIN_Y_SHIFT) % (this._deskTop.clientWidth / 3 * 2) // Set next window X
+        this._nextWinY = (this._nextWinY + DTOP_WIN_X_SHIFT) % (this._deskTop.clientHeight / 3 * 2) // Set next window Y
+        this._deskTop.appendChild(tmpWin)
+        outIcon.addWindow(tmpWin)
+      })
+      return outIcon
+    } else {
+      let outIcon = document.createElement('div')// (isBarIcon ? 'div' : 'li')
+      outIcon.classList.add(HTML_CLASS_ICON)
+      outIcon.style.width = outIcon.style.height = DTOP_BAR_ICON_THICK + 'px'
+      outIcon.style.backgroundImage = 'url("' + appClass.appIconURL + '")'
+      if (!isBarIcon) {
+        let tmpOuter = document.createElement('li') // An outer container for the desktop icon
+        let tmpLabel = document.createElement('div') // Desktop icon label
+        tmpLabel.innerText = appClass.appName
+        tmpOuter.classList.add(HTML_CLASS_DESK_ICON)
+        tmpOuter.appendChild(outIcon)
+        tmpOuter.appendChild(tmpLabel)
+        outIcon = tmpOuter
+      }
+      outIcon.addEventListener('click', () => {
+        let tmpWin = new Window(new appClass(...appParams), {x: this._nextWinX, y: this._nextWinY})
+        tmpWin.addEventListener(WIN_EVENTS.WIN_FOCUSED, this._handleWinFocused.bind(this))
+        tmpWin.addEventListener(WIN_EVENTS.WIN_MINIMIZED, this._handleWinMinimized.bind(this))
+        tmpWin.addEventListener(WIN_EVENTS.WIN_MAXIMIZED, this._handleWinMaximized.bind(this))
+        tmpWin.addEventListener(WIN_EVENTS.WIN_CLOSED, this._handleWinClosed.bind(this))
+        tmpWin.addEventListener(WIN_EVENTS.WIN_GRABBED, this._handleWinGrabbed.bind(this))
+        this._nextWinX = (this._nextWinX + DTOP_WIN_Y_SHIFT) % (this._deskTop.clientWidth / 3 * 2) // Set next window X
+        this._nextWinY = (this._nextWinY + DTOP_WIN_X_SHIFT) % (this._deskTop.clientHeight / 3 * 2) // Set next window Y
+        this._deskTop.appendChild(tmpWin)
+      })
+      return outIcon
     }
-    outIcon.addEventListener('click', () => {
-      // let tmpWin = new Window(appClass, {x: this._nextWinX, y: this._nextWinY})
-      let tmpWin = new Window(new appClass(...appParams), {x: this._nextWinX, y: this._nextWinY})
-      tmpWin.addEventListener(WIN_EVENTS.WIN_FOCUSED, this._handleWinFocused.bind(this))
-      tmpWin.addEventListener(WIN_EVENTS.WIN_MINIMIZED, this._handleWinMinimized.bind(this))
-      tmpWin.addEventListener(WIN_EVENTS.WIN_MAXIMIZED, this._handleWinMaximized.bind(this))
-      tmpWin.addEventListener(WIN_EVENTS.WIN_CLOSED, this._handleWinClosed.bind(this))
-      tmpWin.addEventListener(WIN_EVENTS.WIN_GRABBED, this._handleWinGrabbed.bind(this))
-      this._nextWinX = (this._nextWinX + DTOP_WIN_Y_SHIFT) % (this._deskTop.clientWidth / 3 * 2) // Set next window X
-      this._nextWinY = (this._nextWinY + DTOP_WIN_X_SHIFT) % (this._deskTop.clientHeight / 3 * 2) // Set next window Y
-      this._deskTop.appendChild(tmpWin)
-    })
-    return outIcon
   }
 
   /**
