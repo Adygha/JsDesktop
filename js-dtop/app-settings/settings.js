@@ -49,7 +49,7 @@ export default class Settings extends AbsApp {
    * @private
    */
   _attachRemovableEventHandlers () {
-    // this._handleDtopBarMoved = (ev) => this._ctrlBarPos.value = ev.newValue.toString() // Will use crooked 'Symbol.toString' for now (may fix later)
+    // this._handleDtopBarMoved = ev => this._ctrlBarPos.value = ev.newValue.toString() // Will use crooked 'Symbol.toString' for now (may fix later)
     this._handleDtopBarMoved = () => this._ctrlBarPos.value = this._conf.desktopBarPosition
     this._conf.addEventListener(CONF_KEYS_EVENTS.DTOP_BAR_POS, this._handleDtopBarMoved)
   }

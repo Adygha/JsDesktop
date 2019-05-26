@@ -30,9 +30,9 @@ class ColorBoard {
     this.meTimeDisp = timerNode
     this.meOutput = outputNode
     this.meCounter = 0
-    this.meHandleClick = (ev) => { // A click event handler to be attached with every block of the color display matrix
-      if (ev.target.classList.contains(this.meOutput.innerText)) {
-        ev.target.classList.remove(this.meOutput.innerText)
+    this.meHandleClick = ev => { // A click event handler to be attached with every block of the color display matrix
+      if (ev.target.classList.contains(this.meOutput.textContent)) {
+        ev.target.classList.remove(this.meOutput.textContent)
         ev.target.classList.add(HTML_CLASS_COLORS[0])
         this.meCounter++
         if (this.meCounter === 3) this.endGame()
@@ -58,11 +58,11 @@ class ColorBoard {
         tmpBrk.classList.add(HTML_CLASS_COLORS[i])
       }
     }
-    this.meOutput.innerText = HTML_CLASS_COLORS[Math.floor(Math.random() * 3) + 1]
+    this.meOutput.textContent = HTML_CLASS_COLORS[Math.floor(Math.random() * 3) + 1]
     this.meBricks.forEach(brk => brk.addEventListener('click', this.meHandleClick))
     this.meInterval = window.setInterval(() => {
       this.meTime += 0.1
-      this.meTimeDisp.innerText = this.meTime.toFixed(1)
+      this.meTimeDisp.textContent = this.meTime.toFixed(1)
     }, 100)
   }
 
@@ -101,7 +101,7 @@ class ColorBoard {
   _wrongClick () {
     this.meTimeDisp.classList.add(HTML_CLASS_COLORS[1])
     this.meTime += 3.0
-    this.meTimeDisp.innerText = this.meTime.toFixed(1)
+    this.meTimeDisp.textContent = this.meTime.toFixed(1)
     window.setTimeout(() => this.meTimeDisp.classList.remove(HTML_CLASS_COLORS[1]), 400)
   }
 }
@@ -129,7 +129,7 @@ export default class ClickGame extends AbsApp {
       let tmpColor = document.createElement('span')
       let tmpBut = document.createElement('button')
       this._colBoard = new ColorBoard(tmpBrks, tmpTime, tmpColor)
-      tmpBut.innerText = 'Start New Game'
+      tmpBut.textContent = 'Start New Game'
       tmpBut.addEventListener('click', () => this._colBoard.startGame())
       tmpMsgs.querySelector('#' + HTML_ID_COLOR_MSG).appendChild(tmpColor)
       tmpMsgs.appendChild(tmpBut)

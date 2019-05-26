@@ -1,21 +1,11 @@
 js-dtop-window {
 	position: absolute;
-	display: block;
-	border-style: double;
-	background-color: aliceblue;
-	left: 0;
-	top: 0;
-	width: 300px;
-	height: 300px;
-	box-shadow: 3px 3px 3px grey;
-	box-sizing: border-box;
-}
-
-.js-dtop-win {
-	width: 100%;
-	height: 100%;
 	display: flex;
 	flex-direction: column;
+	border-style: double;
+	background-color: aliceblue;
+	box-shadow: 3px 3px 3px grey;
+	box-sizing: border-box;
 }
 
 .js-dtop-win-inactive {
@@ -36,7 +26,8 @@ js-dtop-window {
 }
 
 .js-dtop-win-hidden {
-	visibility: hidden;
+	/*visibility: hidden;*/
+	display: none;
 }
 
 .js-dtop-win-icon {
@@ -53,13 +44,7 @@ js-dtop-window {
 .js-dtop-win-bar {
 	box-sizing: border-box;
 	background-color: burlywood;
-	width: 100%;
-	/*height: 2em;*/
 	line-height: 2em;
-	top: 0;
-	left: 0;
-	right: 0;
-	flex: 0 1 2em;
 }
 
 .js-dtop-win-bar.js-dtop-win-moveresize {
@@ -97,8 +82,6 @@ js-dtop-window {
 	display: block;
 	width: 100%;
 	height: 100%;
-	/*flex: 1 1 auto;*/
-	/*overflow-y: auto;*/
 	overflow: hidden;
 }
 
@@ -198,7 +181,7 @@ js-dtop-window {
 	cursor: nesw-resize;
 }
 
-.js-dtop-win-bar-drawer-but {
+.js-dtop-win-taskbar-drawer-but {
 	display: block;
 	/*float: initial;*/
 	padding: 5px;
@@ -209,10 +192,10 @@ js-dtop-window {
 	text-decoration: none;
 }
 
-.js-dtop-win-bar-drawer-but-active {
+.js-dtop-win-taskbar-drawer-but-active {
 	border-style: inset;
 }
 
-.js-dtop-win-bar-drawer-but:hover {
+.js-dtop-win-taskbar-drawer-but:hover {
 	background-color: lightgray;
 }

@@ -6,7 +6,6 @@ const WIN_TMPL_PATH = DTOP_PATH + 'tmpl/window.html'
 const WIN_MIN_WIDTH = 300
 const WIN_MIN_HEIGHT = 300
 const HTML_TAG_WIN = 'js-dtop-window' // Window's HTML tag name
-const HTML_CLASS_WIN_OUTER = 'js-dtop-win' // HTML class for the outer container of the window
 const HTML_CLASS_WIN_INNER = 'js-dtop-win-content' // HTML class for the inner container of the window
 const HTML_CLASS_WIN_TITLE = 'js-dtop-win-title' // HTML class for the title-bar
 const HTML_CLASS_WIN_ICON = 'js-dtop-win-icon' // HTML class for the title-bar's icon
@@ -17,8 +16,19 @@ const HTML_CLASS_WIN_INACTIVE = 'js-dtop-win-inactive' // HTML class for inactiv
 const HTML_CLASS_WIN_TRANSP = 'js-dtop-win-transp' // HTML class for transparent window
 const HTML_CLASS_WIN_DISABLED = 'js-dtop-win-disabled' // HTML class for disabled window
 const HTML_CLASS_WIN_HIDDEN = 'js-dtop-win-hidden' // HTML class for disabled window
-const HTML_CLASS_WIN_BAR_BUT = 'js-dtop-win-bar-drawer-but' // HTML class for window's bar drawer button
-const HTML_CLASS_WIN_BAR_BUT_ACT = 'js-dtop-win-bar-drawer-but-active' // HTML class for active window's bar drawer button
+const HTML_CLASS_EDGE_NOCURSOR = 'js-dtop-win-moveresize-nocursor'
+const HTML_CLASS_EDGE_WITHCURSOR = 'js-dtop-win-moveresize'
+const HTML_CLASS__WIN_TITLE_BAR = 'js-dtop-win-bar'
+const HTML_CLASS_EDGE_TOP = 'js-dtop-win-topedge'
+const HTML_CLASS_EDGE_RIGHT = 'js-dtop-win-rightedge'
+const HTML_CLASS_EDGE_BOT = 'js-dtop-win-botedge'
+const HTML_CLASS_EDGE_LEFT = 'js-dtop-win-leftedge'
+const HTML_CLASS_CORN_TOP_LEFT = 'js-dtop-win-topleftcorner'
+const HTML_CLASS_CORN_TOP_RIGHT = 'js-dtop-win-toprightcorner'
+const HTML_CLASS_CORN_BOT_RIGHT = 'js-dtop-win-botrightcorner'
+const HTML_CLASS_CORN_BOT_LEFT = 'js-dtop-win-botleftcorner'
+const HTML_CLASS_WIN_BAR_BUT = 'js-dtop-win-taskbar-drawer-but' // HTML class for window's taskbar drawer button
+const HTML_CLASS_WIN_BAR_BUT_ACT = 'js-dtop-win-taskbar-drawer-but-active' // HTML class for active window's taskbar drawer button
 export const WIN_EVENTS = {
   // EVENT_WIN_CREATED: 'window-created',
   WIN_FOCUSED: 'window-focused',
@@ -108,12 +118,13 @@ export default class Window extends HTMLElement {
    */
   constructor (appObj, winPos, winSize) {
     super()
+    this._winApp = appObj
     if (winSize && winSize.width && winSize.height) {
       this.windowWidth = winSize.width
       this.windowHeight = winSize.height
     } else {
-      this.windowWidth = appObj.constructor.defaultAppSize.width
-      this.windowHeight = appObj.constructor.defaultAppSize.height
+      this.windowWidth = this._winApp.constructor.defaultAppSize.width
+      this.windowHeight = this._winApp.constructor.defaultAppSize.height
     }
     if (winPos && winPos.x && winPos.y) {
       this.windowLeft = winPos.x
@@ -124,24 +135,28 @@ export default class Window extends HTMLElement {
     }
     this._barDrawerBut = document.createElement('div')
     this._barDrawerBut.classList.add(HTML_CLASS_WIN_BAR_BUT)
-    this._barDrawerBut.textContent = appObj.constructor.appName
-    this._barDrawerBut.addEventListener('click', () => {
-      if (!this.isActive) this.dispatchEvent(new Event(WIN_EVENTS.WIN_FOCUSED))
-    })
+    this._barDrawerBut.textContent = this._winApp.constructor.appName
+    this._barDrawerBut.addEventListener('click', this._handleDrawerButClick.bind(this))
     fetch(WIN_TMPL_PATH).then(resp => resp.text()).then(docTxt => { // fetch the window html template
-      this._windowOuter = (new DOMParser()).parseFromString(docTxt, 'text/html').querySelector('.' + HTML_CLASS_WIN_OUTER).cloneNode(true)
-      let tmpInner = this._windowOuter.querySelector('.' + HTML_CLASS_WIN_INNER)
-      this._windowOuter.querySelector('.' + HTML_CLASS_WIN_TITLE).textContent = appObj.constructor.appName
+      let tmpDoc = (new DOMParser()).parseFromString(docTxt, 'text/html') //.querySelector('.' + HTML_CLASS_WIN_OUTER).cloneNode(true)
+      let tmpTitleBar = tmpDoc.querySelector('.' + HTML_CLASS__WIN_TITLE_BAR).cloneNode(true)
+      let tmpInner = tmpDoc.querySelector('.' + HTML_CLASS_WIN_INNER).cloneNode(true)
+      tmpTitleBar.querySelector('.' + HTML_CLASS_WIN_TITLE).textContent = this._winApp.constructor.appName
+      tmpTitleBar.querySelector('.' + HTML_CLASS_WIN_ICON).setAttribute('src', this._winApp.constructor.appIconURL)
+      this.appendChild(tmpTitleBar)
+      Array.from(
+        tmpDoc.querySelectorAll('.' + HTML_CLASS_EDGE_WITHCURSOR + ':not(.' + HTML_CLASS__WIN_TITLE_BAR + ')'),
+        elem => elem.cloneNode(true)
+      ).forEach(elem => this.appendChild(elem))
+      this.appendChild(tmpInner)
       if (tmpInner.attachShadow) tmpInner = tmpInner.attachShadow({mode: 'closed'}) // If 'Shadow Dom' is supported then replace 'tmpInner' with its shadow
-      tmpInner.appendChild(appObj)
-      this._winApp = appObj
-      this._windowOuter.querySelector('.' + HTML_CLASS_WIN_ICON).setAttribute('src', appObj.constructor.appIconURL)
-      this.appendChild(this._windowOuter)
-      this.addEventListener('click', this._handleWinClick.bind(this))
+      tmpInner.appendChild(this._winApp)
+      // this.addEventListener('click', this._handleWinClick.bind(this))
+      this.addEventListener('click', () => this.isActive = true)
       this.addEventListener(window.PointerEvent ? 'pointerdown' : 'mousedown', this._handleWinPointerDown.bind(this))
-      this._windowOuter.querySelector('.' + HTML_CLASS_WIN_MIN).addEventListener('click', this._handleWinMinimize.bind(this))
-      this._windowOuter.querySelector('.' + HTML_CLASS_WIN_MAX).addEventListener('click', this._handleWinMaximize.bind(this))
-      this._windowOuter.querySelector('.' + HTML_CLASS_WIN_CLOSE).addEventListener('click', this._handleWinClose.bind(this))
+      this.querySelector('.' + HTML_CLASS_WIN_MIN).addEventListener('click', this._handleWinMinimize.bind(this))
+      this.querySelector('.' + HTML_CLASS_WIN_MAX).addEventListener('click',this._handleWinMaximize.bind(this))
+      this.querySelector('.' + HTML_CLASS_WIN_CLOSE).addEventListener('click', this._handleWinClose.bind(this))
     })
     // this.dispatchEvent(new Event(WIN_EVENTS.EVENT_WIN_CREATED))
   }
@@ -154,16 +169,9 @@ export default class Window extends HTMLElement {
       tmpStyle.setAttribute('href', WIN_CSS_PATH)
       document.head.appendChild(tmpStyle)
     }
-    this.isActive = false
+    // this.isActive = false
+    this._barDrawerBut.classList.add(HTML_CLASS_WIN_BAR_BUT_ACT)
     this.dispatchEvent(new Event(WIN_EVENTS.WIN_FOCUSED))
-  }
-
-  /**
-   * Supposed to handle the event of window click.
-   * @private
-   */
-  _handleWinClick () {
-    if (!this.isActive) this.dispatchEvent(new Event(WIN_EVENTS.WIN_FOCUSED))
   }
 
   /**
@@ -172,25 +180,25 @@ export default class Window extends HTMLElement {
    * @private
    */
   _handleWinPointerDown (ev) {
-    if (!this._beforeMax && ev.target && ev.target.classList && ev.target.classList.contains('js-dtop-win-moveresize')) { // Check if not maximized and in move-resize
+    if (!this._beforeMax && ev.target && ev.target.classList && ev.target.classList.contains(HTML_CLASS_EDGE_WITHCURSOR)) { // Check if not maximized and in move-resize
       let tmpGrabType
-      if (ev.target.classList.contains('js-dtop-win-bar')) { // The title bar is grabbed
+      if (ev.target.classList.contains(HTML_CLASS__WIN_TITLE_BAR)) { // The title bar is grabbed
         tmpGrabType = WindowGrabType.WINDOW_MOVE
-      } else if (ev.target.classList.contains('js-dtop-win-topedge')) { // The top edge is grabbed
+      } else if (ev.target.classList.contains(HTML_CLASS_EDGE_TOP)) { // The top edge is grabbed
         tmpGrabType = WindowGrabType.TOP_EDGE
-      } else if (ev.target.classList.contains('js-dtop-win-rightedge')) { // The right edge is grabbed
+      } else if (ev.target.classList.contains(HTML_CLASS_EDGE_RIGHT)) { // The right edge is grabbed
         tmpGrabType = WindowGrabType.RIGHT_EDGE
-      } else if (ev.target.classList.contains('js-dtop-win-botedge')) { // The bottom edge is grabbed
+      } else if (ev.target.classList.contains(HTML_CLASS_EDGE_BOT)) { // The bottom edge is grabbed
         tmpGrabType = WindowGrabType.BOTTOM_EDGE
-      } else if (ev.target.classList.contains('js-dtop-win-leftedge')) { // The left edge is grabbed
+      } else if (ev.target.classList.contains(HTML_CLASS_EDGE_LEFT)) { // The left edge is grabbed
         tmpGrabType = WindowGrabType.LEFT_EDGE
-      } else if (ev.target.classList.contains('js-dtop-win-topleftcorner')) { // The top-left corner is grabbed
+      } else if (ev.target.classList.contains(HTML_CLASS_CORN_TOP_LEFT)) { // The top-left corner is grabbed
         tmpGrabType = WindowGrabType.TOP_LEFT_CORNER
-      } else if (ev.target.classList.contains('js-dtop-win-toprightcorner')) { // The top-right corner is grabbed
+      } else if (ev.target.classList.contains(HTML_CLASS_CORN_TOP_RIGHT)) { // The top-right corner is grabbed
         tmpGrabType = WindowGrabType.TOP_RIGHT_CORNER
-      } else if (ev.target.classList.contains('js-dtop-win-botrightcorner')) { // The bottom-right corner is grabbed
+      } else if (ev.target.classList.contains(HTML_CLASS_CORN_BOT_RIGHT)) { // The bottom-right corner is grabbed
         tmpGrabType = WindowGrabType.BOTTOM_RIGHT_CORNER
-      } else if (ev.target.classList.contains('js-dtop-win-botleftcorner')) { // The bottom-left corner is grabbed
+      } else if (ev.target.classList.contains(HTML_CLASS_CORN_BOT_LEFT)) { // The bottom-left corner is grabbed
         tmpGrabType = WindowGrabType.BOTTOM_LEFT_CORNER
       }
       this.dispatchEvent(new WindowGrabEvent(tmpGrabType, ev))
@@ -198,51 +206,46 @@ export default class Window extends HTMLElement {
   }
 
   /**
-   * Supposed to handle the event of window minimize.
+   * Supposed to handle the event of window's drawer button click.
    * @private
    */
-  _handleWinMinimize () {
-    this.classList.add(HTML_CLASS_WIN_HIDDEN)
-    this.dispatchEvent(new Event(WIN_EVENTS.WIN_MINIMIZED))
+  _handleDrawerButClick () {
+    if (this.isActive) {
+      this.isMinimized = true
+    } else {
+      this.isActive = true
+    }
+  }
+
+  /**
+   * Supposed to handle the event of window minimize.
+   * @param {Event} ev  the dispached event
+   * @private
+   */
+  _handleWinMinimize (ev) {
+    ev.stopPropagation()
+    this.isActive = true
+    this.isMinimized = true
   }
 
   /**
    * Supposed to handle the event of window maximize.
+   * @param {Event} ev  the dispached event
    * @private
    */
-  _handleWinMaximize () {
-    if (this._beforeMax) {
-      let tmpEdges = this._windowOuter.querySelectorAll('div.js-dtop-win-moveresize-nocursor')
-      tmpEdges.forEach(elem => {
-        elem.classList.remove('js-dtop-win-moveresize-nocursor')
-        elem.classList.add('js-dtop-win-moveresize')
-      })
-      this.windowLeft = this._beforeMax.x
-      this.windowTop = this._beforeMax.y
-      this.windowWidth = this._beforeMax.width
-      this.windowHeight = this._beforeMax.height
-      this._beforeMax = undefined
-    } else {
-      let tmpEdges = this._windowOuter.querySelectorAll('div.js-dtop-win-moveresize')
-      tmpEdges.forEach(elem => {
-        elem.classList.remove('js-dtop-win-moveresize')
-        elem.classList.add('js-dtop-win-moveresize-nocursor')
-      })
-      this._beforeMax = {
-        x: this.windowLeft,
-        y: this.windowTop,
-        width: this.windowWidth,
-        height: this.windowHeight
-      }
-      this.dispatchEvent(new Event(WIN_EVENTS.WIN_MAXIMIZED))
-    }
+  _handleWinMaximize (ev) {
+    ev.stopPropagation()
+    this.isActive = true
+    this.isMaximized = !this.isMaximized
   }
 
   /**
    * Supposed to handle the event of window close.
    * @private
    */
-  _handleWinClose () {
+  _handleWinClose (ev) {
+    ev.stopPropagation()
+    this.isActive = true
     this._winApp.endApp()
     this.dispatchEvent(new Event(WIN_EVENTS.WIN_CLOSED))
   }
@@ -357,10 +360,12 @@ export default class Window extends HTMLElement {
    * @type {Boolean}
    */
   set isActive (newIsActive) {
-    if (newIsActive) {
-      this.classList.remove(HTML_CLASS_WIN_INACTIVE, HTML_CLASS_WIN_HIDDEN)
+    if (newIsActive && !this.isActive) {
+      this.classList.remove(HTML_CLASS_WIN_INACTIVE)
+      this.isMinimized = false
       this._barDrawerBut.classList.add(HTML_CLASS_WIN_BAR_BUT_ACT)
-    } else {
+      this.dispatchEvent(new Event(WIN_EVENTS.WIN_FOCUSED))
+    } else if (!newIsActive && this.isActive) {
       this.classList.add(HTML_CLASS_WIN_INACTIVE)
       this._barDrawerBut.classList.remove(HTML_CLASS_WIN_BAR_BUT_ACT)
     }
@@ -406,17 +411,67 @@ export default class Window extends HTMLElement {
     }
   }
 
+  /**
+   * Specifies if the window is minimized.
+   * @type {Boolean}
+   */
   get isMinimized () {
-    this.classList.contains(HTML_CLASS_WIN_HIDDEN)
+    return this.classList.contains(HTML_CLASS_WIN_HIDDEN)
   }
 
   /**
-   * Checks if the window is maximized.
-   * @readonly
+   * Specifies if the window is minimized.
+   * @type {Boolean}
+   */
+  set isMinimized (newIsMinimized) {
+    if (newIsMinimized && !this.isMinimized) {
+      this.classList.add(HTML_CLASS_WIN_HIDDEN)
+      this.isActive = false
+      this.dispatchEvent(new Event(WIN_EVENTS.WIN_MINIMIZED))
+    } else if (!newIsMinimized && this.isMinimized) {
+      this.classList.remove(HTML_CLASS_WIN_HIDDEN)
+      this.isActive = true
+    }
+  }
+
+  /**
+   * Specifies if the window is maximized.
    * @type {Boolean}
    */
   get isMaximized () {
     return !!this._beforeMax
+  }
+
+  /**
+   * Specifies if the window is maximized.
+   * @type {Boolean}
+   */
+  set isMaximized (newIsMaximized) {
+    if (this._beforeMax && !newIsMaximized) {
+      let tmpEdges = this.querySelectorAll('.' + HTML_CLASS_EDGE_NOCURSOR)
+      tmpEdges.forEach(elem => {
+        elem.classList.remove(HTML_CLASS_EDGE_NOCURSOR)
+        elem.classList.add(HTML_CLASS_EDGE_WITHCURSOR)
+      })
+      this.windowLeft = this._beforeMax.x
+      this.windowTop = this._beforeMax.y
+      this.windowWidth = this._beforeMax.width
+      this.windowHeight = this._beforeMax.height
+      this._beforeMax = undefined
+    } else if (!this._beforeMax && newIsMaximized) {
+      let tmpEdges = this.querySelectorAll('.' + HTML_CLASS_EDGE_WITHCURSOR)
+      tmpEdges.forEach(elem => {
+        elem.classList.remove(HTML_CLASS_EDGE_WITHCURSOR)
+        elem.classList.add(HTML_CLASS_EDGE_NOCURSOR)
+      })
+      this._beforeMax = {
+        x: this.windowLeft,
+        y: this.windowTop,
+        width: this.windowWidth,
+        height: this.windowHeight
+      }
+      this.dispatchEvent(new Event(WIN_EVENTS.WIN_MAXIMIZED))
+    }
   }
 
   /**

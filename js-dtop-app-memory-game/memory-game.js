@@ -186,15 +186,15 @@ export default class MemoryGame extends AbsApp {
     tmpStyle.setAttribute('rel', 'stylesheet')
     tmpStyle.setAttribute('href', APP_CSS_FILE)
     this.appendChild(tmpStyle)
-    tmpLeg.innerText = 'Play Board'
+    tmpLeg.textContent = 'Play Board'
     this.mePlayBoard.appendChild(tmpLeg)
     this.mePlayBoard.classList.add(this.meCardCount === 4 ? HTML_CLASS_2ROW_BOARD : HTML_CLASS_4ROW_BOARD)
     tmpLeg = document.createElement('legend')
-    tmpLeg.innerText = 'Match Board'
+    tmpLeg.textContent = 'Match Board'
     this.meMatchBoard.appendChild(tmpLeg)
     this.meMatchBoard.classList.add(this.meCardCount === 4 ? HTML_CLASS_2ROW_BOARD : HTML_CLASS_4ROW_BOARD)
     tmpLeg = document.createElement('legend')
-    tmpLeg.innerText = 'Score'
+    tmpLeg.textContent = 'Score'
     this.meScoreBoard.appendChild(tmpLeg)
     this.meScoreBoard.classList.add(this.meCardCount === 4 ? HTML_CLASS_2ROW_BOARD : HTML_CLASS_4ROW_BOARD)
     this.meScoreBoard.appendChild(document.createElement('div'))
@@ -208,7 +208,7 @@ export default class MemoryGame extends AbsApp {
         if (!this.meInterval) {
           this.meInterval = window.setInterval(() => {
             this.meTime += 0.1
-            this.meTimeBoard.innerText = this.meTime.toFixed(1)
+            this.meTimeBoard.textContent = this.meTime.toFixed(1)
           }, 100)
         }
         ev.target.parentNode.flipCard()
@@ -233,8 +233,8 @@ export default class MemoryGame extends AbsApp {
     this.meScoreBoard.appendChild(document.createTextNode(' Tries: '))
     this.meScoreBoard.appendChild(document.createElement('span'))
     this.meScoreBoard = this.meScoreBoard.lastElementChild
-    this.meTimeBoard.innerText = '0.0'
-    this.meScoreBoard.innerText = '0'
+    this.meTimeBoard.textContent = '0.0'
+    this.meScoreBoard.textContent = '0'
     this.appendChild(this.mePlayBoard)
     this.appendChild(this.meMatchBoard)
     this.meTime = 0.0
@@ -273,9 +273,9 @@ export default class MemoryGame extends AbsApp {
           break
         }
       }
-      this.meScoreBoard.innerText = this.meCounter
+      this.meScoreBoard.textContent = this.meCounter
       if (tmpIsFin) {
-        this.meScoreBoard.innerText += ' HAYY... You Win.'
+        this.meScoreBoard.textContent += ' HAYY... You Win.'
         window.clearInterval(this.meInterval)
         this.meInterval = null
         this.meTime = 0.0
@@ -291,7 +291,7 @@ export default class MemoryGame extends AbsApp {
    */
   _wrongTimer (shownCards) {
     this.mePlayBoard.disabled = true
-    this.meScoreBoard.innerText = this.meCounter
+    this.meScoreBoard.textContent = this.meCounter
     shownCards.forEach(elem => elem.flipError(true))
     window.setTimeout(() => {
       shownCards.forEach(elem => {

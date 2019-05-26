@@ -3,7 +3,7 @@ import SilhouetteWindow from './window/silhouette-window.js'
 import AbsApp from './app/abs-app.js'
 import Settings from './app-settings/settings.js'
 import ConfigStorage, {CONF_KEYS_EVENTS} from './config-storage.js'
-import BarIcon from './icon/bar-icon.js'
+import Icon from './icon/icon.js'
 
 const DTOP_PATH = 'js-dtop/'
 const DTOP_CSS_FILE = DTOP_PATH + 'css/desktop.css'
@@ -60,6 +60,7 @@ export default class Desktop extends HTMLElement {
     /** @type {Array<Window>} */
     this._windows = [] // Holds references to all the open windows on desktop
     this._conf = new ConfigStorage() // Object that holds the desktop configurations
+    let tmpSetIcon = new Icon(DTOP_BAR_ICON_THICK, Settings, this._conf)
     this._nextWinY = this._nextWinX = DTOP_WIN_X_SHIFT // Tracks the next position for the next open window
     this._deskTop = document.createElement('div')
     this._deskTop.classList.add(HTML_CLASS_DTOP)
@@ -82,7 +83,8 @@ export default class Desktop extends HTMLElement {
     this._prepareRemovableEventHandlers()
     this._conf.addEventListener(CONF_KEYS_EVENTS.DTOP_BAR_POS, this._updateDtopBarPos.bind(this)) // Update desktop-bar position when changed
     window.addEventListener('resize', this._handleWebPageResize.bind(this))
-    this._deskBarIconsStart.appendChild(this._iconFactory(Settings, true, this._conf))
+    tmpSetIcon.addEventListener('click', this._handleIconClick.bind(this))
+    this._deskBarIconsStart.appendChild(tmpSetIcon)
   }
 
   connectedCallback () {
@@ -342,7 +344,7 @@ export default class Desktop extends HTMLElement {
     theWindow = !theWindow && this._windows.length ? this._windows[this._windows.length - 1] : theWindow // If 'theWindow' is omitted, use the last window
     if (theWindow) {
       let tmpIndex = this._windows.indexOf(theWindow)
-      if (this._windows.length && this._windows[this._windows.length - 1].isActive) this._windows[this._windows.length - 1].isActive = false
+      if (this._windows.length && this._windows[this._windows.length - 1] !== theWindow) this._windows[this._windows.length - 1].isActive = false
       if (tmpIndex === -1) {
         theWindow.windowZIndex = 100 + this._windows.length
         this._windows.push(theWindow)
@@ -360,65 +362,21 @@ export default class Desktop extends HTMLElement {
   }
 
   /**
-   * Used to create an icon to start an app.
-   * @param {typeof AbsApp} appClass    the app's class that the created icon will run
-   * @param {Boolean} isBarIcon         'true' to create a desktop-bar icon ('false' for desktop icon)
-   * @param {...*} appParams            parameter to pass to the app constructor
-   * @return {HTMLElement}              the created icon for the specified app
+   * Handles the event when clicking a desktop-icon/bar-icon
+   * @param {Event|IconClickEvent} ev   the event ('IconClickEvent') dispatched by the icon
    * @private
    */
-  _iconFactory (appClass, isBarIcon, ...appParams) {
-    if (isBarIcon) {
-      let outIcon = new BarIcon(appClass.appIconURL, DTOP_BAR_ICON_THICK)
-      outIcon.addEventListener('click', () => {
-        let tmpWin = new Window(new appClass(...appParams), {x: this._nextWinX, y: this._nextWinY})
-        tmpWin.addEventListener(WIN_EVENTS.WIN_FOCUSED, this._handleWinFocused.bind(this))
-        tmpWin.addEventListener(WIN_EVENTS.WIN_MINIMIZED, this._handleWinMinimized.bind(this))
-        tmpWin.addEventListener(WIN_EVENTS.WIN_MAXIMIZED, this._handleWinMaximized.bind(this))
-        tmpWin.addEventListener(WIN_EVENTS.WIN_CLOSED, this._handleWinClosed.bind(this))
-        tmpWin.addEventListener(WIN_EVENTS.WIN_GRABBED, this._handleWinGrabbed.bind(this))
-        this._nextWinX = (this._nextWinX + DTOP_WIN_Y_SHIFT) % (this._deskTop.clientWidth / 3 * 2) // Set next window X
-        this._nextWinY = (this._nextWinY + DTOP_WIN_X_SHIFT) % (this._deskTop.clientHeight / 3 * 2) // Set next window Y
-        this._deskTop.appendChild(tmpWin)
-        outIcon.addWindow(tmpWin)
-      })
-      return outIcon
-    } else {
-      let outIcon = document.createElement('div')// (isBarIcon ? 'div' : 'li')
-      outIcon.classList.add(HTML_CLASS_ICON)
-      outIcon.style.width = outIcon.style.height = DTOP_BAR_ICON_THICK + 'px'
-      outIcon.style.backgroundImage = 'url("' + appClass.appIconURL + '")'
-      if (!isBarIcon) {
-        let tmpOuter = document.createElement('li') // An outer container for the desktop icon
-        let tmpLabel = document.createElement('div') // Desktop icon label
-        tmpLabel.innerText = appClass.appName
-        tmpOuter.classList.add(HTML_CLASS_DESK_ICON)
-        tmpOuter.appendChild(outIcon)
-        tmpOuter.appendChild(tmpLabel)
-        outIcon = tmpOuter
-      }
-      outIcon.addEventListener('click', () => {
-        let tmpWin = new Window(new appClass(...appParams), {x: this._nextWinX, y: this._nextWinY})
-        tmpWin.addEventListener(WIN_EVENTS.WIN_FOCUSED, this._handleWinFocused.bind(this))
-        tmpWin.addEventListener(WIN_EVENTS.WIN_MINIMIZED, this._handleWinMinimized.bind(this))
-        tmpWin.addEventListener(WIN_EVENTS.WIN_MAXIMIZED, this._handleWinMaximized.bind(this))
-        tmpWin.addEventListener(WIN_EVENTS.WIN_CLOSED, this._handleWinClosed.bind(this))
-        tmpWin.addEventListener(WIN_EVENTS.WIN_GRABBED, this._handleWinGrabbed.bind(this))
-        this._nextWinX = (this._nextWinX + DTOP_WIN_Y_SHIFT) % (this._deskTop.clientWidth / 3 * 2) // Set next window X
-        this._nextWinY = (this._nextWinY + DTOP_WIN_X_SHIFT) % (this._deskTop.clientHeight / 3 * 2) // Set next window Y
-        this._deskTop.appendChild(tmpWin)
-      })
-      return outIcon
-    }
-  }
-
-  /**
-   * Handles the event when a window is focused.
-   * @param {Event} ev    the event dispatched by the window
-   * @private
-   */
-  _handleWinFocused (ev) {
-    if (!ev.target.isActive) this._putWinOnTop(/** @type {Window} */ev.target)
+  _handleIconClick (ev) {
+    ev.resultedWindow.windowLeft = this._nextWinX
+    ev.resultedWindow.windowTop = this._nextWinY
+    ev.resultedWindow.addEventListener(WIN_EVENTS.WIN_FOCUSED, ev => this._putWinOnTop(ev.target))
+    ev.resultedWindow.addEventListener(WIN_EVENTS.WIN_MINIMIZED, this._handleWinMinimized.bind(this))
+    ev.resultedWindow.addEventListener(WIN_EVENTS.WIN_MAXIMIZED, this._handleWinMaximized.bind(this))
+    ev.resultedWindow.addEventListener(WIN_EVENTS.WIN_CLOSED, this._handleWinClosed.bind(this))
+    ev.resultedWindow.addEventListener(WIN_EVENTS.WIN_GRABBED, this._handleWinGrabbed.bind(this))
+    this._nextWinX = (this._nextWinX + DTOP_WIN_Y_SHIFT) % (this._deskTop.clientWidth / 3 * 2) // Set next window X
+    this._nextWinY = (this._nextWinY + DTOP_WIN_X_SHIFT) % (this._deskTop.clientHeight / 3 * 2) // Set next window Y
+    this._deskTop.appendChild(ev.resultedWindow)
   }
 
   /**
@@ -427,7 +385,8 @@ export default class Desktop extends HTMLElement {
    * @private
    */
   _handleWinMinimized (ev) {
-    // TODO: Fill for window minimized
+    this._windows.pop().windowZIndex = 0
+    this._putWinOnTop() // Put the other last window on top (if any)
   }
 
   /**
@@ -448,7 +407,6 @@ export default class Desktop extends HTMLElement {
    * @private
    */
   _handleWinClosed (ev) {
-    this._putWinOnTop(/** @type {Window} */ev.target)
     if (this._windows.length && this._windows[this._windows.length - 1] === ev.target) this._windows.pop() // Remove 'tmpWin' window (it is on top now)
     this._deskTop.removeChild(/** @type {Window} */ev.target)
     this._putWinOnTop() // Put the other last window on top (if any)
@@ -460,7 +418,7 @@ export default class Desktop extends HTMLElement {
    * @private
    */
   _handleWinGrabbed (ev) {
-    this._putWinOnTop(/** @type {Window} */ev.target) // First put window on top
+    ev.target.isActive = true
     ev.target.isDisabled = true // Disable the window (until pointer/mouse is up)
     this._silhWin = new SilhouetteWindow(/** @type {Window} */ev.target) // Make a silhouette of the original
     this._deskTop.appendChild(this._silhWin)
@@ -496,11 +454,14 @@ export default class Desktop extends HTMLElement {
   /**
    * Adds an app to put inside the window.
    * @param {typeof AbsApp} appClass  the class for the application to be put in the window (must extend 'AbsApp')
+   * @param {...*} appParams          parameter to pass to the app constructor
    */
-  addApp (appClass) {
+  addApp (appClass, ...appParams) {
     if (!(appClass.prototype instanceof AbsApp)) throw new TypeError('The passed \'appClass\' argument must be a class that extends the \'AbsApp\' abstract class.') // Check if it is actually a js-desktop-app class
-    this._deskBarIconsCenter.appendChild(this._iconFactory(appClass, true)) // Add desktop-bar icon
-    this._deskTopIconList.appendChild(this._iconFactory(appClass, false)) // Add desktop icon
+    let tmpIcon = new Icon(DTOP_BAR_ICON_THICK, appClass, ...appParams)
+    tmpIcon.addEventListener('click', this._handleIconClick.bind(this))
+    this._deskBarIconsCenter.appendChild(tmpIcon) // Add desktop-bar icon
+    this._deskTopIconList.appendChild(tmpIcon.desktopIcon) // Add desktop icon
   }
 }
 
