@@ -251,14 +251,22 @@ export default class Desktop extends HTMLElement {
    * @private
    */
   _handleWebPageResize () {
-    this._windows.forEach(win => {
-      if (win.isMaximized) { // Loop and update position and size of every maximized window
-        win.windowLeft = 0
-        win.windowTop = 0
-        win.windowWidth = this._deskTop.clientWidth
-        win.windowHeight = this._deskTop.clientHeight
-      }
-    })
+    // this._windows.forEach(win => {
+    //   if (win.isMaximized) { // Loop and update position and size of every maximized window
+    //     win.windowLeft = 0
+    //     win.windowTop = 0
+    //     win.windowWidth = this._deskTop.clientWidth
+    //     win.windowHeight = this._deskTop.clientHeight
+    //   }
+    // })
+    Array.from(this._deskTop.children)
+      .filter(elem => elem instanceof Window && elem.isMaximized) // Check also if they are windows (just in case)
+      .forEach(elem => {
+        elem.windowLeft = 0
+        elem.windowTop = 0
+        elem.windowWidth = this._deskTop.clientWidth
+        elem.windowHeight = this._deskTop.clientHeight
+      })
   }
 
   /**
