@@ -7,6 +7,7 @@ const HTML_CLASS_ICON = 'js-dtop-icon' // HTML/CSS class for the icon
 const HTML_CLASS_DESK_ICON = 'js-dtop-icon-list-icon-frame' // HTML/CSS class for the frame around each desktop icon
 const HTML_CLASS_DRAWER = 'js-dtop-bar-drawer-menu' // HTML/CSS class for the open windows' button drawer (default not visible)
 const HTML_CLASS_DRAWER_VIS = 'js-dtop-bar-drawer-menu-vis' // HTML/CSS class for the visible open windows' button drawer
+const HTML_CLASS_COUNTER_HID = 'js-dtop-bar-icon-after-hidden' // HTML/CSS class used to hide the '::after' pseudo element for the bar icon that contains the window counter
 
 /**
  * A class that represents an event dispatched when an icon is clicked. It holds the 'Window' object resulted from the click event.
@@ -53,14 +54,18 @@ export default class Icon extends HTMLElement {
     tmpIcon.style.backgroundImage = 'url("' + appClass.appIconURL + '")'
     tmpLabel.textContent = appClass.appName
     this._drawer.classList.add(HTML_CLASS_DRAWER)
-    this._dtopIcon.appendChild(tmpIcon.cloneNode(true)) // Just a copy
+    let tmpIconClone = tmpIcon.cloneNode(true)
+    this._dtopIcon.appendChild(tmpIconClone) // Just a copy
     this._dtopIcon.appendChild(tmpLabel)
     this.appendChild(tmpIcon)
     this.appendChild(this._drawer)
     this.addEventListener(window.PointerEvent ? 'pointerleave' : 'mouseleave', () => this._drawer.classList.remove(HTML_CLASS_DRAWER_VIS))
     this._drawer.addEventListener('click', ev => ev.stopPropagation())
     tmpIcon.addEventListener('click', this._handleClick.bind(this))
+    tmpIconClone.addEventListener('click', this._handleDivertClick.bind(this))
+    tmpLabel.addEventListener('click', this._handleDivertClick.bind(this))
     this._dtopIcon.addEventListener('click', this._handleClick.bind(this))
+    this._winCount()
   }
 
   connectedCallback () {
@@ -73,15 +78,60 @@ export default class Icon extends HTMLElement {
     }
   }
 
+  /**
+   * Updates the window count data property of this icon
+   * @private
+   */
+  _winCount () {
+    this.dataset.wincount = this._drawer.children.length.toString()
+    if (this._drawer.children.length) {
+      this.classList.remove(HTML_CLASS_COUNTER_HID)
+    } else {
+      this.classList.add(HTML_CLASS_COUNTER_HID)
+    }
+  }
+
+  /**
+   * Handles clicking the bar or the desktop icon (dispatches our custom event instead)
+   * @param {PointerEvent|MouseEvent} ev  the event that was dispatched
+   * @private
+   */
   _handleClick (ev) {
     ev.stopPropagation()
-    if (ev.target !== this._dtopIcon && this._drawer.children.length && !this._drawer.classList.contains(HTML_CLASS_DRAWER_VIS)) {
-      this._drawer.classList.add(HTML_CLASS_DRAWER_VIS)
+    if (ev.target !== this._dtopIcon && this._drawer.children.length && !this._isDrawerVisible) {
+      this._isDrawerVisible = true
     } else {
       let tmpWin = new Window(new this._appClass(...this._appParams))
       this._drawer.appendChild(tmpWin.windowBarDrawerButton)
-      tmpWin.addEventListener(WIN_EVENTS.WIN_CLOSED, () => this._drawer.removeChild(tmpWin.windowBarDrawerButton))
+      tmpWin.addEventListener(WIN_EVENTS.WIN_CLOSED, () => {
+        this._drawer.removeChild(tmpWin.windowBarDrawerButton)
+        this._winCount()
+      })
+      this._winCount()
+      if (ev.target !== this._dtopIcon) this._isDrawerVisible = true
       this.dispatchEvent(new IconClickEvent(tmpWin, ev))
+    }
+  }
+
+  /**
+   * Used to stop the click event of the inside elements of the desktop icon and divert the click to the parent
+   * @param {PointerEvent|MouseEvent} ev
+   * @private
+   */
+  _handleDivertClick (ev) {
+    ev.stopPropagation()
+    this._dtopIcon.click()
+  }
+
+  get _isDrawerVisible () {
+    return this._drawer.classList.contains(HTML_CLASS_DRAWER_VIS)
+  }
+
+  set _isDrawerVisible (newIsDrawerVisible) {
+    if (newIsDrawerVisible && !this._isDrawerVisible) {
+      this._drawer.classList.add(HTML_CLASS_DRAWER_VIS)
+    } else if (!newIsDrawerVisible && this._isDrawerVisible) {
+      this._drawer.classList.remove(HTML_CLASS_DRAWER_VIS)
     }
   }
 

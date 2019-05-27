@@ -1,8 +1,40 @@
+js-dtop-bar-icon {
+	display: inline-block;
+	position: relative;
+	/*height: 40px;*/
+}
+
+js-dtop-bar-icon::after {
+	content: attr(data-wincount);
+	/*display: inline-block;*/
+	position: absolute;
+	background-color: red;
+	z-index: 5;
+	top: 0;
+	right: 0;
+	padding: 2px 5px;
+	pointer-events: none;
+	border: 2px ridge black;
+	border-radius: 50%;
+	font-weight: bold;
+	color: lightgrey;
+	transition: transform 0.3s;
+}
+
+.js-dtop-bar-icon-after-hidden::after {
+	/*display: none;*/
+	visibility: hidden;
+}
+
+js-dtop-bar-icon:hover::after {
+	transform: scale(1.5);
+}
+
 .js-dtop-icon {
 	background-size: contain;
 	display: inline-block;
 	/*filter: grayscale(100%);*/
-	transition: all 0.3s;
+	transition: transform 0.3s;
 	cursor: pointer;
 }
 
@@ -43,7 +75,7 @@
 	padding: 3px;
 	/*top: -50px;*/
 	left: calc(50% - 100px);
-	bottom: 100%;
+	bottom: 120%;
 	z-index: 2;
 	width: 200px;
 	opacity: 0;

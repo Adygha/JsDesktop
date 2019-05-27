@@ -20,8 +20,6 @@ const HTML_CLASS_DTOP_BAR_ICONS_LEFT = 'js-dtop-bar-icon-container-center-left' 
 const HTML_CLASS_DTOP_BAR_ICONS_BOT = 'js-dtop-bar-icon-container-center-bot' // HTML/CSS class for the bottom desktop-bar icon container
 const HTML_CLASS_DTOP_BAR_ICONS_RIGHT = 'js-dtop-bar-icon-container-center-right' // HTML/CSS class for the right desktop-bar icon container
 const HTML_CLASS_ICON_LIST = 'js-dtop-icon-list' // HTML/CSS class for the list that contains the desktop icons
-const HTML_CLASS_ICON = 'js-dtop-icon' // HTML/CSS class for the icon
-const HTML_CLASS_DESK_ICON = 'js-dtop-icon-list-icon-frame' // HTML/CSS class for the frame around each desktop icon
 
 /**
  * An Enum used to position the desktop-bar on the desktop.

@@ -151,8 +151,7 @@ export default class Window extends HTMLElement {
       this.appendChild(tmpInner)
       if (tmpInner.attachShadow) tmpInner = tmpInner.attachShadow({mode: 'closed'}) // If 'Shadow Dom' is supported then replace 'tmpInner' with its shadow
       tmpInner.appendChild(this._winApp)
-      // this.addEventListener('click', this._handleWinClick.bind(this))
-      this.addEventListener('click', () => this.isActive = true)
+      this.addEventListener(window.PointerEvent ? 'pointerdown' : 'mousedown', () => this.isActive = true)
       this.addEventListener(window.PointerEvent ? 'pointerdown' : 'mousedown', this._handleWinPointerDown.bind(this))
       this.querySelector('.' + HTML_CLASS_WIN_MIN).addEventListener('click', this._handleWinMinimize.bind(this))
       this.querySelector('.' + HTML_CLASS_WIN_MAX).addEventListener('click',this._handleWinMaximize.bind(this))
