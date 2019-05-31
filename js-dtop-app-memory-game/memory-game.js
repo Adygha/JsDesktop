@@ -40,8 +40,7 @@ class GameCard extends HTMLElement {
     tmpStyle.setAttribute('href', APP_CARD_CSS_FILE)
     this.appendChild(tmpStyle)
     this.meAnch = document.createElement('div')
-    this.meAnch.classList.add(HTML_CLASS_CARD + this.mePercent)
-    this.meAnch.classList.add(HTML_CLASS_IMAGE + 0)
+    this.meAnch.classList.add(HTML_CLASS_CARD + this.mePercent, HTML_CLASS_IMAGE + 0)
     this.appendChild(this.meAnch)
     if (isNotActive) this.flipCard(false)
   }
@@ -58,8 +57,7 @@ class GameCard extends HTMLElement {
       this.meAnch.classList.add(HTML_CLASS_IMAGE + this.meInVal)
       this.meAnch.classList.remove(HTML_CLASS_IMAGE + 0)
     } else { // Else, if neither is requested, just switch/toggle
-      this.meAnch.classList.toggle(HTML_CLASS_IMAGE + 0)
-      this.meAnch.classList.toggle(HTML_CLASS_IMAGE + this.meInVal)
+      this.meAnch.classList.toggle(HTML_CLASS_IMAGE + this.meInVal, HTML_CLASS_IMAGE + 0)
     }
   }
 
@@ -81,8 +79,7 @@ class GameCard extends HTMLElement {
    * Deactivates this card object so that no image to display (make it dissapear but its place still taken).
    */
   deactivate () {
-    this.meAnch.classList.remove(HTML_CLASS_IMAGE + 0)
-    this.meAnch.classList.remove(HTML_CLASS_IMAGE + this.meInVal)
+    this.meAnch.classList.remove(HTML_CLASS_IMAGE + this.meInVal, HTML_CLASS_IMAGE + 0)
   }
 
   /**

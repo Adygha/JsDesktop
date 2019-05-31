@@ -1,14 +1,12 @@
 import AbsApp from '../app/abs-app.js'
+import {CONF_CONSTS} from '../config-storage.js'
 
-const DTOP_PATH = 'js-dtop/'
-const WIN_CSS_PATH = DTOP_PATH + 'css/window.css'
-const WIN_TMPL_PATH = DTOP_PATH + 'tmpl/window.html'
-const WIN_MIN_WIDTH = 300
-const WIN_MIN_HEIGHT = 300
+const WIN_CSS_PATH = CONF_CONSTS.DTOP_PATH + 'css/window.css'
+const WIN_TMPL_PATH = CONF_CONSTS.DTOP_PATH + 'tmpl/window.html'
 const HTML_TAG_WIN = 'js-dtop-window' // Window's HTML tag name
 const HTML_CLASS_WIN_INNER = 'js-dtop-win-content' // HTML class for the inner container of the window
-const HTML_CLASS_WIN_TITLE = 'js-dtop-win-title' // HTML class for the title-bar
-const HTML_CLASS_WIN_ICON = 'js-dtop-win-icon' // HTML class for the title-bar's icon
+const HTML_CLASS_WIN_TITLE = 'js-dtop-win-title' // HTML class for the title-text element
+const HTML_CLASS_WIN_ICON = 'js-dtop-win-icon' // HTML class for the titlebar's icon
 const HTML_CLASS_WIN_MIN = 'js-dtop-win-min' // HTML class for the min button
 const HTML_CLASS_WIN_MAX = 'js-dtop-win-max' // HTML class for the max button
 const HTML_CLASS_WIN_CLOSE = 'js-dtop-win-close' // HTML class for the close button
@@ -16,19 +14,19 @@ const HTML_CLASS_WIN_INACTIVE = 'js-dtop-win-inactive' // HTML class for inactiv
 const HTML_CLASS_WIN_TRANSP = 'js-dtop-win-transp' // HTML class for transparent window
 const HTML_CLASS_WIN_DISABLED = 'js-dtop-win-disabled' // HTML class for disabled window
 const HTML_CLASS_WIN_HIDDEN = 'js-dtop-win-hidden' // HTML class for disabled window
-const HTML_CLASS_EDGE_NOCURSOR = 'js-dtop-win-moveresize-nocursor'
-const HTML_CLASS_EDGE_WITHCURSOR = 'js-dtop-win-moveresize'
-const HTML_CLASS__WIN_TITLE_BAR = 'js-dtop-win-bar'
-const HTML_CLASS_EDGE_TOP = 'js-dtop-win-topedge'
-const HTML_CLASS_EDGE_RIGHT = 'js-dtop-win-rightedge'
-const HTML_CLASS_EDGE_BOT = 'js-dtop-win-botedge'
-const HTML_CLASS_EDGE_LEFT = 'js-dtop-win-leftedge'
-const HTML_CLASS_CORN_TOP_LEFT = 'js-dtop-win-topleftcorner'
-const HTML_CLASS_CORN_TOP_RIGHT = 'js-dtop-win-toprightcorner'
-const HTML_CLASS_CORN_BOT_RIGHT = 'js-dtop-win-botrightcorner'
-const HTML_CLASS_CORN_BOT_LEFT = 'js-dtop-win-botleftcorner'
-const HTML_CLASS_WIN_BAR_BUT = 'js-dtop-win-taskbar-drawer-but' // HTML class for window's taskbar drawer button
-const HTML_CLASS_WIN_BAR_BUT_ACT = 'js-dtop-win-taskbar-drawer-but-active' // HTML class for active window's taskbar drawer button
+const HTML_CLASS_EDGE_WITHCURSOR = 'js-dtop-win-moveresize' // HTML classfir the window's edges (with visible cursor)
+const HTML_CLASS_EDGE_NOCURSOR = 'js-dtop-win-moveresize-nocursor' // HTML class to disable cursor for the window's edges
+const HTML_CLASS_WIN_TITLEBAR = 'js-dtop-win-titlebar' // HTML class for window's title bar
+const HTML_CLASS_EDGE_TOP = 'js-dtop-win-topedge' // HTML class for window's top edge
+const HTML_CLASS_EDGE_RIGHT = 'js-dtop-win-rightedge' // HTML class for window's right edge
+const HTML_CLASS_EDGE_BOT = 'js-dtop-win-botedge' // HTML class for window's bottom edge
+const HTML_CLASS_EDGE_LEFT = 'js-dtop-win-leftedge' // HTML class for window's left edge
+const HTML_CLASS_CORN_TOP_LEFT = 'js-dtop-win-topleftcorner' // HTML class for window's top-left corner
+const HTML_CLASS_CORN_TOP_RIGHT = 'js-dtop-win-toprightcorner' // HTML class for window's top-right corner
+const HTML_CLASS_CORN_BOT_RIGHT = 'js-dtop-win-botrightcorner' // HTML class for window's bottom-right corner
+const HTML_CLASS_CORN_BOT_LEFT = 'js-dtop-win-botleftcorner' // HTML class for window's bottom-left corner
+const HTML_CLASS_WIN_TASKBAR_BUT = 'js-dtop-win-taskbar-drawer-but' // HTML class for window's taskbar drawer button
+const HTML_CLASS_WIN_TASKBAR_BUT_ACT = 'js-dtop-win-taskbar-drawer-but-active' // HTML class for active window's taskbar drawer button
 export const WIN_EVENTS = {
   // EVENT_WIN_CREATED: 'window-created',
   WIN_FOCUSED: 'window-focused',
@@ -133,19 +131,19 @@ export default class Window extends HTMLElement {
       this.windowLeft = 0
       this.windowTop = 0
     }
-    this._barDrawerBut = document.createElement('div')
-    this._barDrawerBut.classList.add(HTML_CLASS_WIN_BAR_BUT)
-    this._barDrawerBut.textContent = this._winApp.constructor.appName
-    this._barDrawerBut.addEventListener('click', this._handleDrawerButClick.bind(this))
+    this._taskBarDrawerBut = document.createElement('div')
+    this._taskBarDrawerBut.classList.add(HTML_CLASS_WIN_TASKBAR_BUT)
+    this._taskBarDrawerBut.textContent = this._taskBarDrawerBut.title = this._winApp.constructor.appName
+    this._taskBarDrawerBut.addEventListener('click', this._handleDrawerButClick.bind(this))
     fetch(WIN_TMPL_PATH).then(resp => resp.text()).then(docTxt => { // fetch the window html template
       let tmpDoc = (new DOMParser()).parseFromString(docTxt, 'text/html') //.querySelector('.' + HTML_CLASS_WIN_OUTER).cloneNode(true)
-      let tmpTitleBar = tmpDoc.querySelector('.' + HTML_CLASS__WIN_TITLE_BAR).cloneNode(true)
+      let tmpTitleBar = tmpDoc.querySelector('.' + HTML_CLASS_WIN_TITLEBAR).cloneNode(true)
       let tmpInner = tmpDoc.querySelector('.' + HTML_CLASS_WIN_INNER).cloneNode(true)
       tmpTitleBar.querySelector('.' + HTML_CLASS_WIN_TITLE).textContent = this._winApp.constructor.appName
       tmpTitleBar.querySelector('.' + HTML_CLASS_WIN_ICON).setAttribute('src', this._winApp.constructor.appIconURL)
       this.appendChild(tmpTitleBar)
       Array.from(
-        tmpDoc.querySelectorAll('.' + HTML_CLASS_EDGE_WITHCURSOR + ':not(.' + HTML_CLASS__WIN_TITLE_BAR + ')'),
+        tmpDoc.querySelectorAll('.' + HTML_CLASS_EDGE_WITHCURSOR + ':not(.' + HTML_CLASS_WIN_TITLEBAR + ')'),
         elem => elem.cloneNode(true)
       ).forEach(elem => this.appendChild(elem))
       this.appendChild(tmpInner)
@@ -169,7 +167,7 @@ export default class Window extends HTMLElement {
       document.head.appendChild(tmpStyle)
     }
     // this.isActive = false
-    this._barDrawerBut.classList.add(HTML_CLASS_WIN_BAR_BUT_ACT)
+    this._taskBarDrawerBut.classList.add(HTML_CLASS_WIN_TASKBAR_BUT_ACT)
     this.dispatchEvent(new Event(WIN_EVENTS.WIN_FOCUSED))
   }
 
@@ -181,7 +179,7 @@ export default class Window extends HTMLElement {
   _handleWinPointerDown (ev) {
     if (!this._beforeMax && ev.target && ev.target.classList && ev.target.classList.contains(HTML_CLASS_EDGE_WITHCURSOR)) { // Check if not maximized and in move-resize
       let tmpGrabType
-      if (ev.target.classList.contains(HTML_CLASS__WIN_TITLE_BAR)) { // The title bar is grabbed
+      if (ev.target.classList.contains(HTML_CLASS_WIN_TITLEBAR)) { // The title bar is grabbed
         tmpGrabType = WindowGrabType.WINDOW_MOVE
       } else if (ev.target.classList.contains(HTML_CLASS_EDGE_TOP)) { // The top edge is grabbed
         tmpGrabType = WindowGrabType.TOP_EDGE
@@ -250,11 +248,11 @@ export default class Window extends HTMLElement {
   }
 
   /**
-   * The window's bar drawer button (that you can bring a minimized window back with).
+   * The window's taskbar drawer button (that you can bring a minimized window back with).
    * @type {HTMLElement}
    */
-  get windowBarDrawerButton () {
-    return this._barDrawerBut
+  get taskBarDrawerButton () {
+    return this._taskBarDrawerBut
   }
 
   /**
@@ -302,7 +300,7 @@ export default class Window extends HTMLElement {
    * @type {Number}
    */
   set windowWidth (newWidth) {
-    if (newWidth >= WIN_MIN_WIDTH) this.style.width = newWidth + 'px'
+    if (newWidth >= CONF_CONSTS.WIN_MIN_WIDTH) this.style.width = newWidth + 'px'
   }
 
   /**
@@ -318,7 +316,7 @@ export default class Window extends HTMLElement {
    * @type {Number}
    */
   set windowHeight (newHeight) {
-    if (newHeight >= WIN_MIN_HEIGHT) this.style.height = newHeight + 'px'
+    if (newHeight >= CONF_CONSTS.WIN_MIN_HEIGHT) this.style.height = newHeight + 'px'
   }
 
   /**
@@ -362,11 +360,11 @@ export default class Window extends HTMLElement {
     if (newIsActive && !this.isActive) {
       this.classList.remove(HTML_CLASS_WIN_INACTIVE)
       this.isMinimized = false
-      this._barDrawerBut.classList.add(HTML_CLASS_WIN_BAR_BUT_ACT)
+      this._taskBarDrawerBut.classList.add(HTML_CLASS_WIN_TASKBAR_BUT_ACT)
       this.dispatchEvent(new Event(WIN_EVENTS.WIN_FOCUSED))
     } else if (!newIsActive && this.isActive) {
       this.classList.add(HTML_CLASS_WIN_INACTIVE)
-      this._barDrawerBut.classList.remove(HTML_CLASS_WIN_BAR_BUT_ACT)
+      this._taskBarDrawerBut.classList.remove(HTML_CLASS_WIN_TASKBAR_BUT_ACT)
     }
   }
 
@@ -478,7 +476,7 @@ export default class Window extends HTMLElement {
    * @type {Number}
    */
   static get minWindowWidth () {
-    return WIN_MIN_WIDTH
+    return CONF_CONSTS.WIN_MIN_WIDTH
   }
 
   /**
@@ -486,7 +484,7 @@ export default class Window extends HTMLElement {
    * @type {Number}
    */
   static get minWindowHeight () {
-    return WIN_MIN_HEIGHT
+    return CONF_CONSTS.WIN_MIN_HEIGHT
   }
 }
 

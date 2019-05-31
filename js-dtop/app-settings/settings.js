@@ -1,9 +1,7 @@
 import AbsApp from '../app/abs-app.js'
-import {BarPos} from '../desktop.js'
-import {CONF_KEYS_EVENTS} from '../config-storage.js'
+import {CONF_CONSTS, CONF_KEYS_EVENTS, PositionEdge} from '../config-storage.js'
 
-const DTOP_PATH = 'js-dtop/'
-const APP_PATH = DTOP_PATH + 'app-settings/' // This app's path
+const APP_PATH = CONF_CONSTS.DTOP_PATH + 'app-settings/' // This app's path
 const APP_NAME = 'JsDesktop Settings' // App's name
 const APP_ICON_FILE = APP_PATH + 'settings-icon.png' // App's icon image
 const APP_CSS_FILE = APP_PATH + 'settings.css' // App's css file
@@ -12,7 +10,7 @@ const APP_WIDTH = 400   //
 const APP_HEIGHT = 425  // App's initial/default size
 const HTML_TAG_APP = 'js-dtop-app-settings' // App's HTML tag name
 const HTML_CLASS_ROOT = 'settings' // HTML class for the template's root element
-const HTML_CLASS_BAR_POS = 'settings-desktop-bar-position' // HTML class for desktop-bar position drop-box
+const HTML_CLASS_TASKBAR_POS = 'settings-taskbar-position' // HTML class for taskbar position drop-box
 
 export default class Settings extends AbsApp {
 
@@ -25,21 +23,20 @@ export default class Settings extends AbsApp {
     this._conf = confObj
     fetch(APP_TEMPL_FILE).then(resp => resp.text()).then(docTxt => {
       let tmpRoot = (new DOMParser()).parseFromString(docTxt, 'text/html').querySelector('.' + HTML_CLASS_ROOT).cloneNode(true)
-      let tmpCurBarPos = this._conf.desktopBarPosition
-      this._ctrlBarPos = tmpRoot.querySelector('.' + HTML_CLASS_BAR_POS)
-      Object.keys(BarPos).forEach(key => {
+      let tmpCurBarPos = this._conf.taskBarPosition
+      this._ctrlTaskBarPos = tmpRoot.querySelector('.' + HTML_CLASS_TASKBAR_POS)
+      Object.keys(PositionEdge).forEach(key => {
         let tmpOpt = document.createElement('option')
-        if (BarPos[key] === tmpCurBarPos) tmpOpt.selected = true
-        // tmpOpt.value = BarPos[key].toString() // Will use crooked 'Symbol.toString' for now (may fix later)
+        if (PositionEdge[key] === tmpCurBarPos) tmpOpt.selected = true
+        // tmpOpt.value = PositionEdge[key].toString() // Will use crooked 'Symbol.toString' for now (may fix later)
         // tmpOpt.textContent = key
         tmpOpt.value = key                //
-        tmpOpt.textContent = BarPos[key]  // They are both the same now (but in case I changed them later)
-        this._ctrlBarPos.add(tmpOpt)
+        tmpOpt.textContent = PositionEdge[key]  // They are both the same now (but in case I changed them later)
+        this._ctrlTaskBarPos.add(tmpOpt)
       })
       tmpRoot.querySelector('#settings-style').href = APP_CSS_FILE
       this.appendChild(tmpRoot)
-      // this._ctrlBarPos.addEventListener('change', () => this._conf.desktopBarPosition = BarPos[this._ctrlBarPos.options[this._ctrlBarPos.selectedIndex].textContent])
-      this._ctrlBarPos.addEventListener('change', () => this._conf.desktopBarPosition = BarPos[this._ctrlBarPos.value])
+      this._ctrlTaskBarPos.addEventListener('change', () => this._conf.taskBarPosition = PositionEdge[this._ctrlTaskBarPos.value])
       this._attachRemovableEventHandlers()
     })
   }
@@ -49,9 +46,9 @@ export default class Settings extends AbsApp {
    * @private
    */
   _attachRemovableEventHandlers () {
-    // this._handleDtopBarMoved = ev => this._ctrlBarPos.value = ev.newValue.toString() // Will use crooked 'Symbol.toString' for now (may fix later)
-    this._handleDtopBarMoved = () => this._ctrlBarPos.value = this._conf.desktopBarPosition
-    this._conf.addEventListener(CONF_KEYS_EVENTS.DTOP_BAR_POS, this._handleDtopBarMoved)
+    // this._handleTaskBarMoved = ev => this._ctrlTaskBarPos.value = ev.newValue.toString() // Will use crooked 'Symbol.toString' for now (may fix later)
+    this._handleTaskBarMoved = () => this._ctrlTaskBarPos.value = this._conf.taskBarPosition
+    this._conf.addEventListener(CONF_KEYS_EVENTS.TASKBAR_POS, this._handleTaskBarMoved)
   }
 
   /**
@@ -59,7 +56,7 @@ export default class Settings extends AbsApp {
    * @private
    */
   _detachRemovableEventHandlers () {
-    this._conf.removeEventListener(CONF_KEYS_EVENTS.DTOP_BAR_POS, this._handleDtopBarMoved)
+    this._conf.removeEventListener(CONF_KEYS_EVENTS.TASKBAR_POS, this._handleTaskBarMoved)
   }
 
   /**

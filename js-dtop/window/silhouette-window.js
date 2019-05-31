@@ -1,5 +1,6 @@
-const DTOP_PATH = 'js-dtop/'
-const SILH_WIN_CSS_PATH = DTOP_PATH + 'css/silhouette-window.css'
+import {CONF_CONSTS} from '../config-storage.js'
+
+const SILH_WIN_CSS_PATH = CONF_CONSTS.DTOP_PATH + 'css/silhouette-window.css'
 const HTML_TAG_SILH_WIN = 'js-dtop-silhouette-window' // The HTML tag for the silhouette window
 
 /**

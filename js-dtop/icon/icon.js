@@ -1,13 +1,17 @@
+import {CONF_CONSTS, CONF_KEYS_EVENTS, PositionEdge} from '../config-storage.js'
 import Window, {WIN_EVENTS} from '../window/window.js'
 
-const DTOP_PATH = 'js-dtop/'
-const ICON_CSS_PATH = DTOP_PATH + 'css/icon.css'
-const HTML_TAG_BAR_ICON = 'js-dtop-bar-icon' // Desktop's HTML tag name
+const ICON_CSS_PATH = CONF_CONSTS.DTOP_PATH + 'css/icon.css'
+const HTML_TAG_BAR_ICON = 'js-dtop-taskbar-icon' // Icon's HTML tag name
 const HTML_CLASS_ICON = 'js-dtop-icon' // HTML/CSS class for the icon
 const HTML_CLASS_DESK_ICON = 'js-dtop-icon-list-icon-frame' // HTML/CSS class for the frame around each desktop icon
-const HTML_CLASS_DRAWER = 'js-dtop-bar-drawer-menu' // HTML/CSS class for the open windows' button drawer (default not visible)
-const HTML_CLASS_DRAWER_VIS = 'js-dtop-bar-drawer-menu-vis' // HTML/CSS class for the visible open windows' button drawer
-const HTML_CLASS_COUNTER_HID = 'js-dtop-bar-icon-after-hidden' // HTML/CSS class used to hide the '::after' pseudo element for the bar icon that contains the window counter
+const HTML_CLASS_DRAWER = 'js-dtop-taskbar-drawer-menu' // HTML/CSS class for the open windows' button drawer (default not visible)
+const HTML_CLASS_DRAWER_VIS = 'js-dtop-taskbar-drawer-menu-vis' // HTML/CSS class for the visible open windows' button drawer
+const HTML_CLASS_COUNTER_HID = 'js-dtop-taskbar-icon-after-hidden' // HTML/CSS class used to hide the '::after' pseudo element for the bar icon that contains the window counter
+const HTML_CLASS_BAR_ICON_TOP = 'js-dtop-taskbar-icon-top' // HTML/CSS class for the top taskbar icon
+const HTML_CLASS_BAR_ICON_LEFT = 'js-dtop-taskbar-icon-left' // HTML/CSS class for the left taskbar icon
+const HTML_CLASS_BAR_ICON_BOT = 'js-dtop-taskbar-icon-bot' // HTML/CSS class for the bottom taskbar icon
+const HTML_CLASS_BAR_ICON_RIGHT = 'js-dtop-taskbar-icon-right' // HTML/CSS class for the right taskbar icon
 
 /**
  * A class that represents an event dispatched when an icon is clicked. It holds the 'Window' object resulted from the click event.
@@ -29,18 +33,19 @@ export class IconClickEvent extends (window.PointerEvent ? PointerEvent : MouseE
 }
 
 /**
- * A class that represents an icon (a desktop-bar version) that starts an app.
+ * A class that represents an icon that starts an app.
  */
 export default class Icon extends HTMLElement {
 
   /**
    * Constructor that takes the app-class and and the icon size as parameters.
-   * @param {number} iconSize         the size (will be used as width and height) of the icon
+   * @param {ConfigStorage} confObj   the ConfigStorage object
    * @param {typeof AbsApp} appClass  the app-class for the app that this icon starts
    * @param {...*} appParams          parameter to pass to the app constructor
    */
-  constructor (iconSize, appClass, ...appParams) {
+  constructor (confObj, appClass, ...appParams) {
     super()
+    this._conf = confObj
     this._appClass = appClass
     this._appParams = appParams
     this._drawer = document.createElement('nav') // The icon's taskbar drawer
@@ -50,7 +55,7 @@ export default class Icon extends HTMLElement {
     this._dtopIcon.classList.add(HTML_CLASS_DESK_ICON)
     tmpIcon.title = appClass.appName
     tmpIcon.classList.add(HTML_CLASS_ICON)
-    tmpIcon.style.width = tmpIcon.style.height = iconSize + 'px'
+    tmpIcon.style.width = tmpIcon.style.height = CONF_CONSTS.ICON_SIZE + 'px'
     tmpIcon.style.backgroundImage = 'url("' + appClass.appIconURL + '")'
     tmpLabel.textContent = appClass.appName
     this._drawer.classList.add(HTML_CLASS_DRAWER)
@@ -65,6 +70,8 @@ export default class Icon extends HTMLElement {
     tmpIconClone.addEventListener('click', this._handleDivertClick.bind(this))
     tmpLabel.addEventListener('click', this._handleDivertClick.bind(this))
     this._dtopIcon.addEventListener('click', this._handleClick.bind(this))
+    this._conf.addEventListener(CONF_KEYS_EVENTS.TASKBAR_POS, this._handleTaskbarPosChange.bind(this))
+    this._handleTaskbarPosChange()
     this._winCount()
   }
 
@@ -75,6 +82,29 @@ export default class Icon extends HTMLElement {
       tmpStyle.setAttribute('rel', 'stylesheet')
       tmpStyle.setAttribute('href', ICON_CSS_PATH)
       document.head.appendChild(tmpStyle)
+    }
+  }
+
+  _handleTaskbarPosChange () {
+    switch (this._conf.taskBarPosition) {
+      case PositionEdge.TOP:
+        this.classList.add(HTML_CLASS_BAR_ICON_TOP)
+        this.classList.remove(HTML_CLASS_BAR_ICON_RIGHT, HTML_CLASS_BAR_ICON_BOT, HTML_CLASS_BAR_ICON_LEFT)
+        break
+      case PositionEdge.LEFT:
+        this.classList.add(HTML_CLASS_BAR_ICON_LEFT)
+        this.classList.remove(HTML_CLASS_BAR_ICON_TOP, HTML_CLASS_BAR_ICON_RIGHT, HTML_CLASS_BAR_ICON_BOT)
+        break
+      case PositionEdge.BOTTOM:
+        this.classList.add(HTML_CLASS_BAR_ICON_BOT)
+        this.classList.remove(HTML_CLASS_BAR_ICON_TOP, HTML_CLASS_BAR_ICON_RIGHT, HTML_CLASS_BAR_ICON_LEFT)
+        break
+      case PositionEdge.RIGHT:
+        this.classList.add(HTML_CLASS_BAR_ICON_RIGHT)
+        this.classList.remove(HTML_CLASS_BAR_ICON_TOP, HTML_CLASS_BAR_ICON_BOT, HTML_CLASS_BAR_ICON_LEFT)
+        break
+      default:
+        throw new TypeError('The passed new taskbar position value should be one of the \'PositionEdge\' constant values.')
     }
   }
 
@@ -102,9 +132,9 @@ export default class Icon extends HTMLElement {
       this._isDrawerVisible = true
     } else {
       let tmpWin = new Window(new this._appClass(...this._appParams))
-      this._drawer.appendChild(tmpWin.windowBarDrawerButton)
+      this._drawer.appendChild(tmpWin.taskBarDrawerButton)
       tmpWin.addEventListener(WIN_EVENTS.WIN_CLOSED, () => {
-        this._drawer.removeChild(tmpWin.windowBarDrawerButton)
+        this._drawer.removeChild(tmpWin.taskBarDrawerButton)
         this._winCount()
       })
       this._winCount()

@@ -1,15 +1,16 @@
-js-dtop-bar-icon {
+js-dtop-taskbar-icon {
 	display: inline-block;
 	position: relative;
 	/*height: 40px;*/
+	transition: margin-left 0.3s, margin-right 0.3s; /* This margin data is in 'desktop.css' */
 }
 
-js-dtop-bar-icon::after {
+js-dtop-taskbar-icon::after {
 	content: attr(data-wincount);
 	/*display: inline-block;*/
 	position: absolute;
 	background-color: red;
-	z-index: 5;
+	/*z-index: 5;*/
 	top: 0;
 	right: 0;
 	padding: 2px 5px;
@@ -21,14 +22,44 @@ js-dtop-bar-icon::after {
 	transition: transform 0.3s;
 }
 
-.js-dtop-bar-icon-after-hidden::after {
+/*js-dtop-taskbar-icon:hover {*/
+/*	transform: scale(1.5);*/
+/*}*/
+
+js-dtop-taskbar-icon:hover::after {
+	transform: scale(1.5);
+}
+
+.js-dtop-taskbar-icon-after-hidden::after {
 	/*display: none;*/
 	visibility: hidden;
 }
 
-js-dtop-bar-icon:hover::after {
-	transform: scale(1.5);
-}
+/*.js-dtop-taskbar-icon-top,*/
+/*.js-dtop-taskbar-icon-bot {*/
+/*	margin-left: 10px;*/
+/*	margin-right: 10px;*/
+/*	transition: margin-left 0.3s, margin-right 0.3s;*/
+/*}*/
+
+/*.js-dtop-taskbar-icon-left,*/
+/*.js-dtop-taskbar-icon-right {*/
+/*	margin-top: 10px;*/
+/*	margin-bottom: 10px;*/
+/*}*/
+
+/*.js-dtop-taskbar-icon-top:hover,*/
+/*.js-dtop-taskbar-icon-bot:hover {*/
+/*	margin-left: 20px;*/
+/*	margin-right: 20px;*/
+/*}*/
+
+/*.js-dtop-taskbar-icon-left:hover,*/
+/*.js-dtop-taskbar-icon-right:hover {*/
+/*	margin-top: 20px;*/
+/*	margin-bottom: 20px;*/
+/*	transition: margin-top 0.3s, margin-bottom 0.3s;*/
+/*}*/
 
 .js-dtop-icon {
 	background-size: contain;
@@ -42,6 +73,26 @@ js-dtop-bar-icon:hover::after {
 	/*filter: saturate(50);*/
 	/*filter: grayscale(0%);*/
 	transform: scale(1.5);
+}
+
+.js-dtop-taskbar-icon-top::after,
+.js-dtop-taskbar-icon-top > .js-dtop-icon {
+	transform-origin: top;
+}
+
+.js-dtop-taskbar-icon-right::after,
+.js-dtop-taskbar-icon-right > .js-dtop-icon {
+	transform-origin: right;
+}
+
+.js-dtop-taskbar-icon-bot::after,
+.js-dtop-taskbar-icon-bot > .js-dtop-icon {
+	transform-origin: bottom;
+}
+
+.js-dtop-taskbar-icon-left::after,
+.js-dtop-taskbar-icon-left > .js-dtop-icon {
+	transform-origin: left;
 }
 
 .js-dtop-icon-list-icon-frame {
@@ -67,26 +118,44 @@ js-dtop-bar-icon:hover::after {
 	margin-right: 20px;
 }
 
-.js-dtop-bar-drawer-menu {
+.js-dtop-taskbar-drawer-menu {
 	position: absolute;
 	border-radius: 5px;
 	background-color: gray;
 	box-shadow: 3px 3px 15px grey;
+	overflow-y: auto;
 	padding: 3px;
-	/*top: -50px;*/
-	left: calc(50% - 100px);
-	bottom: 120%;
-	z-index: 2;
 	width: 200px;
+	max-height: 50vh;
 	opacity: 0;
-	/*visibility: hidden;*/
-	display: none;
-	transition: all 0.3s ease-out;
+	visibility: hidden;
+	/*display: none;*/
+	transition: opacity 0.3s;
 }
 
-.js-dtop-bar-drawer-menu-vis {
+.js-dtop-taskbar-icon-top > .js-dtop-taskbar-drawer-menu {
+	top: 105%;
+	left: -10px;
+}
+
+.js-dtop-taskbar-icon-right > .js-dtop-taskbar-drawer-menu {
+	top: -10px;
+	right: 105%;
+}
+
+.js-dtop-taskbar-icon-bot > .js-dtop-taskbar-drawer-menu {
+	bottom: 105%;
+	left: -10px;
+}
+
+.js-dtop-taskbar-icon-left > .js-dtop-taskbar-drawer-menu {
+	top: -10px;
+	left: 105%;
+}
+
+.js-dtop-taskbar-drawer-menu-vis {
 	opacity: 1;
 	/*filter: saturate(1);*/
-	/*visibility: visible;*/
-	display: unset;
+	visibility: visible;
+	/*display: unset;*/
 }

@@ -2,48 +2,19 @@ import Window, {WIN_EVENTS, WindowGrabType} from './window/window.js'
 import SilhouetteWindow from './window/silhouette-window.js'
 import AbsApp from './app/abs-app.js'
 import Settings from './app-settings/settings.js'
-import ConfigStorage, {CONF_KEYS_EVENTS} from './config-storage.js'
+import ConfigStorage, {CONF_CONSTS, CONF_KEYS_EVENTS, PositionEdge} from './config-storage.js'
 import Icon from './icon/icon.js'
 
-const DTOP_PATH = 'js-dtop/'
-const DTOP_CSS_FILE = DTOP_PATH + 'css/desktop.css'
-const DTOP_BGROUND_FILE = DTOP_PATH + 'img/desktop-background.jpg'
-const DTOP_BAR_ICON_THICK = 40 // Desktop-bar/icon thickness in pixels
-const DTOP_BAR_PAD = 5 // Desktop-bar padding in pixels
-const DTOP_WIN_X_SHIFT = 15 // New window X position shift from the previous window
-const DTOP_WIN_Y_SHIFT = 30 // New window Y position shift from the previous window
+const DTOP_CSS_FILE = CONF_CONSTS.DTOP_PATH + 'css/desktop.css'
+const DTOP_BGROUND_FILE = CONF_CONSTS.DTOP_PATH + 'img/desktop-background.jpg'
 const HTML_TAG_DTOP = 'js-desktop' // Desktop's HTML tag name
-const HTML_CLASS_DTOP = 'js-dtop' // HTML/CSS class for the desktop area
-const HTML_CLASS_DTOP_BAR = 'js-dtop-bar' // HTML/CSS class for the desktop-bar
-const HTML_CLASS_DTOP_BAR_ICONS_TOP = 'js-dtop-bar-icon-container-center-top' // HTML/CSS class for the top desktop-bar icon container
-const HTML_CLASS_DTOP_BAR_ICONS_LEFT = 'js-dtop-bar-icon-container-center-left' // HTML/CSS class for the left desktop-bar icon container
-const HTML_CLASS_DTOP_BAR_ICONS_BOT = 'js-dtop-bar-icon-container-center-bot' // HTML/CSS class for the bottom desktop-bar icon container
-const HTML_CLASS_DTOP_BAR_ICONS_RIGHT = 'js-dtop-bar-icon-container-center-right' // HTML/CSS class for the right desktop-bar icon container
+const HTML_CLASS_DTOP = 'js-dtop' // HTML/CSS class for the desktop area (excluding the taskbar area)
+const HTML_CLASS_TASKBAR = 'js-dtop-taskbar' // HTML/CSS class for the taskbar
+const HTML_CLASS_TASKBAR_ICONS_TOP = 'js-dtop-taskbar-icon-container-top' // HTML/CSS class for the top taskbar icon container
+const HTML_CLASS_TASKBAR_ICONS_LEFT = 'js-dtop-taskbar-icon-container-left' // HTML/CSS class for the left taskbar icon container
+const HTML_CLASS_TASKBAR_ICONS_BOT = 'js-dtop-taskbar-icon-container-bot' // HTML/CSS class for the bottom taskbar icon container
+const HTML_CLASS_TASKBAR_ICONS_RIGHT = 'js-dtop-taskbar-icon-container-right' // HTML/CSS class for the right taskbar icon container
 const HTML_CLASS_ICON_LIST = 'js-dtop-icon-list' // HTML/CSS class for the list that contains the desktop icons
-
-/**
- * An Enum used to position the desktop-bar on the desktop.
- * @readonly
- * @enum {Symbol}
- */
-export const BarPos = Object.freeze({ // Some sites recommended 'freeze' to prevent accidentally adding properties
-
-  /** Position the bar on top */
-  TOP: 'TOP',
-  // TOP: Symbol('TOP'),
-
-  /** Position the bar on left */
-  LEFT: 'LEFT',
-  // LEFT: Symbol('LEFT'),
-
-  /** Position the bar on bottom */
-  BOTTOM: 'BOTTOM',
-  // BOTTOM: Symbol('BOTTOM'),
-
-  /** Position the bar on right */
-  RIGHT: 'RIGHT'
-  // RIGHT: Symbol('RIGHT')
-})
 
 /**
  * A class that represents the desktop in 'JsDesktop'.
@@ -58,8 +29,8 @@ export default class Desktop extends HTMLElement {
     /** @type {Array<Window>} */
     this._windows = [] // Holds references to all the open windows on desktop
     this._conf = new ConfigStorage() // Object that holds the desktop configurations
-    let tmpSetIcon = new Icon(DTOP_BAR_ICON_THICK, Settings, this._conf)
-    this._nextWinY = this._nextWinX = DTOP_WIN_X_SHIFT // Tracks the next position for the next open window
+    let tmpSetIcon = new Icon(this._conf, Settings, this._conf)
+    this._nextWinY = this._nextWinX = CONF_CONSTS.WIN_NEW_X_SHIFT // Tracks the next position for the next open window
     this._deskTop = document.createElement('div')
     this._deskTop.classList.add(HTML_CLASS_DTOP)
     this._deskTop.style.backgroundImage = 'url(\'' + DTOP_BGROUND_FILE + '\')'
@@ -70,16 +41,16 @@ export default class Desktop extends HTMLElement {
     this._deskBar.appendChild(this._deskBarIconsStart)
     this._deskBar.appendChild(this._deskBarIconsCenter)
     this._deskBar.appendChild(this._deskBarIconsEnd)
-    this._deskBar.classList.add(HTML_CLASS_DTOP_BAR)
+    this._deskBar.classList.add(HTML_CLASS_TASKBAR)
     this._deskTopIconList = document.createElement('ul')
     this._deskTopIconList.classList.add(HTML_CLASS_ICON_LIST)
     this._deskTop.appendChild(this._deskTopIconList)
-    this._deskBar.style.padding = DTOP_BAR_PAD + 'px'
-    this._updateDtopBarPos()
+    this._deskBar.style.padding = CONF_CONSTS.TASKBAR_PAD + 'px'
+    this._updateTaskBarPos()
     this.appendChild(this._deskTop)
     this.appendChild(this._deskBar)
     this._prepareRemovableEventHandlers()
-    this._conf.addEventListener(CONF_KEYS_EVENTS.DTOP_BAR_POS, this._updateDtopBarPos.bind(this)) // Update desktop-bar position when changed
+    this._conf.addEventListener(CONF_KEYS_EVENTS.TASKBAR_POS, this._updateTaskBarPos.bind(this)) // Update taskbar position when changed
     window.addEventListener('resize', this._handleWebPageResize.bind(this))
     tmpSetIcon.addEventListener('click', this._handleIconClick.bind(this))
     this._deskBarIconsStart.appendChild(tmpSetIcon)
@@ -268,26 +239,26 @@ export default class Desktop extends HTMLElement {
   }
 
   /**
-   * Handles changing desktop-bar position.
+   * Handles changing taskbar position.
    * @private
    */
-  _updateDtopBarPos () {
+  _updateTaskBarPos () {
     let tmpHorBar = () => {
       this._deskTop.style.width = '100vw'
-      this._deskTop.style.height = 'calc(100vh - ' + (2 * DTOP_BAR_PAD + DTOP_BAR_ICON_THICK) + 'px)'
+      this._deskTop.style.height = 'calc(100vh - ' + (2 * CONF_CONSTS.TASKBAR_PAD + CONF_CONSTS.ICON_SIZE) + 'px)'
       this._deskBar.style.width = '100vw'
-      this._deskBar.style.height = DTOP_BAR_ICON_THICK + 'px'
+      this._deskBar.style.height = CONF_CONSTS.ICON_SIZE + 'px'
       this._deskBar.style.flexDirection = 'row'
     }
     let tmpVerBar = () => {
-      this._deskTop.style.width = 'calc(100vw - ' + (2 * DTOP_BAR_PAD + DTOP_BAR_ICON_THICK) + 'px)'
+      this._deskTop.style.width = 'calc(100vw - ' + (2 * CONF_CONSTS.TASKBAR_PAD + CONF_CONSTS.ICON_SIZE) + 'px)'
       this._deskTop.style.height = '100vh'
-      this._deskBar.style.width = DTOP_BAR_ICON_THICK + 'px'
+      this._deskBar.style.width = CONF_CONSTS.ICON_SIZE + 'px'
       this._deskBar.style.height = '100vh'
       this._deskBar.style.flexDirection = 'column'
     }
-    switch (this._conf.desktopBarPosition) {
-      case BarPos.TOP:
+    switch (this._conf.taskBarPosition) {
+      case PositionEdge.TOP:
         tmpHorBar()
         this._deskTop.style.top = ''
         this._deskTop.style.right = ''
@@ -297,9 +268,9 @@ export default class Desktop extends HTMLElement {
         this._deskBar.style.right = ''
         this._deskBar.style.bottom = ''
         this._deskBar.style.left = ''
-        this._deskBarIconsCenter.className = HTML_CLASS_DTOP_BAR_ICONS_TOP
+        this._deskBarIconsCenter.className = HTML_CLASS_TASKBAR_ICONS_TOP
         break
-      case BarPos.LEFT:
+      case PositionEdge.LEFT:
         tmpVerBar()
         this._deskTop.style.top = ''
         this._deskTop.style.right = '0'
@@ -309,9 +280,9 @@ export default class Desktop extends HTMLElement {
         this._deskBar.style.right = ''
         this._deskBar.style.bottom = ''
         this._deskBar.style.left = '0'
-        this._deskBarIconsCenter.className = HTML_CLASS_DTOP_BAR_ICONS_LEFT
+        this._deskBarIconsCenter.className = HTML_CLASS_TASKBAR_ICONS_LEFT
         break
-      case BarPos.BOTTOM:
+      case PositionEdge.BOTTOM:
         tmpHorBar()
         this._deskTop.style.top = '0'
         this._deskTop.style.right = ''
@@ -321,9 +292,9 @@ export default class Desktop extends HTMLElement {
         this._deskBar.style.right = ''
         this._deskBar.style.bottom = '0'
         this._deskBar.style.left = ''
-        this._deskBarIconsCenter.className = HTML_CLASS_DTOP_BAR_ICONS_BOT
+        this._deskBarIconsCenter.className = HTML_CLASS_TASKBAR_ICONS_BOT
         break
-      case BarPos.RIGHT:
+      case PositionEdge.RIGHT:
         tmpVerBar()
         this._deskTop.style.top = ''
         this._deskTop.style.right = ''
@@ -333,10 +304,10 @@ export default class Desktop extends HTMLElement {
         this._deskBar.style.right = '0'
         this._deskBar.style.bottom = ''
         this._deskBar.style.left = ''
-        this._deskBarIconsCenter.className = HTML_CLASS_DTOP_BAR_ICONS_RIGHT
+        this._deskBarIconsCenter.className = HTML_CLASS_TASKBAR_ICONS_RIGHT
         break
       default:
-        throw new TypeError('The passed new desktop-bar position value should be one of the \'BarPos\' constant values.')
+        throw new TypeError('The passed new taskbar position value should be one of the \'PositionEdge\' constant values.')
     }
     this._handleWebPageResize()
   }
@@ -373,16 +344,18 @@ export default class Desktop extends HTMLElement {
    * @private
    */
   _handleIconClick (ev) {
-    ev.resultedWindow.windowLeft = this._nextWinX
-    ev.resultedWindow.windowTop = this._nextWinY
-    ev.resultedWindow.addEventListener(WIN_EVENTS.WIN_FOCUSED, ev => this._putWinOnTop(ev.target))
-    ev.resultedWindow.addEventListener(WIN_EVENTS.WIN_MINIMIZED, this._handleWinMinimized.bind(this))
-    ev.resultedWindow.addEventListener(WIN_EVENTS.WIN_MAXIMIZED, this._handleWinMaximized.bind(this))
-    ev.resultedWindow.addEventListener(WIN_EVENTS.WIN_CLOSED, this._handleWinClosed.bind(this))
-    ev.resultedWindow.addEventListener(WIN_EVENTS.WIN_GRABBED, this._handleWinGrabbed.bind(this))
-    this._nextWinX = (this._nextWinX + DTOP_WIN_Y_SHIFT) % (this._deskTop.clientWidth / 3 * 2) // Set next window X
-    this._nextWinY = (this._nextWinY + DTOP_WIN_X_SHIFT) % (this._deskTop.clientHeight / 3 * 2) // Set next window Y
-    this._deskTop.appendChild(ev.resultedWindow)
+    if (ev.resultedWindow) {
+      ev.resultedWindow.windowLeft = this._nextWinX
+      ev.resultedWindow.windowTop = this._nextWinY
+      ev.resultedWindow.addEventListener(WIN_EVENTS.WIN_FOCUSED, ev => this._putWinOnTop(ev.target))
+      ev.resultedWindow.addEventListener(WIN_EVENTS.WIN_MINIMIZED, this._handleWinMinimized.bind(this))
+      ev.resultedWindow.addEventListener(WIN_EVENTS.WIN_MAXIMIZED, this._handleWinMaximized.bind(this))
+      ev.resultedWindow.addEventListener(WIN_EVENTS.WIN_CLOSED, this._handleWinClosed.bind(this))
+      ev.resultedWindow.addEventListener(WIN_EVENTS.WIN_GRABBED, this._handleWinGrabbed.bind(this))
+      this._nextWinX = (this._nextWinX + CONF_CONSTS.WIN_NEW_Y_SHIFT) % (this._deskTop.clientWidth / 3 * 2) // Set next window X
+      this._nextWinY = (this._nextWinY + CONF_CONSTS.WIN_NEW_X_SHIFT) % (this._deskTop.clientHeight / 3 * 2) // Set next window Y
+      this._deskTop.appendChild(ev.resultedWindow)
+    }
   }
 
   /**
@@ -464,9 +437,9 @@ export default class Desktop extends HTMLElement {
    */
   addApp (appClass, ...appParams) {
     if (!(appClass.prototype instanceof AbsApp)) throw new TypeError('The passed \'appClass\' argument must be a class that extends the \'AbsApp\' abstract class.') // Check if it is actually a js-desktop-app class
-    let tmpIcon = new Icon(DTOP_BAR_ICON_THICK, appClass, ...appParams)
+    let tmpIcon = new Icon(this._conf, appClass, ...appParams)
     tmpIcon.addEventListener('click', this._handleIconClick.bind(this))
-    this._deskBarIconsCenter.appendChild(tmpIcon) // Add desktop-bar icon
+    this._deskBarIconsCenter.appendChild(tmpIcon) // Add taskbar icon
     this._deskTopIconList.appendChild(tmpIcon.desktopIcon) // Add desktop icon
   }
 }

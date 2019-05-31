@@ -41,13 +41,13 @@ js-dtop-window {
 	pointer-events: none;
 }
 
-.js-dtop-win-bar {
+.js-dtop-win-titlebar {
 	box-sizing: border-box;
 	background-color: burlywood;
 	line-height: 2em;
 }
 
-.js-dtop-win-bar.js-dtop-win-moveresize {
+.js-dtop-win-titlebar.js-dtop-win-moveresize {
 	cursor: move;
 }
 
@@ -184,18 +184,27 @@ js-dtop-window {
 .js-dtop-win-taskbar-drawer-but {
 	display: block;
 	/*float: initial;*/
-	padding: 5px;
 	color: white;
-	font-size: 10px;
+	padding: 4px;
+	font-size: 0.8em;
 	border-radius: 3px;
-	border-style: outset;
+	border: 3px outset;
 	text-decoration: none;
+	margin: 3px 0;
+}
+
+.js-dtop-win-taskbar-drawer-but:first-child {
+	margin-top: 0;
+}
+
+.js-dtop-win-taskbar-drawer-but:last-child {
+	margin-bottom: 0;
 }
 
 .js-dtop-win-taskbar-drawer-but-active {
 	border-style: inset;
 }
 
-.js-dtop-win-taskbar-drawer-but:hover {
-	background-color: lightgray;
-}
+/*.js-dtop-win-taskbar-drawer-but:hover {*/
+/*	background-color: lightgray;*/
+/*}*/

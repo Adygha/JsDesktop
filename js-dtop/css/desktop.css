@@ -22,7 +22,8 @@ header {
 	-ms-user-select: none;
 	user-select: none;
 }
-.js-dtop-bar {
+
+.js-dtop-taskbar {
 	position: fixed;
 	display: flex;
 	justify-content: space-between;
@@ -36,46 +37,29 @@ header {
 	user-select: none;
 }
 
-.js-dtop-bar-icon-container-center-top > * {
-	transform-origin: top;
-}
-
-.js-dtop-bar-icon-container-center-right > * {
-	transform-origin: right;
-}
-
-.js-dtop-bar-icon-container-center-bot > * {
-	transform-origin: bottom;
-}
-
-.js-dtop-bar-icon-container-center-left > * {
-	transform-origin: left;
-}
-
-.js-dtop-bar-icon-container-center-top > *,
-.js-dtop-bar-icon-container-center-bot > * {
+.js-dtop-taskbar-icon-container-top > *,
+.js-dtop-taskbar-icon-container-bot > * {
 	margin-left: 10px;
 	margin-right: 10px;
-	transition: margin-left 0.3s, margin-right 0.3s;
+	/*transition: margin-left 0.3s, margin-right 0.3s;*/
 }
 
-.js-dtop-bar-icon-container-center-left > *,
-.js-dtop-bar-icon-container-center-right > * {
+.js-dtop-taskbar-icon-container-left > *,
+.js-dtop-taskbar-icon-container-right > * {
 	margin-top: 10px;
 	margin-bottom: 10px;
 }
 
-.js-dtop-bar-icon-container-center-top > *:hover,
-.js-dtop-bar-icon-container-center-bot > *:hover {
+.js-dtop-taskbar-icon-container-top > *:hover,
+.js-dtop-taskbar-icon-container-bot > *:hover {
 	margin-left: 20px;
 	margin-right: 20px;
 }
 
-.js-dtop-bar-icon-container-center-left > *:hover,
-.js-dtop-bar-icon-container-center-right > *:hover {
+.js-dtop-taskbar-icon-container-left > *:hover,
+.js-dtop-taskbar-icon-container-right > *:hover {
 	margin-top: 20px;
 	margin-bottom: 20px;
-	transition: margin-top 0.3s, margin-bottom 0.3s;
 }
 
 .js-dtop-icon-list {
