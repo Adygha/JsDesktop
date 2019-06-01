@@ -1,3 +1,7 @@
+:root {
+	--window-minimize-duration: 200ms;
+}
+
 js-dtop-window {
 	position: absolute;
 	display: flex;
@@ -6,6 +10,8 @@ js-dtop-window {
 	background-color: aliceblue;
 	box-shadow: 3px 3px 3px grey;
 	box-sizing: border-box;
+	clip-path: inset(0);
+	transition: clip-path var(--window-minimize-duration);
 }
 
 .js-dtop-win-inactive {
@@ -25,9 +31,8 @@ js-dtop-window {
 	pointer-events: none;
 }
 
-.js-dtop-win-hidden {
-	/*visibility: hidden;*/
-	display: none;
+.js-dtop-win-minim {
+	clip-path: inset(0 0 100% 0);
 }
 
 .js-dtop-win-icon {
@@ -183,7 +188,6 @@ js-dtop-window {
 
 .js-dtop-win-taskbar-drawer-but {
 	display: block;
-	/*float: initial;*/
 	color: white;
 	padding: 4px;
 	font-size: 0.8em;
@@ -197,6 +201,10 @@ js-dtop-window {
 	margin-top: 0;
 }
 
+.js-dtop-win-taskbar-drawer-but:hover {
+	background-color: dimgray;
+}
+
 .js-dtop-win-taskbar-drawer-but:last-child {
 	margin-bottom: 0;
 }
@@ -205,6 +213,6 @@ js-dtop-window {
 	border-style: inset;
 }
 
-/*.js-dtop-win-taskbar-drawer-but:hover {*/
-/*	background-color: lightgray;*/
-/*}*/
+.js-dtop-win-taskbar-drawer-but-active:hover {
+	background-color: lightslategrey;
+}

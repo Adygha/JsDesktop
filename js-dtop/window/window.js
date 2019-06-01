@@ -13,8 +13,8 @@ const HTML_CLASS_WIN_CLOSE = 'js-dtop-win-close' // HTML class for the close but
 const HTML_CLASS_WIN_INACTIVE = 'js-dtop-win-inactive' // HTML class for inactive window
 const HTML_CLASS_WIN_TRANSP = 'js-dtop-win-transp' // HTML class for transparent window
 const HTML_CLASS_WIN_DISABLED = 'js-dtop-win-disabled' // HTML class for disabled window
-const HTML_CLASS_WIN_HIDDEN = 'js-dtop-win-hidden' // HTML class for disabled window
-const HTML_CLASS_EDGE_WITHCURSOR = 'js-dtop-win-moveresize' // HTML classfir the window's edges (with visible cursor)
+const HTML_CLASS_WIN_MINIM = 'js-dtop-win-minim' // HTML class for minimized window
+const HTML_CLASS_EDGE_WITHCURSOR = 'js-dtop-win-moveresize' // HTML class for the window's edges (with visible cursor)
 const HTML_CLASS_EDGE_NOCURSOR = 'js-dtop-win-moveresize-nocursor' // HTML class to disable cursor for the window's edges
 const HTML_CLASS_WIN_TITLEBAR = 'js-dtop-win-titlebar' // HTML class for window's title bar
 const HTML_CLASS_EDGE_TOP = 'js-dtop-win-topedge' // HTML class for window's top edge
@@ -413,7 +413,7 @@ export default class Window extends HTMLElement {
    * @type {Boolean}
    */
   get isMinimized () {
-    return this.classList.contains(HTML_CLASS_WIN_HIDDEN)
+    return this.classList.contains(HTML_CLASS_WIN_MINIM)
   }
 
   /**
@@ -422,11 +422,17 @@ export default class Window extends HTMLElement {
    */
   set isMinimized (newIsMinimized) {
     if (newIsMinimized && !this.isMinimized) {
-      this.classList.add(HTML_CLASS_WIN_HIDDEN)
+      let tmpHandler = ev => {
+        ev.target.removeEventListener('transitionend', tmpHandler)
+        ev.target.dispatchEvent(new Event(WIN_EVENTS.WIN_MINIMIZED))
+        this._taskBarDrawerBut.parentElement.style.pointerEvents = 'auto'
+      }
+      this._taskBarDrawerBut.parentElement.style.pointerEvents = 'none' // To prevent multiple clicks
+      this.addEventListener('transitionend', tmpHandler)
+      this.classList.add(HTML_CLASS_WIN_MINIM)
       this.isActive = false
-      this.dispatchEvent(new Event(WIN_EVENTS.WIN_MINIMIZED))
     } else if (!newIsMinimized && this.isMinimized) {
-      this.classList.remove(HTML_CLASS_WIN_HIDDEN)
+      this.classList.remove(HTML_CLASS_WIN_MINIM)
       this.isActive = true
     }
   }

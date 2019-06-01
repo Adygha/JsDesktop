@@ -1,8 +1,11 @@
+:root {
+	--icon-animation-duration: 300ms;
+}
+
 js-dtop-taskbar-icon {
 	display: inline-block;
 	position: relative;
-	/*height: 40px;*/
-	transition: margin-left 0.3s, margin-right 0.3s; /* This margin data is in 'desktop.css' */
+	transition: margin-left var(--icon-animation-duration), margin-right var(--icon-animation-duration); /* This margin data is in 'desktop.css' */
 }
 
 js-dtop-taskbar-icon::after {
@@ -10,7 +13,6 @@ js-dtop-taskbar-icon::after {
 	/*display: inline-block;*/
 	position: absolute;
 	background-color: red;
-	/*z-index: 5;*/
 	top: 0;
 	right: 0;
 	padding: 2px 5px;
@@ -19,7 +21,7 @@ js-dtop-taskbar-icon::after {
 	border-radius: 50%;
 	font-weight: bold;
 	color: lightgrey;
-	transition: transform 0.3s;
+	transition: transform var(--icon-animation-duration);
 }
 
 /*js-dtop-taskbar-icon:hover {*/
@@ -35,43 +37,14 @@ js-dtop-taskbar-icon:hover::after {
 	visibility: hidden;
 }
 
-/*.js-dtop-taskbar-icon-top,*/
-/*.js-dtop-taskbar-icon-bot {*/
-/*	margin-left: 10px;*/
-/*	margin-right: 10px;*/
-/*	transition: margin-left 0.3s, margin-right 0.3s;*/
-/*}*/
-
-/*.js-dtop-taskbar-icon-left,*/
-/*.js-dtop-taskbar-icon-right {*/
-/*	margin-top: 10px;*/
-/*	margin-bottom: 10px;*/
-/*}*/
-
-/*.js-dtop-taskbar-icon-top:hover,*/
-/*.js-dtop-taskbar-icon-bot:hover {*/
-/*	margin-left: 20px;*/
-/*	margin-right: 20px;*/
-/*}*/
-
-/*.js-dtop-taskbar-icon-left:hover,*/
-/*.js-dtop-taskbar-icon-right:hover {*/
-/*	margin-top: 20px;*/
-/*	margin-bottom: 20px;*/
-/*	transition: margin-top 0.3s, margin-bottom 0.3s;*/
-/*}*/
-
 .js-dtop-icon {
 	background-size: contain;
 	display: inline-block;
-	/*filter: grayscale(100%);*/
-	transition: transform 0.3s;
+	transition: transform var(--icon-animation-duration);
 	cursor: pointer;
 }
 
 .js-dtop-icon:hover {
-	/*filter: saturate(50);*/
-	/*filter: grayscale(0%);*/
 	transform: scale(1.5);
 }
 
@@ -130,7 +103,7 @@ js-dtop-taskbar-icon:hover::after {
 	opacity: 0;
 	visibility: hidden;
 	/*display: none;*/
-	transition: opacity 0.3s;
+	transition: opacity var(--icon-animation-duration);
 }
 
 .js-dtop-taskbar-icon-top > .js-dtop-taskbar-drawer-menu {
@@ -155,7 +128,6 @@ js-dtop-taskbar-icon:hover::after {
 
 .js-dtop-taskbar-drawer-menu-vis {
 	opacity: 1;
-	/*filter: saturate(1);*/
 	visibility: visible;
 	/*display: unset;*/
 }

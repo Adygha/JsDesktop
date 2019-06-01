@@ -41,7 +41,6 @@ header {
 .js-dtop-taskbar-icon-container-bot > * {
 	margin-left: 10px;
 	margin-right: 10px;
-	/*transition: margin-left 0.3s, margin-right 0.3s;*/
 }
 
 .js-dtop-taskbar-icon-container-left > *,

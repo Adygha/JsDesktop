@@ -26,8 +26,11 @@ export default class Desktop extends HTMLElement {
    */
   constructor () {
     super()
+    this._silhWin = undefined // Used to store a rectangle that silhouettes a moved/re-sized window
+    this._grabType = undefined // Used to store the type of the pointer grab when a window starts to move/re-size
+    this._moveDif = undefined // Used to store the window's move difference when a window is moved
     /** @type {Array<Window>} */
-    this._windows = [] // Holds references to all the open windows on desktop
+    this._windows = [] // Used to store references to all the visible windows on desktop
     this._conf = new ConfigStorage() // Object that holds the desktop configurations
     let tmpSetIcon = new Icon(this._conf, Settings, this._conf)
     this._nextWinY = this._nextWinX = CONF_CONSTS.WIN_NEW_X_SHIFT // Tracks the next position for the next open window
@@ -118,7 +121,7 @@ export default class Desktop extends HTMLElement {
             this._silhWin.windowWidth = tmpWdLE
           }
         }
-        switch (this._winGrab) {
+        switch (this._grabType) {
           case WindowGrabType.WINDOW_MOVE:
             this._silhWin.windowLeft = ev.clientX - this._moveDif.x //
             this._silhWin.windowTop = ev.clientY - this._moveDif.y  // Move the silhouette window according to difference
@@ -173,7 +176,7 @@ export default class Desktop extends HTMLElement {
           this._silhWin.originalWindow.windowWidth = this._silhWin.windowWidth
         }
         this._silhWin.originalWindow.isDisabled = false // Set original window back to normal
-        switch (this._winGrab) {
+        switch (this._grabType) {
           case WindowGrabType.WINDOW_MOVE:
             this._silhWin.originalWindow.windowLeft = this._silhWin.windowLeft
             this._silhWin.originalWindow.windowTop = this._silhWin.windowTop
@@ -209,7 +212,7 @@ export default class Desktop extends HTMLElement {
         }
         this._deskTop.removeChild(this._silhWin)
         this._silhWin = undefined
-        this._winGrab = undefined // To indicate move/grab end
+        this._grabType = undefined // To indicate move/grab end
         if (document.body.style.cursor !== 'default') document.body.style.cursor = 'default'
       }
     }
@@ -401,7 +404,7 @@ export default class Desktop extends HTMLElement {
     ev.target.isDisabled = true // Disable the window (until pointer/mouse is up)
     this._silhWin = new SilhouetteWindow(/** @type {Window} */ev.target) // Make a silhouette of the original
     this._deskTop.appendChild(this._silhWin)
-    this._winGrab = ev.grabType // To indicate that a move/grab in progress
+    this._grabType = ev.grabType // To indicate that a move/grab in progress
     switch (ev.grabType) {
       case WindowGrabType.WINDOW_MOVE: // The title bar is grabbed (moving)
         document.body.style.cursor = 'move' // To prevent cursor change during move
