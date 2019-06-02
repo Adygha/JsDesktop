@@ -139,8 +139,10 @@ export default class Window extends HTMLElement {
       let tmpDoc = (new DOMParser()).parseFromString(docTxt, 'text/html') //.querySelector('.' + HTML_CLASS_WIN_OUTER).cloneNode(true)
       let tmpTitleBar = tmpDoc.querySelector('.' + HTML_CLASS_WIN_TITLEBAR).cloneNode(true)
       let tmpInner = tmpDoc.querySelector('.' + HTML_CLASS_WIN_INNER).cloneNode(true)
+      let tmpIcon = tmpTitleBar.querySelector('.' + HTML_CLASS_WIN_ICON)
+      tmpIcon.setAttribute('src', this._winApp.constructor.appIconURL)
+      tmpIcon.style.pointerEvents = 'none' // Thought it's better to put it here in case accidentally removed from css file
       tmpTitleBar.querySelector('.' + HTML_CLASS_WIN_TITLE).textContent = this._winApp.constructor.appName
-      tmpTitleBar.querySelector('.' + HTML_CLASS_WIN_ICON).setAttribute('src', this._winApp.constructor.appIconURL)
       this.appendChild(tmpTitleBar)
       Array.from(
         tmpDoc.querySelectorAll('.' + HTML_CLASS_EDGE_WITHCURSOR + ':not(.' + HTML_CLASS_WIN_TITLEBAR + ')'),

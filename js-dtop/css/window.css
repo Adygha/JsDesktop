@@ -1,5 +1,9 @@
 :root {
 	--window-minimize-duration: 200ms;
+	--window-shadow-offset: 3px;
+	--window-shadow-blur: 15px;
+	--window-active-shadow-color: dimgrey;
+	--window-not-active-shadow-color: gray;
 }
 
 js-dtop-window {
@@ -8,26 +12,26 @@ js-dtop-window {
 	flex-direction: column;
 	border-style: double;
 	background-color: aliceblue;
-	box-shadow: 3px 3px 3px grey;
+	box-shadow: var(--window-shadow-offset) var(--window-shadow-offset) var(--window-shadow-blur) var(--window-active-shadow-color);
 	box-sizing: border-box;
-	clip-path: inset(0);
+	clip-path: inset(calc(-1 * var(--window-shadow-blur)));
 	transition: clip-path var(--window-minimize-duration);
 }
 
 .js-dtop-win-inactive {
 	/* filter: blur(2px); */
 	filter: grayscale(100%);
-	box-shadow: 2px 2px 3px lightgray;
+	box-shadow: var(--window-shadow-offset) var(--window-shadow-offset) var(--window-shadow-blur) var(--window-not-active-shadow-color);
 }
 
 .js-dtop-win-transp {
 	filter: grayscale(100%);
-	opacity: .8;
+	opacity: 0.8;
 }
 
 .js-dtop-win-disabled {
 	filter: grayscale(100%);
-	box-shadow: 2px 2px 3px lightgray;
+	box-shadow: var(--window-shadow-offset) var(--window-shadow-offset) var(--window-shadow-blur) var(--window-not-active-shadow-color);
 	pointer-events: none;
 }
 
@@ -43,7 +47,6 @@ js-dtop-window {
 	height: 90%;
 	margin-top: 1px;
 	margin-left: 1px;
-	pointer-events: none;
 }
 
 .js-dtop-win-titlebar {
@@ -74,8 +77,8 @@ js-dtop-window {
 	font-size: 1.6em;
 	text-decoration: none;
 	line-height: 0;
-	padding-left: .2em;
-	padding-right: .2em;
+	padding-left: 0.2em;
+	padding-right: 0.2em;
 	cursor: pointer;
 }
 

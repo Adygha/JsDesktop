@@ -67,8 +67,8 @@ export default class Icon extends HTMLElement {
     this.addEventListener(window.PointerEvent ? 'pointerleave' : 'mouseleave', () => this._drawer.classList.remove(HTML_CLASS_DRAWER_VIS))
     this._drawer.addEventListener('click', ev => ev.stopPropagation())
     tmpIcon.addEventListener('click', this._handleClick.bind(this))
-    tmpIconClone.addEventListener('click', this._handleDivertClick.bind(this))
-    tmpLabel.addEventListener('click', this._handleDivertClick.bind(this))
+    tmpIconClone.style.pointerEvents = 'none' // Thought it's better to set 'none' here in
+    tmpLabel.style.pointerEvents = 'none'     // case accidentally removed from css file
     this._dtopIcon.addEventListener('click', this._handleClick.bind(this))
     this._conf.addEventListener(CONF_KEYS_EVENTS.TASKBAR_POS, this._handleTaskbarPosChange.bind(this))
     this._handleTaskbarPosChange()
@@ -141,16 +141,6 @@ export default class Icon extends HTMLElement {
       if (ev.target !== this._dtopIcon) this._isDrawerVisible = true
       this.dispatchEvent(new IconClickEvent(tmpWin, ev))
     }
-  }
-
-  /**
-   * Used to stop the click event of the inside elements of the desktop icon and divert the click to the parent
-   * @param {PointerEvent|MouseEvent} ev
-   * @private
-   */
-  _handleDivertClick (ev) {
-    ev.stopPropagation()
-    this._dtopIcon.click()
   }
 
   get _isDrawerVisible () {
