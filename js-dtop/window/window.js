@@ -29,11 +29,11 @@ const HTML_CLASS_WIN_TASKBAR_BUT = 'js-dtop-win-taskbar-drawer-but' // HTML clas
 const HTML_CLASS_WIN_TASKBAR_BUT_ACT = 'js-dtop-win-taskbar-drawer-but-active' // HTML class for active window's taskbar drawer button
 export const WIN_EVENTS = {
   // EVENT_WIN_CREATED: 'window-created',
-  WIN_FOCUSED: 'window-focused',
-  WIN_MAXIMIZED: 'window-maximized',
-  WIN_MINIMIZED: 'window-minimized',
-  WIN_CLOSED: 'window-closed',
-  WIN_GRABBED: 'window-grabbed'
+  WIN_FOCUS: 'window-focus',
+  WIN_MAXIMIZE: 'window-maximize',
+  WIN_MINIMIZE: 'window-minimize',
+  WIN_CLOSE: 'window-close',
+  WIN_GRAB: 'window-grab'
 }
 
 /**
@@ -86,7 +86,7 @@ export class WindowGrabEvent extends (window.PointerEvent ? PointerEvent : Mouse
    *          MouseEvent} eventInit     a PointerEventInit/MouseEventInit dictionary (or a PointerEvent/MouseEvent Object) to build this event on
    */
   constructor (grabType, eventInit) {
-    super(WIN_EVENTS.WIN_GRABBED, eventInit)
+    super(WIN_EVENTS.WIN_GRAB, eventInit)
     this._grabType = grabType
   }
 
@@ -116,6 +116,8 @@ export default class Window extends HTMLElement {
    */
   constructor (appObj, winPos, winSize) {
     super()
+    /** @type {{x: Number, y: Number, width: Number, height: Number}} */
+    this._beforeMax = undefined // Used to store this window rect before going to maximize
     this._winApp = appObj
     if (winSize && winSize.width && winSize.height) {
       this.windowWidth = winSize.width
@@ -151,10 +153,10 @@ export default class Window extends HTMLElement {
       this.appendChild(tmpInner)
       if (tmpInner.attachShadow) tmpInner = tmpInner.attachShadow({mode: 'closed'}) // If 'Shadow Dom' is supported then replace 'tmpInner' with its shadow
       tmpInner.appendChild(this._winApp)
-      this.addEventListener(window.PointerEvent ? 'pointerdown' : 'mousedown', () => this.isActive = true)
+      tmpTitleBar.addEventListener('dblclick', this._handleWinMaximize.bind(this))
       this.addEventListener(window.PointerEvent ? 'pointerdown' : 'mousedown', this._handleWinPointerDown.bind(this))
       this.querySelector('.' + HTML_CLASS_WIN_MIN).addEventListener('click', this._handleWinMinimize.bind(this))
-      this.querySelector('.' + HTML_CLASS_WIN_MAX).addEventListener('click',this._handleWinMaximize.bind(this))
+      this.querySelector('.' + HTML_CLASS_WIN_MAX).addEventListener('click', this._handleWinMaximize.bind(this))
       this.querySelector('.' + HTML_CLASS_WIN_CLOSE).addEventListener('click', this._handleWinClose.bind(this))
     })
     // this.dispatchEvent(new Event(WIN_EVENTS.EVENT_WIN_CREATED))
@@ -170,7 +172,7 @@ export default class Window extends HTMLElement {
     }
     // this.isActive = false
     this._taskBarDrawerBut.classList.add(HTML_CLASS_WIN_TASKBAR_BUT_ACT)
-    this.dispatchEvent(new Event(WIN_EVENTS.WIN_FOCUSED))
+    this.dispatchEvent(new Event(WIN_EVENTS.WIN_FOCUS))
   }
 
   /**
@@ -179,6 +181,7 @@ export default class Window extends HTMLElement {
    * @private
    */
   _handleWinPointerDown (ev) {
+    if (!this.isActive) this.dispatchEvent(new Event(WIN_EVENTS.WIN_FOCUS)) // Get focus first
     if (!this._beforeMax && ev.target && ev.target.classList && ev.target.classList.contains(HTML_CLASS_EDGE_WITHCURSOR)) { // Check if not maximized and in move-resize
       let tmpGrabType
       if (ev.target.classList.contains(HTML_CLASS_WIN_TITLEBAR)) { // The title bar is grabbed
@@ -205,26 +208,15 @@ export default class Window extends HTMLElement {
   }
 
   /**
-   * Supposed to handle the event of window's drawer button click.
-   * @private
-   */
-  _handleDrawerButClick () {
-    if (this.isActive) {
-      this.isMinimized = true
-    } else {
-      this.isActive = true
-    }
-  }
-
-  /**
    * Supposed to handle the event of window minimize.
    * @param {Event} ev  the dispached event
    * @private
    */
   _handleWinMinimize (ev) {
-    ev.stopPropagation()
-    this.isActive = true
-    this.isMinimized = true
+    if (!this.isMinimized) {
+      if (!this.isActive) this.dispatchEvent(new Event(WIN_EVENTS.WIN_FOCUS)) // Get focus first
+      this.dispatchEvent(new Event(WIN_EVENTS.WIN_MINIMIZE)) // Then request minimize
+    }
   }
 
   /**
@@ -233,20 +225,39 @@ export default class Window extends HTMLElement {
    * @private
    */
   _handleWinMaximize (ev) {
-    ev.stopPropagation()
-    this.isActive = true
-    this.isMaximized = !this.isMaximized
+    if (!this.isActive) this.dispatchEvent(new Event(WIN_EVENTS.WIN_FOCUS)) // Get focus first
+    // this.isMaximized = !this.isMaximized
+    if (this.isMaximized) {
+      this.isMaximized = false
+    } else {
+      this.dispatchEvent(new Event(WIN_EVENTS.WIN_MAXIMIZE))
+    }
   }
 
   /**
    * Supposed to handle the event of window close.
    * @private
    */
-  _handleWinClose (ev) {
-    ev.stopPropagation()
-    this.isActive = true
+  _handleWinClose () {
+    if (!this.isActive) this.dispatchEvent(new Event(WIN_EVENTS.WIN_FOCUS)) // Get focus first
     this._winApp.endApp()
-    this.dispatchEvent(new Event(WIN_EVENTS.WIN_CLOSED))
+    this.dispatchEvent(new Event(WIN_EVENTS.WIN_CLOSE))
+  }
+
+  /**
+   * Supposed to handle the event of window's drawer button click.
+   * @private
+   */
+  _handleDrawerButClick () {
+    if (this.isActive) {
+      this.dispatchEvent(new Event(WIN_EVENTS.WIN_MINIMIZE))
+    } else {
+      if (this.isMinimized) {
+        this.isMinimized = false
+      } else {
+        this.dispatchEvent(new Event(WIN_EVENTS.WIN_FOCUS))
+      }
+    }
   }
 
   /**
@@ -361,9 +372,7 @@ export default class Window extends HTMLElement {
   set isActive (newIsActive) {
     if (newIsActive && !this.isActive) {
       this.classList.remove(HTML_CLASS_WIN_INACTIVE)
-      this.isMinimized = false
       this._taskBarDrawerBut.classList.add(HTML_CLASS_WIN_TASKBAR_BUT_ACT)
-      this.dispatchEvent(new Event(WIN_EVENTS.WIN_FOCUSED))
     } else if (!newIsActive && this.isActive) {
       this.classList.add(HTML_CLASS_WIN_INACTIVE)
       this._taskBarDrawerBut.classList.remove(HTML_CLASS_WIN_TASKBAR_BUT_ACT)
@@ -395,7 +404,7 @@ export default class Window extends HTMLElement {
    * @type {Boolean}
    */
   get isDisabled () {
-    return !this.classList.contains(HTML_CLASS_WIN_DISABLED)
+    return this.classList.contains(HTML_CLASS_WIN_DISABLED)
   }
 
   /**
@@ -403,9 +412,9 @@ export default class Window extends HTMLElement {
    * @type {Boolean}
    */
   set isDisabled (newIsDisabled) {
-    if (newIsDisabled) {
+    if (newIsDisabled && !this.isDisabled) {
       this.classList.add(HTML_CLASS_WIN_DISABLED)
-    } else {
+    } else if (!newIsDisabled && this.isDisabled) {
       this.classList.remove(HTML_CLASS_WIN_DISABLED)
     }
   }
@@ -426,16 +435,17 @@ export default class Window extends HTMLElement {
     if (newIsMinimized && !this.isMinimized) {
       let tmpHandler = ev => {
         ev.target.removeEventListener('transitionend', tmpHandler)
-        ev.target.dispatchEvent(new Event(WIN_EVENTS.WIN_MINIMIZED))
+        this.isDisabled = false
         this._taskBarDrawerBut.parentElement.style.pointerEvents = 'auto'
       }
       this._taskBarDrawerBut.parentElement.style.pointerEvents = 'none' // To prevent multiple clicks
+      this.isDisabled = true
       this.addEventListener('transitionend', tmpHandler)
       this.classList.add(HTML_CLASS_WIN_MINIM)
       this.isActive = false
     } else if (!newIsMinimized && this.isMinimized) {
       this.classList.remove(HTML_CLASS_WIN_MINIM)
-      this.isActive = true
+      this.dispatchEvent(new Event(WIN_EVENTS.WIN_FOCUS))
     }
   }
 
@@ -452,7 +462,7 @@ export default class Window extends HTMLElement {
    * @type {Boolean}
    */
   set isMaximized (newIsMaximized) {
-    if (this._beforeMax && !newIsMaximized) {
+    if (this._beforeMax && !newIsMaximized) { // Already maximized? then restore original size
       let tmpEdges = this.querySelectorAll('.' + HTML_CLASS_EDGE_NOCURSOR)
       tmpEdges.forEach(elem => {
         elem.classList.remove(HTML_CLASS_EDGE_NOCURSOR)
@@ -463,7 +473,7 @@ export default class Window extends HTMLElement {
       this.windowWidth = this._beforeMax.width
       this.windowHeight = this._beforeMax.height
       this._beforeMax = undefined
-    } else if (!this._beforeMax && newIsMaximized) {
+    } else if (!this._beforeMax && newIsMaximized) { // Not maximized? then maximize
       let tmpEdges = this.querySelectorAll('.' + HTML_CLASS_EDGE_WITHCURSOR)
       tmpEdges.forEach(elem => {
         elem.classList.remove(HTML_CLASS_EDGE_WITHCURSOR)
@@ -475,7 +485,6 @@ export default class Window extends HTMLElement {
         width: this.windowWidth,
         height: this.windowHeight
       }
-      this.dispatchEvent(new Event(WIN_EVENTS.WIN_MAXIMIZED))
     }
   }
 

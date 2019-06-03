@@ -26,11 +26,15 @@ export default class Desktop extends HTMLElement {
    */
   constructor () {
     super()
+    /** @type {SilhouetteWindow} */
     this._silhWin = undefined // Used to store a rectangle that silhouettes a moved/re-sized window
+    /** @type {WindowGrabType} */
     this._grabType = undefined // Used to store the type of the pointer grab when a window starts to move/re-size
+    /** @type {{x: Number, y: Number}} */
     this._moveDif = undefined // Used to store the window's move difference when a window is moved
     /** @type {Array<Window>} */
     this._windows = [] // Used to store references to all the visible windows on desktop
+    this._isInitGrab = false // Used as a flag to indicate window-grab initiated
     this._conf = new ConfigStorage() // Object that holds the desktop configurations
     let tmpSetIcon = new Icon(this._conf, Settings, this._conf)
     this._nextWinY = this._nextWinX = CONF_CONSTS.WIN_NEW_X_SHIFT // Tracks the next position for the next open window
@@ -92,6 +96,12 @@ export default class Desktop extends HTMLElement {
    */
   _prepareRemovableEventHandlers () {
     this._handleDesktopPointerMove = ev => { // A handler function to handle pointer-/mouse-move event for the desktop
+      if (this._isInitGrab) {
+        this._isInitGrab = false
+        this._silhWin.originalWindow.isActive = true // to bring it to front if it isn't
+        this._silhWin.originalWindow.isDisabled = true // Disable the window (until pointer/mouse is up)
+        this._deskTop.appendChild(this._silhWin) // Only append it if pointer/mouse starts moving at this point
+      }
       if (this._silhWin) { // Only handle if there is a silhouette window
         let tmpTopGrab = ev => {
           let tmpHtTE = this._silhWin.windowHeight + this._silhWin.windowTop + this._deskTop.offsetTop - ev.clientY
@@ -160,57 +170,12 @@ export default class Desktop extends HTMLElement {
       // First, we remove the attached listener functions
       this._deskTop.removeEventListener(window.PointerEvent ? 'pointermove' : 'mousemove', this._handleDesktopPointerMove)
       document.removeEventListener(window.PointerEvent ? 'pointerup' : 'mouseup', this._handleDocPointerUp)
+      if (this._isInitGrab) this._isInitGrab = false
       if (this._silhWin) { // Only handle if there is a silhouette window
-        let tmpTopRel = () => {
-          this._silhWin.originalWindow.windowTop = this._silhWin.windowTop
-          this._silhWin.originalWindow.windowHeight = this._silhWin.windowHeight
-        }
-        let tmpRightRel = () => {
-          this._silhWin.originalWindow.windowWidth = this._silhWin.windowWidth
-        }
-        let tmpBotRel = () => {
-          this._silhWin.originalWindow.windowHeight = this._silhWin.windowHeight
-        }
-        let tmpLeftRel = () => {
-          this._silhWin.originalWindow.windowLeft = this._silhWin.windowLeft
-          this._silhWin.originalWindow.windowWidth = this._silhWin.windowWidth
-        }
         this._silhWin.originalWindow.isDisabled = false // Set original window back to normal
-        switch (this._grabType) {
-          case WindowGrabType.WINDOW_MOVE:
-            this._silhWin.originalWindow.windowLeft = this._silhWin.windowLeft
-            this._silhWin.originalWindow.windowTop = this._silhWin.windowTop
-            this._moveDif = undefined
-            break
-          case WindowGrabType.TOP_EDGE:
-            tmpTopRel()
-            break
-          case WindowGrabType.RIGHT_EDGE:
-            tmpRightRel()
-            break
-          case WindowGrabType.BOTTOM_EDGE:
-            tmpBotRel()
-            break
-          case WindowGrabType.LEFT_EDGE:
-            tmpLeftRel()
-            break
-          case WindowGrabType.TOP_LEFT_CORNER:
-            tmpTopRel()
-            tmpLeftRel()
-            break
-          case WindowGrabType.TOP_RIGHT_CORNER:
-            tmpTopRel()
-            tmpRightRel()
-            break
-          case WindowGrabType.BOTTOM_RIGHT_CORNER:
-            tmpRightRel()
-            tmpBotRel()
-            break
-          case WindowGrabType.BOTTOM_LEFT_CORNER:
-            tmpBotRel()
-            tmpLeftRel()
-        }
-        this._deskTop.removeChild(this._silhWin)
+        this._silhWin.makeOriginalMatchSilhouette()
+        if (this._silhWin.parentElement) this._deskTop.removeChild(this._silhWin)
+        this._moveDif = undefined
         this._silhWin = undefined
         this._grabType = undefined // To indicate move/grab end
         if (document.body.style.cursor !== 'default') document.body.style.cursor = 'default'
@@ -223,14 +188,6 @@ export default class Desktop extends HTMLElement {
    * @private
    */
   _handleWebPageResize () {
-    // this._windows.forEach(win => {
-    //   if (win.isMaximized) { // Loop and update position and size of every maximized window
-    //     win.windowLeft = 0
-    //     win.windowTop = 0
-    //     win.windowWidth = this._deskTop.clientWidth
-    //     win.windowHeight = this._deskTop.clientHeight
-    //   }
-    // })
     Array.from(this._deskTop.children)
       .filter(elem => elem instanceof Window && elem.isMaximized) // Check also if they are windows (just in case)
       .forEach(elem => {
@@ -350,11 +307,11 @@ export default class Desktop extends HTMLElement {
     if (ev.resultedWindow) {
       ev.resultedWindow.windowLeft = this._nextWinX
       ev.resultedWindow.windowTop = this._nextWinY
-      ev.resultedWindow.addEventListener(WIN_EVENTS.WIN_FOCUSED, ev => this._putWinOnTop(ev.target))
-      ev.resultedWindow.addEventListener(WIN_EVENTS.WIN_MINIMIZED, this._handleWinMinimized.bind(this))
-      ev.resultedWindow.addEventListener(WIN_EVENTS.WIN_MAXIMIZED, this._handleWinMaximized.bind(this))
-      ev.resultedWindow.addEventListener(WIN_EVENTS.WIN_CLOSED, this._handleWinClosed.bind(this))
-      ev.resultedWindow.addEventListener(WIN_EVENTS.WIN_GRABBED, this._handleWinGrabbed.bind(this))
+      ev.resultedWindow.addEventListener(WIN_EVENTS.WIN_FOCUS, ev => this._putWinOnTop(ev.target))
+      ev.resultedWindow.addEventListener(WIN_EVENTS.WIN_MINIMIZE, this._handleWinMinimized.bind(this))
+      ev.resultedWindow.addEventListener(WIN_EVENTS.WIN_MAXIMIZE, this._handleWinMaximized.bind(this))
+      ev.resultedWindow.addEventListener(WIN_EVENTS.WIN_CLOSE, this._handleWinClosed.bind(this))
+      ev.resultedWindow.addEventListener(WIN_EVENTS.WIN_GRAB, this._handleWinGrabbed.bind(this))
       this._nextWinX = (this._nextWinX + CONF_CONSTS.WIN_NEW_Y_SHIFT) % (this._deskTop.clientWidth / 3 * 2) // Set next window X
       this._nextWinY = (this._nextWinY + CONF_CONSTS.WIN_NEW_X_SHIFT) % (this._deskTop.clientHeight / 3 * 2) // Set next window Y
       this._deskTop.appendChild(ev.resultedWindow)
@@ -367,7 +324,9 @@ export default class Desktop extends HTMLElement {
    * @private
    */
   _handleWinMinimized (ev) {
-    this._windows.pop().windowZIndex = 0
+    let tmpWin = this._windows.pop()
+    tmpWin.isMinimized = true
+    // tmpWin.windowZIndex = 0
     this._putWinOnTop() // Put the other last window on top (if any)
   }
 
@@ -377,6 +336,7 @@ export default class Desktop extends HTMLElement {
    * @private
    */
   _handleWinMaximized (ev) {
+    ev.target.isMaximized = true
     ev.target.windowLeft = 0
     ev.target.windowTop = 0
     ev.target.windowWidth = this._deskTop.clientWidth
@@ -400,10 +360,8 @@ export default class Desktop extends HTMLElement {
    * @private
    */
   _handleWinGrabbed (ev) {
-    ev.target.isActive = true
-    ev.target.isDisabled = true // Disable the window (until pointer/mouse is up)
+    this._isInitGrab = true
     this._silhWin = new SilhouetteWindow(/** @type {Window} */ev.target) // Make a silhouette of the original
-    this._deskTop.appendChild(this._silhWin)
     this._grabType = ev.grabType // To indicate that a move/grab in progress
     switch (ev.grabType) {
       case WindowGrabType.WINDOW_MOVE: // The title bar is grabbed (moving)

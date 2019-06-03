@@ -1,4 +1,5 @@
 :root {
+	--window-resize-duration: 20ms;
 	--window-minimize-duration: 200ms;
 	--window-shadow-offset: 3px;
 	--window-shadow-blur: 15px;
@@ -15,7 +16,7 @@ js-dtop-window {
 	box-shadow: var(--window-shadow-offset) var(--window-shadow-offset) var(--window-shadow-blur) var(--window-active-shadow-color);
 	box-sizing: border-box;
 	clip-path: inset(calc(-1 * var(--window-shadow-blur)));
-	transition: clip-path var(--window-minimize-duration);
+	transition: clip-path var(--window-minimize-duration), left var(--window-resize-duration), top var(--window-resize-duration), width var(--window-resize-duration), height var(--window-resize-duration);
 }
 
 .js-dtop-win-inactive {

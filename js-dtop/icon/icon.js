@@ -65,7 +65,6 @@ export default class Icon extends HTMLElement {
     this.appendChild(tmpIcon)
     this.appendChild(this._drawer)
     this.addEventListener(window.PointerEvent ? 'pointerleave' : 'mouseleave', () => this._drawer.classList.remove(HTML_CLASS_DRAWER_VIS))
-    this._drawer.addEventListener('click', ev => ev.stopPropagation())
     tmpIcon.addEventListener('click', this._handleClick.bind(this))
     tmpIconClone.style.pointerEvents = 'none' // Thought it's better to set 'none' here in
     tmpLabel.style.pointerEvents = 'none'     // case accidentally removed from css file
@@ -127,13 +126,13 @@ export default class Icon extends HTMLElement {
    * @private
    */
   _handleClick (ev) {
-    ev.stopPropagation()
     if (ev.target !== this._dtopIcon && this._drawer.children.length && !this._isDrawerVisible) {
       this._isDrawerVisible = true
     } else {
+      ev.stopPropagation()
       let tmpWin = new Window(new this._appClass(...this._appParams))
       this._drawer.appendChild(tmpWin.taskBarDrawerButton)
-      tmpWin.addEventListener(WIN_EVENTS.WIN_CLOSED, () => {
+      tmpWin.addEventListener(WIN_EVENTS.WIN_CLOSE, () => {
         this._drawer.removeChild(tmpWin.taskBarDrawerButton)
         this._winCount()
       })

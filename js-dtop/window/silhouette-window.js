@@ -2,6 +2,7 @@ import {CONF_CONSTS} from '../config-storage.js'
 
 const SILH_WIN_CSS_PATH = CONF_CONSTS.DTOP_PATH + 'css/silhouette-window.css'
 const HTML_TAG_SILH_WIN = 'js-dtop-silhouette-window' // The HTML tag for the silhouette window
+const BIT_FLAG = {LEFT: 1, TOP: 2, WIDTH: 4, HEIGHT: 8} // Used to indicate if the 'SilhouetteWindow' rect is changed (and which part is changed)
 
 /**
  * A class that represents a silhouette window to show when an actual window is moved/re-sized.
@@ -15,6 +16,7 @@ export default class SilhouetteWindow extends HTMLElement {
    */
   constructor (windowToSilhouette) {
     super()
+    this._bitFlag = 0 // Used to indicate if this object's rect is changed and which part is changed (to avoid unnecessary move/resize)
     this.windowLeft = windowToSilhouette.windowLeft
     this.windowTop = windowToSilhouette.windowTop
     this.windowWidth = windowToSilhouette.windowWidth
@@ -33,6 +35,21 @@ export default class SilhouetteWindow extends HTMLElement {
     }
   }
 
+  makeOriginalMatchSilhouette () {
+    if ((this._bitFlag & BIT_FLAG.LEFT) === BIT_FLAG.LEFT) {
+      this._origWindow.windowLeft = this.windowLeft
+    }
+    if ((this._bitFlag & BIT_FLAG.TOP) === BIT_FLAG.TOP) {
+      this._origWindow.windowTop = this.windowTop
+    }
+    if ((this._bitFlag & BIT_FLAG.WIDTH) === BIT_FLAG.WIDTH) {
+      this._origWindow.windowWidth = this.windowWidth
+    }
+    if ((this._bitFlag & BIT_FLAG.HEIGHT) === BIT_FLAG.HEIGHT) {
+      this._origWindow.windowHeight = this.windowHeight
+    }
+  }
+
   /**
    * The silhouette window's left.
    * @type {Number}
@@ -47,6 +64,7 @@ export default class SilhouetteWindow extends HTMLElement {
    */
   set windowLeft (newLeft) {
     this.style.left = newLeft + 'px'
+    this._bitFlag |= BIT_FLAG.LEFT
   }
 
   /**
@@ -63,6 +81,7 @@ export default class SilhouetteWindow extends HTMLElement {
    */
   set windowTop (newTop) {
     this.style.top = newTop + 'px'
+    this._bitFlag |= BIT_FLAG.TOP
   }
 
   /**
@@ -79,6 +98,7 @@ export default class SilhouetteWindow extends HTMLElement {
    */
   set windowWidth (newWidth) {
     this.style.width = newWidth + 'px'
+    this._bitFlag |= BIT_FLAG.WIDTH
   }
 
   /**
@@ -95,6 +115,7 @@ export default class SilhouetteWindow extends HTMLElement {
    */
   set windowHeight (newHeight) {
     this.style.height = newHeight + 'px'
+    this._bitFlag |= BIT_FLAG.HEIGHT
   }
 
   /**
