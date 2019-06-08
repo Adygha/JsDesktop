@@ -1,15 +1,17 @@
 :root {
+	--count-open-windows: 0;
 	--icon-animation-duration: 300ms;
 }
 
 js-dtop-taskbar-icon {
 	display: inline-block;
 	position: relative;
-	transition: margin-left var(--icon-animation-duration), margin-right var(--icon-animation-duration); /* This margin data is in 'desktop.css' */
+	transition: margin var(--icon-animation-duration); /* This margin data is in 'desktop.css' */
 }
 
 js-dtop-taskbar-icon::after {
-	content: attr(data-wincount);
+	counter-reset: count-open-windows var(--count-open-windows);
+	content: counter(count-open-windows);
 	/*display: inline-block;*/
 	position: absolute;
 	background-color: red;
