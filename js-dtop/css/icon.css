@@ -1,9 +1,9 @@
 :root {
-	--count-open-windows: 0;
 	--icon-animation-duration: 300ms;
 }
 
 js-dtop-taskbar-icon {
+	--count-open-windows: 0;
 	display: inline-block;
 	position: relative;
 	transition: margin var(--icon-animation-duration); /* This margin data is in 'desktop.css' */

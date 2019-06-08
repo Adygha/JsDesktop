@@ -12,7 +12,7 @@ const HTML_CLASS_BAR_ICON_TOP = 'js-dtop-taskbar-icon-top' // HTML/CSS class for
 const HTML_CLASS_BAR_ICON_LEFT = 'js-dtop-taskbar-icon-left' // HTML/CSS class for the left taskbar icon
 const HTML_CLASS_BAR_ICON_BOT = 'js-dtop-taskbar-icon-bot' // HTML/CSS class for the bottom taskbar icon
 const HTML_CLASS_BAR_ICON_RIGHT = 'js-dtop-taskbar-icon-right' // HTML/CSS class for the right taskbar icon
-const CSS_VAR_COUNT_OPEN_WINS = '--count-open-windows' // CSS variable for open windows count
+const CSS_VAR_COUNT_OPEN_WINS = '--count-open-windows' // CSS variable for open windows count (local to each icon)
 
 /**
  * A class that represents an event dispatched when an icon is clicked. It holds the 'Window' object resulted from the click event.
@@ -113,7 +113,7 @@ export default class Icon extends HTMLElement {
    * @private
    */
   _winCount () {
-    document.documentElement.style.setProperty(CSS_VAR_COUNT_OPEN_WINS, this._drawer.children.length.toString())
+    this.style.setProperty(CSS_VAR_COUNT_OPEN_WINS, this._drawer.children.length.toString())
     if (this._drawer.children.length) {
       this.classList.remove(HTML_CLASS_COUNTER_HID)
     } else {
