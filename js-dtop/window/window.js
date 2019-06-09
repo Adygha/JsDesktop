@@ -119,6 +119,7 @@ export default class Window extends HTMLElement {
     super()
     /** @type {{x: Number, y: Number, width: Number, height: Number}} */
     this._beforeMax = undefined // Used to store this window rect before going to maximize
+    this._isInTrans = false // To indicate that a window is in transition effect
     this._winApp = appObj
     if (winSize && winSize.width && winSize.height) {
       this.windowWidth = winSize.width
@@ -210,59 +211,75 @@ export default class Window extends HTMLElement {
 
   /**
    * Supposed to handle the event of window minimize.
-   * @param {Event} ev  the dispached event
+   * @param {Event} ev  the dispatched event
    * @private
    */
   _handleWinMinimize (ev) {
-    if (!this.isMinimized) {
-      if (!this.isActive) this.dispatchEvent(new Event(WIN_EVENTS.WIN_FOCUS)) // Get focus first
-      this.dispatchEvent(new Event(WIN_EVENTS.WIN_MINIMIZE)) // Then request minimize
+    if (this._isInTrans) {
+      ev.stopPropagation()
+    } else {
+      if (!this.isMinimized) {
+        if (!this.isActive) this.dispatchEvent(new Event(WIN_EVENTS.WIN_FOCUS)) // Get focus first
+        this.dispatchEvent(new Event(WIN_EVENTS.WIN_MINIMIZE)) // Then request minimize
+      }
     }
   }
 
   /**
    * Supposed to handle the event of window maximize.
-   * @param {Event} ev  the dispached event
+   * @param {Event} ev  the dispatched event
    * @private
    */
   _handleWinMaximize (ev) {
-    if (!this.isActive) this.dispatchEvent(new Event(WIN_EVENTS.WIN_FOCUS)) // Get focus first
-    // this.isMaximized = !this.isMaximized
-    if (this.isMaximized) {
-      this.isMaximized = false
+    if (this._isInTrans) {
+      ev.stopPropagation()
     } else {
-      this.dispatchEvent(new Event(WIN_EVENTS.WIN_MAXIMIZE))
+      if (!this.isActive) this.dispatchEvent(new Event(WIN_EVENTS.WIN_FOCUS)) // Get focus first
+      if (this.isMaximized) {
+        this.isMaximized = false
+      } else {
+        this.dispatchEvent(new Event(WIN_EVENTS.WIN_MAXIMIZE))
+      }
     }
   }
 
   /**
    * Supposed to handle the event of window close.
+   * @param {Event} ev  the dispatched event
    * @private
    */
-  _handleWinClose () {
-    let tmpHandler = ev => {
-      ev.target.removeEventListener('transitionend', tmpHandler)
-      this._winApp.endApp()
-      this.dispatchEvent(new Event(WIN_EVENTS.WIN_CLOSE))
+  _handleWinClose (ev) {
+    if (this._isInTrans) {
+      ev.stopPropagation()
+    } else {
+      let tmpHandler = ev => {
+        ev.target.removeEventListener('transitionend', tmpHandler)
+        this._winApp.endApp()
+        this.dispatchEvent(new Event(WIN_EVENTS.WIN_CLOSE))
+        this._isInTrans = false
+      }
+      this._isInTrans = true
+      if (!this.isActive) this.dispatchEvent(new Event(WIN_EVENTS.WIN_FOCUS)) // Get focus first
+      this.addEventListener('transitionend', tmpHandler)
+      this.isDisabled = true
+      this.classList.add(HTML_CLASS_WIN_CLOSE)
     }
-    if (!this.isActive) this.dispatchEvent(new Event(WIN_EVENTS.WIN_FOCUS)) // Get focus first
-    this.addEventListener('transitionend', tmpHandler)
-    this.isDisabled = true
-    this.classList.add(HTML_CLASS_WIN_CLOSE)
   }
 
   /**
    * Supposed to handle the event of window's drawer button click.
+   * @param {Event} ev  the dispatched event
    * @private
    */
-  _handleDrawerButClick () {
-    if (this.isActive) {
-      this.dispatchEvent(new Event(WIN_EVENTS.WIN_MINIMIZE))
+  _handleDrawerButClick (ev) {
+    if (this._isInTrans) {
+      ev.stopPropagation()
     } else {
-      if (this.isMinimized) {
-        this.isMinimized = false
+      if (this.isActive) {
+        this.dispatchEvent(new Event(WIN_EVENTS.WIN_MINIMIZE))
       } else {
         this.dispatchEvent(new Event(WIN_EVENTS.WIN_FOCUS))
+        if (this.isMinimized) this.isMinimized = false
       }
     }
   }
@@ -443,16 +460,26 @@ export default class Window extends HTMLElement {
       let tmpHandler = ev => {
         ev.target.removeEventListener('transitionend', tmpHandler)
         this.isDisabled = false
-        this._taskBarDrawerBut.parentElement.style.pointerEvents = 'auto'
+        // this._taskBarDrawerBut.parentElement.style.pointerEvents = 'auto'
+        this._isInTrans = false
       }
-      this._taskBarDrawerBut.parentElement.style.pointerEvents = 'none' // To prevent multiple clicks
+      this._isInTrans = true
+      // this._taskBarDrawerBut.parentElement.style.pointerEvents = 'none' // To prevent multiple clicks
       this.isDisabled = true
       this.addEventListener('transitionend', tmpHandler)
       this.classList.add(HTML_CLASS_WIN_MINIM)
       this.isActive = false
     } else if (!newIsMinimized && this.isMinimized) {
+      let tmpHandler = ev => {
+        ev.target.removeEventListener('transitionend', tmpHandler)
+        this.dispatchEvent(new Event(WIN_EVENTS.WIN_FOCUS))
+        // this._taskBarDrawerBut.parentElement.style.pointerEvents = 'auto'
+        this._isInTrans = false
+      }
+      this._isInTrans = true
+      // this._taskBarDrawerBut.parentElement.style.pointerEvents = 'none' // To prevent multiple clicks
+      this.addEventListener('transitionend', tmpHandler)
       this.classList.remove(HTML_CLASS_WIN_MINIM)
-      this.dispatchEvent(new Event(WIN_EVENTS.WIN_FOCUS))
     }
   }
 

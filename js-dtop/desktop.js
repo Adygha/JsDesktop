@@ -294,6 +294,7 @@ export default class Desktop extends HTMLElement {
         this._windows[this._windows.length - 1] = theWindow
         // this._windows.sort((win1, win2) => win1.windowZIndex - win2.windowZIndex) // Sort with provided comparer (according to zIndex)
       }
+      // this._windows.slice(0, -1).forEach(win => win.isActive = false)
       theWindow.isActive = true
     }
   }
@@ -308,10 +309,10 @@ export default class Desktop extends HTMLElement {
       ev.resultedWindow.windowLeft = this._nextWinX
       ev.resultedWindow.windowTop = this._nextWinY
       ev.resultedWindow.addEventListener(WIN_EVENTS.WIN_FOCUS, ev => this._putWinOnTop(ev.target))
-      ev.resultedWindow.addEventListener(WIN_EVENTS.WIN_MINIMIZE, this._handleWinMinimized.bind(this))
-      ev.resultedWindow.addEventListener(WIN_EVENTS.WIN_MAXIMIZE, this._handleWinMaximized.bind(this))
-      ev.resultedWindow.addEventListener(WIN_EVENTS.WIN_CLOSE, this._handleWinClosed.bind(this))
-      ev.resultedWindow.addEventListener(WIN_EVENTS.WIN_GRAB, this._handleWinGrabbed.bind(this))
+      ev.resultedWindow.addEventListener(WIN_EVENTS.WIN_MINIMIZE, this._handleWinMinimize.bind(this))
+      ev.resultedWindow.addEventListener(WIN_EVENTS.WIN_MAXIMIZE, this._handleWinMaximize.bind(this))
+      ev.resultedWindow.addEventListener(WIN_EVENTS.WIN_CLOSE, this._handleWinClose.bind(this))
+      ev.resultedWindow.addEventListener(WIN_EVENTS.WIN_GRAB, this._handleWinGrab.bind(this))
       this._nextWinX = (this._nextWinX + CONF_CONSTS.WIN_NEW_Y_SHIFT) % (this._deskTop.clientWidth / 3 * 2) // Set next window X
       this._nextWinY = (this._nextWinY + CONF_CONSTS.WIN_NEW_X_SHIFT) % (this._deskTop.clientHeight / 3 * 2) // Set next window Y
       this._deskTop.appendChild(ev.resultedWindow)
@@ -323,10 +324,11 @@ export default class Desktop extends HTMLElement {
    * @param {Event} ev    the event dispatched by the window
    * @private
    */
-  _handleWinMinimized (ev) {
-    let tmpWin = this._windows.pop()
-    tmpWin.isMinimized = true
-    // tmpWin.windowZIndex = 0
+  _handleWinMinimize (ev) {
+    if (this._windows.length && this._windows.includes(/** @type {Window} */ev.target)) {
+      if (this._windows[this._windows.length - 1] !== ev.target) this._putWinOnTop(/** @type {Window} */ev.target) // Better make it on top
+      this._windows.pop().isMinimized = true
+    }
     this._putWinOnTop() // Put the other last window on top (if any)
   }
 
@@ -335,7 +337,7 @@ export default class Desktop extends HTMLElement {
    * @param {Event} ev    the event dispatched by the window
    * @private
    */
-  _handleWinMaximized (ev) {
+  _handleWinMaximize (ev) {
     ev.target.isMaximized = true
     ev.target.windowLeft = 0
     ev.target.windowTop = 0
@@ -348,18 +350,21 @@ export default class Desktop extends HTMLElement {
    * @param {Event} ev    the event dispatched by the window
    * @private
    */
-  _handleWinClosed (ev) {
-    if (this._windows.length && this._windows[this._windows.length - 1] === ev.target) this._windows.pop() // Remove 'tmpWin' window (it is on top now)
+  _handleWinClose (ev) {
+    if (this._windows.length && this._windows.includes(/** @type {Window} */ev.target)) {
+      if (this._windows[this._windows.length - 1] !== ev.target) this._putWinOnTop(/** @type {Window} */ev.target) // Better make it on top
+      this._windows.pop() // Remove 'tmpWin' window (it is on top now)
+    }
     this._deskTop.removeChild(/** @type {Window} */ev.target)
     this._putWinOnTop() // Put the other last window on top (if any)
   }
 
   /**
    * Handles the event when a window is grabbed for move/resize.
-   * @param {Event|WindowGrabEvent} ev    the event dispatched by the window
+   * @param {MouseEvent|PointerEvent|WindowGrabEvent} ev    the event dispatched by the window
    * @private
    */
-  _handleWinGrabbed (ev) {
+  _handleWinGrab (ev) {
     this._isInitGrab = true
     this._silhWin = new SilhouetteWindow(/** @type {Window} */ev.target) // Make a silhouette of the original
     this._grabType = ev.grabType // To indicate that a move/grab in progress
