@@ -15,12 +15,13 @@ js-dtop-window {
 	background-color: aliceblue;
 	box-shadow: var(--window-shadow-offset) var(--window-shadow-offset) var(--window-shadow-blur) var(--window-active-shadow-color);
 	box-sizing: border-box;
+	-webkit-clip-path: inset(calc(-1 * var(--window-shadow-blur)));
 	clip-path: inset(calc(-1 * var(--window-shadow-blur)));
-	transition: clip-path var(--window-minimize-duration), left var(--window-resize-duration), top var(--window-resize-duration), width var(--window-resize-duration), height var(--window-resize-duration);
+	transition: -webkit-clip-path var(--window-minimize-duration), clip-path var(--window-minimize-duration), left var(--window-resize-duration), top var(--window-resize-duration), width var(--window-resize-duration), height var(--window-resize-duration);
 }
 
 .js-dtop-win-inactive {
-	/* filter: blur(2px); */
+	/*filter: blur(2px);*/
 	filter: grayscale(100%);
 	box-shadow: var(--window-shadow-offset) var(--window-shadow-offset) var(--window-shadow-blur) var(--window-not-active-shadow-color);
 }
@@ -37,7 +38,14 @@ js-dtop-window {
 }
 
 .js-dtop-win-minim {
+	-webkit-clip-path: inset(0 0 100% 0);
 	clip-path: inset(0 0 100% 0);
+}
+
+.js-dtop-win-close {
+	filter: invert(20%);
+	-webkit-clip-path: inset(50%);
+	clip-path: inset(50%);
 }
 
 .js-dtop-win-icon {
@@ -72,7 +80,7 @@ js-dtop-window {
 	cursor: default;
 }
 
-.js-dtop-win-close, .js-dtop-win-max, .js-dtop-win-min {
+.js-dtop-win-close-but, .js-dtop-win-max-but, .js-dtop-win-min-but {
 	color: gray;
 	font-family: Arial, sans-serif;
 	font-size: 1.6em;
@@ -83,7 +91,7 @@ js-dtop-window {
 	cursor: pointer;
 }
 
-.js-dtop-win-close:hover, .js-dtop-win-max:hover, .js-dtop-win-min:hover {
+.js-dtop-win-close-but:hover, .js-dtop-win-max-but:hover, .js-dtop-win-min-but:hover {
 	color: red;
 }
 

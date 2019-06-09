@@ -7,13 +7,14 @@ const HTML_TAG_WIN = 'js-dtop-window' // Window's HTML tag name
 const HTML_CLASS_WIN_INNER = 'js-dtop-win-content' // HTML class for the inner container of the window
 const HTML_CLASS_WIN_TITLE = 'js-dtop-win-title' // HTML class for the title-text element
 const HTML_CLASS_WIN_ICON = 'js-dtop-win-icon' // HTML class for the titlebar's icon
-const HTML_CLASS_WIN_MIN = 'js-dtop-win-min' // HTML class for the min button
-const HTML_CLASS_WIN_MAX = 'js-dtop-win-max' // HTML class for the max button
-const HTML_CLASS_WIN_CLOSE = 'js-dtop-win-close' // HTML class for the close button
+const HTML_CLASS_WIN_MIN_BUT = 'js-dtop-win-min-but' // HTML class for the min button
+const HTML_CLASS_WIN_MAX_BUT = 'js-dtop-win-max-but' // HTML class for the max button
+const HTML_CLASS_WIN_CLOSE_BUT = 'js-dtop-win-close-but' // HTML class for the close button
 const HTML_CLASS_WIN_INACTIVE = 'js-dtop-win-inactive' // HTML class for inactive window
 const HTML_CLASS_WIN_TRANSP = 'js-dtop-win-transp' // HTML class for transparent window
 const HTML_CLASS_WIN_DISABLED = 'js-dtop-win-disabled' // HTML class for disabled window
-const HTML_CLASS_WIN_MINIM = 'js-dtop-win-minim' // HTML class for minimized window
+const HTML_CLASS_WIN_MINIM = 'js-dtop-win-minim' // HTML class for minimizing window
+const HTML_CLASS_WIN_CLOSE = 'js-dtop-win-close' // HTML class for closing window
 const HTML_CLASS_EDGE_WITHCURSOR = 'js-dtop-win-moveresize' // HTML class for the window's edges (with visible cursor)
 const HTML_CLASS_EDGE_NOCURSOR = 'js-dtop-win-moveresize-nocursor' // HTML class to disable cursor for the window's edges
 const HTML_CLASS_WIN_TITLEBAR = 'js-dtop-win-titlebar' // HTML class for window's title bar
@@ -155,9 +156,9 @@ export default class Window extends HTMLElement {
       tmpInner.appendChild(this._winApp)
       tmpTitleBar.addEventListener('dblclick', this._handleWinMaximize.bind(this))
       this.addEventListener(window.PointerEvent ? 'pointerdown' : 'mousedown', this._handleWinPointerDown.bind(this))
-      this.querySelector('.' + HTML_CLASS_WIN_MIN).addEventListener('click', this._handleWinMinimize.bind(this))
-      this.querySelector('.' + HTML_CLASS_WIN_MAX).addEventListener('click', this._handleWinMaximize.bind(this))
-      this.querySelector('.' + HTML_CLASS_WIN_CLOSE).addEventListener('click', this._handleWinClose.bind(this))
+      this.querySelector('.' + HTML_CLASS_WIN_MIN_BUT).addEventListener('click', this._handleWinMinimize.bind(this))
+      this.querySelector('.' + HTML_CLASS_WIN_MAX_BUT).addEventListener('click', this._handleWinMaximize.bind(this))
+      this.querySelector('.' + HTML_CLASS_WIN_CLOSE_BUT).addEventListener('click', this._handleWinClose.bind(this))
     })
     // this.dispatchEvent(new Event(WIN_EVENTS.EVENT_WIN_CREATED))
   }
@@ -239,9 +240,15 @@ export default class Window extends HTMLElement {
    * @private
    */
   _handleWinClose () {
+    let tmpHandler = ev => {
+      ev.target.removeEventListener('transitionend', tmpHandler)
+      this._winApp.endApp()
+      this.dispatchEvent(new Event(WIN_EVENTS.WIN_CLOSE))
+    }
     if (!this.isActive) this.dispatchEvent(new Event(WIN_EVENTS.WIN_FOCUS)) // Get focus first
-    this._winApp.endApp()
-    this.dispatchEvent(new Event(WIN_EVENTS.WIN_CLOSE))
+    this.addEventListener('transitionend', tmpHandler)
+    this.isDisabled = true
+    this.classList.add(HTML_CLASS_WIN_CLOSE)
   }
 
   /**
